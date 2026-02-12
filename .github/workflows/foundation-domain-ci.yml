@@ -1,0 +1,250 @@
+name: Foundation Domain CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Rapid-Assist/Foundation-Domain/**'
+      - '.github/workflows/foundation-domain-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Rapid-Assist/Foundation-Domain/**'
+      - '.github/workflows/foundation-domain-ci.yml'
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+  MAVEN_OPTS: '-Xmx3072m'
+
+jobs:
+  shared-libraries:
+    name: Build Shared Libraries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Build common-domain-models
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/common-domain-models
+          mvn clean install -DskipTests
+
+      - name: Build event-schemas
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/event-schemas
+          mvn clean install -DskipTests
+
+      - name: Build shared-security-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-security-library
+          mvn clean install -DskipTests
+
+      - name: Build shared-exception-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-exception-library
+          mvn clean install -DskipTests
+
+      - name: Build shared-request-context-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-request-context-library
+          mvn clean install -DskipTests
+
+      - name: Build shared-audit-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-audit-library
+          mvn clean install -DskipTests
+
+      - name: Build shared-idempotency-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-idempotency-library
+          mvn clean install -DskipTests
+
+      - name: Build shared-observability-library
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-libraries/Backend/Java/shared-observability-library
+          mvn clean install -DskipTests
+
+  shared-infrastructure-services:
+    name: Build Shared Infrastructure Services
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - access-control-service
+          - api-gateway
+          - api-keys-service
+          - identity-service
+          - mfa-service
+          - session-token-service
+          - rate-limiting-service
+          - metrics-telemetry-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Build ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-infrastructure/Backend/Java/${{ matrix.service }}
+          mvn clean compile test-compile
+
+      - name: Run tests for ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-infrastructure/Backend/Java/${{ matrix.service }}
+          mvn test
+
+  central-configuration-services:
+    name: Build Central Configuration Services
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - config-service
+          - feature-flags-service
+          - policy-configuration-service
+          - rate-limit-policy-service
+          - tenancy-configuration-service
+          - country-localization-config-service
+          - dynamic-routing-config-service
+          - release-rollout-config-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Build ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/central-configuration/Backend/Java/${{ matrix.service }}
+          mvn clean compile test-compile
+
+      - name: Run tests for ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/central-configuration/Backend/Java/${{ matrix.service }}
+          mvn test
+
+  centralized-dashboard-services:
+    name: Build Centralized Dashboard Services
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - dashboard-analytics-service
+          - dashboard-configuration-service
+          - dashboard-reporting-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Build ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/centralized-dashboard/Backend/Java/${{ matrix.service }}
+          mvn clean compile test-compile
+
+      - name: Run tests for ${{ matrix.service }}
+        run: |
+          cd Rapid-Assist/Foundation-Domain/centralized-dashboard/Backend/Java/${{ matrix.service }}
+          mvn test
+
+  security-scan:
+    name: Security Scanning
+    needs: [shared-libraries, shared-infrastructure-services, central-configuration-services, centralized-dashboard-services]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'Rapid-Assist/Foundation-Domain'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  code-quality:
+    name: Code Quality Check
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Run architecture tests (access-control-service)
+        run: |
+          cd Rapid-Assist/Foundation-Domain/shared-infrastructure/Backend/Java/access-control-service
+          mvn test -Dtest=HexArchitectureTest
+
+  production-readiness:
+    name: Production Readiness Check
+    needs: [shared-infrastructure-services, central-configuration-services, centralized-dashboard-services, security-scan]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Production Readiness Summary
+        run: |
+          echo "# Foundation Domain Production Readiness Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Shared Libraries: ${{ needs.shared-libraries.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Shared Infrastructure Services: ${{ needs.shared-infrastructure-services.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Central Configuration Services: ${{ needs.central-configuration-services.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Centralized Dashboard Services: ${{ needs.centralized-dashboard-services.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
+          echo "Foundation Domain is ready for integration with Management Domain." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check if all jobs passed
+        if: |
+          needs.shared-libraries.result != 'success' ||
+          needs.shared-infrastructure-services.result != 'success' ||
+          needs.central-configuration-services.result != 'success' ||
+          needs.centralized-dashboard-services.result != 'success'
+        run: exit 1
