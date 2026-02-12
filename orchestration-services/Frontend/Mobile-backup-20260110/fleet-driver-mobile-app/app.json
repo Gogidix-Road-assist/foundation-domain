@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Fleet Driver Mobile App",
+    "slug": "fleet-driver-mobile-app",
+    "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
+    "sdkVersion": "51.0.0"
+  }
+}

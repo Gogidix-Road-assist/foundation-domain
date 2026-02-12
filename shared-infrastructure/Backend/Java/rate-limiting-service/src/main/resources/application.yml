@@ -1,0 +1,47 @@
+server:
+  port: 0
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+  rate-limiting:
+    provider:
+      type: ${GOGIDIX_RATE_LIMITING_PROVIDER:comprehensive} # comprehensive or noop
+    key-prefix: ${GOGIDIX_RATE_LIMITING_KEY_PREFIX:rapidassist}
+    default-limit: ${GOGIDIX_RATE_LIMITING_DEFAULT_LIMIT:100}
+    default-window-size-ms: ${GOGIDIX_RATE_LIMITING_WINDOW:60000}
+    algorithm:
+      type: ${GOGIDIX_RATE_LIMITING_ALGORITHM:sliding_window} # fixed_window, sliding_window, token_bucket
+      limit: ${GOGIDIX_RATE_LIMITING_ALG_LIMIT:100}
+      window-size-ms: ${GOGIDIX_RATE_LIMITING_ALG_WINDOW:60000}
+      capacity: ${GOGIDIX_RATE_LIMITING_CAPACITY:100}
+      refill-rate: ${GOGIDIX_RATE_LIMITING_REFILL_RATE:10}
+      refill-interval-ms: ${GOGIDIX_RATE_LIMITING_REFILL_INTERVAL:1000}
+    mongo-enabled: ${GOGIDIX_RATE_LIMITING_MONGO_ENABLED:false}
+
+spring:
+  data:
+    mongodb:
+      uri: ${GOGIDIX_MONGODB_URI:mongodb://localhost:27017/rapidassist}
+      database: ${GOGIDIX_RATE_LIMITING_DB:rate_limiting}
+  redis:
+    host: ${GOGIDIX_REDIS_HOST:localhost}
+    port: ${GOGIDIX_REDIS_PORT:6379}
+    password: ${GOGIDIX_REDIS_PASSWORD:}
+    timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
+    lettuce:
+      pool:
+        max-active: ${GOGIDIX_REDIS_POOL_MAX_ACTIVE:8}
+        max-idle: ${GOGIDIX_REDIS_POOL_MAX_IDLE:8}
+        min-idle: ${GOGIDIX_REDIS_POOL_MIN_IDLE:0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

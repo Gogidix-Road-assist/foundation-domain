@@ -1,0 +1,134 @@
+spring:
+  application:
+    name: ai-model-management-service
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DB:rapid_assist_ai_model_management_service}
+      auto-index-creation: true
+      repositories:
+        enabled: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: ai-model-management-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  show-actuator: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.gogidix.rapidassist.ai.modelmanagement: DEBUG
+    org.springframework.data.mongodb: ${MONGO_LOG_LEVEL:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Kafka Topics
+kafka:
+  topic:
+    model:
+      registered: model.registered
+      version-created: model.version.created
+      deployed: model.deployed
+      undeployed: model.undeployed
+      performance-recorded: model.performance.recorded
+
+# ============================================================
+# Development Profile
+# ============================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.data.mongodb: DEBUG
+
+# ============================================================
+# Test Configuration (with Embedded MongoDB)
+# ============================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/rapid_assist_ai_model_management_service_test
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.data.mongodb: DEBUG
+
+# ============================================================
+# Production Profile
+# ============================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    com.gogidix.rapidassist: INFO
+
+# OpenAPI disabled in production
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

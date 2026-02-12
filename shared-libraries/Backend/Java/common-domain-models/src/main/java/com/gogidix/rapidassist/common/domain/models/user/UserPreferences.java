@@ -1,0 +1,147 @@
+package com.gogidix.rapidassist.common.domain.models.user;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import java.time.LocalDateTime;
+
+/**
+ * UserPreferences entity for storing user-specific application preferences.
+ * Supports key-value pair storage for flexible preference management.
+ */
+@Document(collection = "user_preferences")
+public class UserPreferences {
+
+    @Id
+        private String id;
+
+            private User user;
+
+        private String preferenceKey;
+
+        private String preferenceValue;
+
+        private String valueType = "STRING"; // STRING, BOOLEAN, INTEGER, JSON
+
+        private String category;
+
+        private Boolean isDefault = false;
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+    // Constructors
+    public UserPreferences() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public UserPreferences(User user, String preferenceKey, String preferenceValue) {
+        this();
+        this.user = user;
+        this.preferenceKey = preferenceKey;
+        this.preferenceValue = preferenceValue;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getPreferenceKey() {
+        return preferenceKey;
+    }
+
+    public void setPreferenceKey(String preferenceKey) {
+        this.preferenceKey = preferenceKey;
+    }
+
+    public String getPreferenceValue() {
+        return preferenceValue;
+    }
+
+    public void setPreferenceValue(String preferenceValue) {
+        this.preferenceValue = preferenceValue;
+    }
+
+    public String getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(String valueType) {
+        this.valueType = valueType;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+        protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public Boolean getBooleanValue() {
+        return "true".equalsIgnoreCase(preferenceValue);
+    }
+
+    public Integer getIntegerValue() {
+        try {
+            return Integer.parseInt(preferenceValue);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserPreferences)) return false;
+        UserPreferences that = (UserPreferences) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

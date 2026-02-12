@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: Access Control Service API
+  description: |
+    Access Control Service for the RapidAssist platform.
+    Provides RBAC/ABAC authorization capabilities for multi-tenant SaaS.
+  version: 1.0.0
+  contact:
+    name: Gogidix RapidAssist Team
+    email: support@gogidix.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.rapidassist.com/access-control/api/v1
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Access Control
+    description: Access control check operations
+  - name: Permission Management
+    description: Permission CRUD operations
+  - name: Role Management
+    description: Role CRUD operations
+
+paths:
+  /access/check:
+    post:
+      tags:
+        - Access Control
+      summary: Check access authorization
+      description: Check if a subject is authorized to perform an action on a resource
+      operationId: checkAccess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckAccessRequest'
+      responses:
+        '200':
+          description: Access check completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessDecisionResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+
+  /permissions/grant:
+    post:
+      tags:
+        - Permission Management
+      summary: Grant a permission
+      description: Grants a permission to a subject
+      operationId: grantPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantPermissionRequest'
+      responses:
+        '201':
+          description: Permission granted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+
+  /roles:
+    get:
+      tags:
+        - Role Management
+      summary: List all roles
+      description: Returns all roles for the tenant
+      operationId: listRoles
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleResponse'
+    post:
+      tags:
+        - Role Management
+      summary: Create a role
+      description: Creates a new role
+      operationId: createRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CheckAccessRequest:
+      type: object
+      required:
+        - subjectId
+        - resource
+        - action
+      properties:
+        subjectId:
+          type: string
+        resource:
+          type: string
+        action:
+          type: string
+        context:
+          type: object
+
+    AccessDecisionResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        reason:
+          type: string
+        evaluatedAt:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+
+    PermissionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        subjectId:
+          type: string
+        resource:
+          type: string
+        action:
+          type: string
+        effect:
+          type: string
+          enum: [ALLOW, DENY]
+
+    RoleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        permissionCount:
+          type: integer

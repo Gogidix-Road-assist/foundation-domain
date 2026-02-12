@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+             https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <!--
+        Tenant-Aware Persistence Configuration Example
+
+        This file demonstrates how to configure JPA for tenant-aware persistence.
+        Actual configuration should be in application.yml/properties for Spring Boot.
+    -->
+
+    <persistence-unit name="rapidassist-pu" transaction-type="RESOURCE_LOCAL">
+        <description>Rapid Assist Tenant-Aware Persistence Unit</description>
+
+        <!-- Entity classes that extend TenantAwareEntity will be automatically discovered -->
+        <!-- <class>com.gogidix.rapidassist.yourdomain.YourEntity</class> -->
+
+        <properties>
+            <!-- Database connection (configure via Spring Boot) -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/rapidassist"/>
+            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="password"/>
+
+            <!-- Hibernate properties -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- Enable tenant filter by default -->
+            <property name="hibernate.default_filters" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

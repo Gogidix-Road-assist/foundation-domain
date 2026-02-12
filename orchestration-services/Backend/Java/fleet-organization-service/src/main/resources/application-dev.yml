@@ -1,0 +1,12 @@
+# Development Profile Configuration
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: orchestration_fleet_organization_service_db
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.data.mongodb: DEBUG

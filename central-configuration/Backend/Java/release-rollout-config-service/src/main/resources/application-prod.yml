@@ -1,0 +1,100 @@
+# Production Configuration
+server:
+  port: ${SERVICE_PORT:8080}
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: release-rollout-config-service
+
+  profiles:
+    active: prod
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DB:release-rollout-config-service-prod}
+      username: ${MONGODB_USER}
+      password: ${MONGODB_PASSWORD}
+      auto-index-creation: false
+
+  # Redis Configuration
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 5
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializers.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      group-id: release-rollout-config-service-prod
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializers.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging Configuration
+logging:
+  level:
+    com.gogidix.rapidassist: INFO
+    org.springframework.data.mongodb: WARN
+    org.springframework.web: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg [tenantId=%X{tenantId}][%X{traceId},%X{spanId}]%n"
+
+# OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  show-actuator: false
+
+# Application Configuration
+app:
+  rollout:
+    environment: production
+    tenant:
+      enforce-isolation: true
+      require-tenant-id: true
+    cache:
+      enabled: true
+      ttl-seconds: 600
+    validation:
+      require-approval-for-production: true
+      validate-batch-configuration: true
+      enforce-environment-constraints: true
+    events:
+      enabled: true
+      async-publishing: true
+  tenant-service:
+    base-url: ${TENANT_SERVICE_URL}
+    api-key: ${TENANT_SERVICE_API_KEY}
+  kafka:
+    topics:
+      events: release-rollout.events

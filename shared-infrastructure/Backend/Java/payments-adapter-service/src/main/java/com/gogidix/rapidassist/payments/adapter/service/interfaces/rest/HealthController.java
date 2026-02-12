@@ -1,0 +1,32 @@
+package com.gogidix.rapidassist.payments.adapter.service.interfaces.rest;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Instant;
+import java.util.Map;
+
+/**
+ * REST Controller: HealthController
+ *
+ * Provides health check endpoints for the PaymentsAdapter service.
+ * This controller follows the hexagonal architecture pattern.
+ *
+ * @author Rapid Assist
+ * @version 1.0.0
+ */
+@RestController
+@RequestMapping("/api/v1")
+public class HealthController {
+
+    @GetMapping("/status")
+    public Map<String, Object> status() {
+        return Map.of(
+                "service", "payments-adapter-service",
+                "status", "UP",
+                "timestamp", Instant.now().toString(),
+                "version", "1.0.0"
+        );
+    }
+}

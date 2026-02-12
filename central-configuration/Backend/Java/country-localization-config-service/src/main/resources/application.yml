@@ -1,0 +1,87 @@
+server:
+  port: ${SERVICE_PORT:8080}
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: country-localization-config-service
+
+  profiles:
+    active: dev
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DB:country-localization-db}
+      username: ${MONGODB_USER:}
+      password: ${MONGODB_PASSWORD:}
+      auto-index-creation: true
+
+  # Redis Configuration
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializers.JsonSerializer
+    consumer:
+      group-id: country-localization-config-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializers.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg [tenantId=%X{tenantId}][%X{traceId},%X{spanId}]%n"
+
+# OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  show-actuator: true
+
+# Application Configuration
+app:
+  config:
+    environment: development
+    cache:
+      enabled: true
+      ttl-seconds: 86400
+    events:
+      enabled: true
+      async-publishing: true
+  tenant-service:
+    base-url: ${TENANT_SERVICE_URL:http://localhost:8081}
+    api-key: ${TENANT_SERVICE_API_KEY:dev-api-key-123}

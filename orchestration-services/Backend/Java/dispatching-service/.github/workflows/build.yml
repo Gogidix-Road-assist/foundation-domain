@@ -1,0 +1,43 @@
+name: Build Dispatching Service
+
+on:
+  push:
+    paths:
+      - 'orchestration-services/Backend/Java/dispatching-service/**'
+  pull_request:
+    paths:
+      - 'orchestration-services/Backend/Java/dispatching-service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: |
+          cd orchestration-services/Backend/Java/dispatching-service
+          mvn clean compile -B
+
+      - name: Run tests
+        run: |
+          cd orchestration-services/Backend/Java/dispatching-service
+          mvn test -B
+
+      - name: Generate test report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: 'orchestration-services/Backend/Java/dispatching-service/target/surefire-reports/*.xml'
+          reporter: java-junit
+          fail-on-error: false

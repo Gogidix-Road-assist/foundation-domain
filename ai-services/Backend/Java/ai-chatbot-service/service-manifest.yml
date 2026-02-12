@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ServiceManifest
+metadata:
+  name: ai-chatbot-service
+  version: 1.0.0
+  description: AI-powered ai-chatbot-service for RapidAssist platform
+  owner: gogidix
+  department: ai-services
+
+spec:
+  type: ai-service
+  category: foundation-domain
+
+  team:
+    name: AI Services Team
+    email: ai-team@gogidix.com
+    slack: #ai-services
+
+  techStack:
+    language: java
+    version: "21"
+    framework: spring-boot
+    frameworkVersion: "3.2.0"
+
+  dependencies:
+    - name: postgresql
+      version: "14+"
+    - name: redis
+      version: "7+"
+      optional: true
+
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      description: REST API endpoint
+
+  healthCheck:
+    enabled: true
+    endpoint: /actuator/health
+    interval: 30s
+
+  metrics:
+    enabled: true
+    endpoint: /actuator/metrics
+    format: prometheus
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  scaling:
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  security:
+    tlsEnabled: true
+    authentication:
+      type: jwt
+    authorization:
+      type: rbac
+
+  multiTenancy:
+    enabled: true
+    strategy: database
+
+  deployment:
+    strategy: rollingUpdate
+    readinessProbe:
+      httpGet:
+        path: /actuator/health/readiness
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    livenessProbe:
+      httpGet:
+        path: /actuator/health/liveness
+        port: 8080
+      initialDelaySeconds: 60
+      periodSeconds: 30

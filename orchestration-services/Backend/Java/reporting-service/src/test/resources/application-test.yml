@@ -1,0 +1,22 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: reporting-service
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: orchestration_reporting_service_db_test
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+
+logging:
+  level:
+    root: INFO
+    com.gogidix.rapidassist.orchestration.reporting: DEBUG

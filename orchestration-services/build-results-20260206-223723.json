@@ -1,0 +1,79 @@
+﻿[
+    {
+        "Port":  8083,
+        "Status":  "FAIL",
+        "Service":  "alerting-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  562.46
+    },
+    {
+        "Port":  8084,
+        "Status":  "FAIL",
+        "Service":  "dispatching-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  24.61
+    },
+    {
+        "Port":  8085,
+        "Status":  "FAIL",
+        "Service":  "fleet-assistance-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  209.08
+    },
+    {
+        "Port":  8086,
+        "Status":  "FAIL",
+        "Service":  "fleet-organization-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  125.51
+    },
+    {
+        "Port":  8087,
+        "Status":  "FAIL",
+        "Service":  "fleet-policy-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  143.45
+    },
+    {
+        "Port":  8088,
+        "Status":  "FAIL",
+        "Service":  "fleet-vehicles-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  90.8
+    },
+    {
+        "Port":  8089,
+        "Status":  "FAIL",
+        "Service":  "location-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  23.4
+    },
+    {
+        "Port":  8090,
+        "Status":  "FAIL",
+        "Service":  "matching-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  46.81
+    },
+    {
+        "Port":  8091,
+        "Status":  "FAIL",
+        "Service":  "monitoring-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  5.12
+    },
+    {
+        "Port":  8092,
+        "Status":  "FAIL",
+        "Service":  "reporting-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  51.56
+    },
+    {
+        "Port":  8093,
+        "Status":  "FAIL",
+        "Service":  "transaction-orchestration-service",
+        "Reason":  "Cannot find an overload for \"Round\" and the argument count: \"1\".",
+        "BuildTime":  8.7
+    }
+]

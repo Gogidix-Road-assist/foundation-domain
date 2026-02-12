@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:8085}
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+
+spring:
+  application:
+    name: tenant-org-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      database: ${MONGODB_DATABASE:rapid_assist_tenant_org}
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.gogidix.rapidassist.tenant.org.service: DEBUG
+    org.springframework.data.mongodb: DEBUG

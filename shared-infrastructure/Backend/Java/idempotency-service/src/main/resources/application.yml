@@ -1,0 +1,35 @@
+server:
+  port: 0
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+  idempotency:
+    persistence:
+      type: ${GOGIDIX_IDEMPOTENCY_PERSISTENCE:redis} # redis or memory
+    default-ttl-seconds: ${GOGIDIX_IDEMPOTENCY_TTL:3600} # 1 hour default
+    max-retries: ${GOGIDIX_IDEMPOTENCY_MAX_RETRIES:3}
+    lock-timeout-seconds: ${GOGIDIX_IDEMPOTENCY_LOCK_TIMEOUT:300} # 5 minutes
+
+spring:
+  redis:
+    host: ${GOGIDIX_REDIS_HOST:localhost}
+    port: ${GOGIDIX_REDIS_PORT:6379}
+    password: ${GOGIDIX_REDIS_PASSWORD:}
+    timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
+    lettuce:
+      pool:
+        max-active: ${GOGIDIX_REDIS_POOL_MAX_ACTIVE:8}
+        max-idle: ${GOGIDIX_REDIS_POOL_MAX_IDLE:8}
+        min-idle: ${GOGIDIX_REDIS_POOL_MIN_IDLE:0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

@@ -1,0 +1,86 @@
+{
+  "tenantId": "test-tenant",
+  "environment": "development",
+  "namespace": "test-fixtures",
+  "configurations": [
+    {
+      "configKey": "app.name",
+      "value": "Config Service",
+      "dataType": "STRING",
+      "required": true,
+      "encrypted": false,
+      "description": "Application name"
+    },
+    {
+      "configKey": "app.version",
+      "value": "1.0.0",
+      "dataType": "STRING",
+      "required": true,
+      "encrypted": false,
+      "description": "Application version"
+    },
+    {
+      "configKey": "database.pool.maxSize",
+      "value": 100,
+      "dataType": "NUMBER",
+      "required": false,
+      "encrypted": false,
+      "description": "Database connection pool max size"
+    },
+    {
+      "configKey": "feature.flags.newUI",
+      "value": true,
+      "dataType": "BOOLEAN",
+      "required": false,
+      "encrypted": false,
+      "description": "Enable new UI feature"
+    },
+    {
+      "configKey": "cache.ttl.seconds",
+      "value": 300,
+      "dataType": "NUMBER",
+      "required": false,
+      "encrypted": false,
+      "description": "Cache TTL in seconds"
+    },
+    {
+      "configKey": "security.session.timeout",
+      "value": 3600,
+      "dataType": "NUMBER",
+      "required": true,
+      "encrypted": false,
+      "description": "Session timeout in seconds"
+    },
+    {
+      "configKey": "notification.email.recipients",
+      "value": ["admin@example.com", "ops@example.com"],
+      "dataType": "ARRAY",
+      "required": false,
+      "encrypted": false,
+      "description": "Email notification recipients"
+    },
+    {
+      "configKey": "api.endpoints",
+      "value": {
+        "users": "http://users-service",
+        "orders": "http://orders-service",
+        "payments": "http://payments-service"
+      },
+      "dataType": "OBJECT",
+      "required": false,
+      "encrypted": false,
+      "description": "API endpoint mappings"
+    },
+    {
+      "configKey": "logging.levels",
+      "value": {
+        "root": "INFO",
+        "com.gogidix": "DEBUG"
+      },
+      "dataType": "JSON",
+      "required": false,
+      "encrypted": false,
+      "description": "Logging level configuration"
+    }
+  ]
+}

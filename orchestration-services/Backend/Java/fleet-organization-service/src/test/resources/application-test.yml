@@ -1,0 +1,11 @@
+# Test Profile Configuration
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: test_fleet_organization_service_db
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG

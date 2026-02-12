@@ -1,0 +1,452 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import com.gogidix.rapidassist.common.domain.models.common.Address;
+import com.gogidix.rapidassist.common.domain.models.common.GeoLocation;
+import com.gogidix.rapidassist.common.domain.models.common.Money;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * ServiceRequest entity representing a roadside assistance or service request.
+ * Core entity for the Road Assist business operations.
+ */
+@Document(collection = "service_request")
+public class ServiceRequest {
+
+    @Id
+        private String id;
+
+    @Size(max = 50)
+        private String requestNumber;
+
+        private String customerId;
+
+        private String vehicleId;
+
+    @Size(max = 50)
+        private String vehicleVin;
+
+    @Size(max = 50)
+        private String vehicleRegistration;
+
+    @NotBlank(message = "Service type is required")
+    @Size(max = 50)
+        private String serviceType; // TOWING, JUMP_START, TIRE_CHANGE, FUEL_DELIVERY, LOCKOUT, etc.
+
+    @Size(max = 50)
+        private String priorityLevel = "NORMAL"; // LOW, NORMAL, HIGH, EMERGENCY
+
+        private String urgencyLevel; // NON_URGENT, URGENT, CRITICAL
+
+        private String status = "PENDING"; // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED
+
+        private GeoLocation location;
+
+        private Address address;
+
+    @Size(max = 500)
+        private String locationDescription;
+
+    @Size(max = 20)
+        private String phoneNumber;
+
+        private String description;
+
+        private String notes;
+
+        private LocalDateTime estimatedArrival;
+
+        private LocalDateTime actualArrival;
+
+        private LocalDateTime completedAt;
+
+        private LocalDateTime cancelledAt;
+
+    @Size(max = 50)
+        private String cancellationReason;
+
+        private String assignedProviderId;
+
+        private String assignedDriverId;
+
+        private LocalDateTime assignedAt;
+
+        private Money estimatedCost;
+
+        private Money actualCost;
+
+        private Money quotedPrice;
+
+        private String paymentStatus = "PENDING"; // PENDING, PAID, FAILED, REFUNDED
+
+    @Size(max = 100)
+        private String paymentReference;
+
+        private String tenantId;
+
+        private String organizationId;
+
+        private Set<ServiceRequestUpdate> updates = new HashSet<>();
+
+        private Set<ServiceRequestPhoto> photos = new HashSet<>();
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+        private String createdBy;
+
+        private Integer rating; // 1-5
+
+    @Size(max = 1000)
+        private String feedback;
+
+    // Constructors
+    public ServiceRequest() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRequestNumber() {
+        return requestNumber;
+    }
+
+    public void setRequestNumber(String requestNumber) {
+        this.requestNumber = requestNumber;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public String getVehicleVin() {
+        return vehicleVin;
+    }
+
+    public void setVehicleVin(String vehicleVin) {
+        this.vehicleVin = vehicleVin;
+    }
+
+    public String getVehicleRegistration() {
+        return vehicleRegistration;
+    }
+
+    public void setVehicleRegistration(String vehicleRegistration) {
+        this.vehicleRegistration = vehicleRegistration;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getPriorityLevel() {
+        return priorityLevel;
+    }
+
+    public void setPriorityLevel(String priorityLevel) {
+        this.priorityLevel = priorityLevel;
+    }
+
+    public String getUrgencyLevel() {
+        return urgencyLevel;
+    }
+
+    public void setUrgencyLevel(String urgencyLevel) {
+        this.urgencyLevel = urgencyLevel;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public GeoLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(GeoLocation location) {
+        this.location = location;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public String getLocationDescription() {
+        return locationDescription;
+    }
+
+    public void setLocationDescription(String locationDescription) {
+        this.locationDescription = locationDescription;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public LocalDateTime getEstimatedArrival() {
+        return estimatedArrival;
+    }
+
+    public void setEstimatedArrival(LocalDateTime estimatedArrival) {
+        this.estimatedArrival = estimatedArrival;
+    }
+
+    public LocalDateTime getActualArrival() {
+        return actualArrival;
+    }
+
+    public void setActualArrival(LocalDateTime actualArrival) {
+        this.actualArrival = actualArrival;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public String getAssignedProviderId() {
+        return assignedProviderId;
+    }
+
+    public void setAssignedProviderId(String assignedProviderId) {
+        this.assignedProviderId = assignedProviderId;
+    }
+
+    public String getAssignedDriverId() {
+        return assignedDriverId;
+    }
+
+    public void setAssignedDriverId(String assignedDriverId) {
+        this.assignedDriverId = assignedDriverId;
+    }
+
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
+
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
+    }
+
+    public Money getEstimatedCost() {
+        return estimatedCost;
+    }
+
+    public void setEstimatedCost(Money estimatedCost) {
+        this.estimatedCost = estimatedCost;
+    }
+
+    public Money getActualCost() {
+        return actualCost;
+    }
+
+    public void setActualCost(Money actualCost) {
+        this.actualCost = actualCost;
+    }
+
+    public Money getQuotedPrice() {
+        return quotedPrice;
+    }
+
+    public void setQuotedPrice(Money quotedPrice) {
+        this.quotedPrice = quotedPrice;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Set<ServiceRequestUpdate> getUpdates() {
+        return updates;
+    }
+
+    public void setUpdates(Set<ServiceRequestUpdate> updates) {
+        this.updates = updates;
+    }
+
+    public Set<ServiceRequestPhoto> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(Set<ServiceRequestPhoto> photos) {
+        this.photos = photos;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+        protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isAssigned() {
+        return assignedProviderId != null;
+    }
+
+    public boolean isInProgress() {
+        return "IN_PROGRESS".equals(status);
+    }
+
+    public boolean isCompleted() {
+        return "COMPLETED".equals(status);
+    }
+
+    public boolean isCancelled() {
+        return "CANCELLED".equals(status);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ServiceRequest)) return false;
+        ServiceRequest that = (ServiceRequest) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

@@ -1,0 +1,94 @@
+# Development Configuration
+server:
+  port: ${SERVICE_PORT:8080}
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: feature-flags-service
+
+  profiles:
+    active: dev
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DB:feature-flags-service-dev}
+      username: ${MONGODB_USER:}
+      password: ${MONGODB_PASSWORD:}
+      auto-index-creation: true
+
+  # Redis Configuration
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializers.JsonSerializer
+    consumer:
+      group-id: feature-flags-service-dev
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializers.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg [tenantId=%X{tenantId}][%X{traceId},%X{spanId}]%n"
+
+# OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  show-actuator: true
+
+# Application Configuration
+app:
+  config:
+    environment: development
+    tenant:
+      enforce-isolation: true
+      require-tenant-id: true
+    cache:
+      enabled: true
+      ttl-seconds: 300
+    validation:
+      enforce-description-for-production: true
+      warn-on-experimental-flags: true
+    events:
+      enabled: true
+      async-publishing: true
+  tenant-service:
+    base-url: http://localhost:8081
+    api-key: dev-api-key-123

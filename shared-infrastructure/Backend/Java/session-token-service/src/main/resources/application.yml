@@ -1,0 +1,42 @@
+server:
+  port: 0
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+  session-token:
+    provider:
+      type: ${GOGIDIX_SESSION_TOKEN_PROVIDER:jwt} # jwt or noop
+    key-prefix: ${GOGIDIX_SESSION_TOKEN_KEY_PREFIX:rapidassist:session}
+    enable-refresh-tokens: ${GOGIDIX_SESSION_TOKEN_ENABLE_REFRESH:true}
+    jwt:
+      secret: ${GOGIDIX_JWT_SECRET:} # MUST be provided in production
+      algorithm: ${GOGIDIX_JWT_ALGORITHM:HS256}
+      issuer: ${GOGIDIX_JWT_ISSUER:Gogidix RapidAssist}
+      access-token-ttl-seconds: ${GOGIDIX_ACCESS_TOKEN_TTL:3600}
+      refresh-token-ttl-seconds: ${GOGIDIX_REFRESH_TOKEN_TTL:2592000}
+      default-scopes: ${GOGIDIX_DEFAULT_SCOPES:read write}
+      default-roles: ${GOGIDIX_DEFAULT_ROLES:USER}
+
+spring:
+  redis:
+    host: ${GOGIDIX_REDIS_HOST:localhost}
+    port: ${GOGIDIX_REDIS_PORT:6379}
+    password: ${GOGIDIX_REDIS_PASSWORD:}
+    timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
+    lettuce:
+      pool:
+        max-active: ${GOGIDIX_REDIS_POOL_MAX_ACTIVE:8}
+        max-idle: ${GOGIDIX_REDIS_POOL_MAX_IDLE:8}
+        min-idle: ${GOGIDIX_REDIS_POOL_MIN_IDLE:0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

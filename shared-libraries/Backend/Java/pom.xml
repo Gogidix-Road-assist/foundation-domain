@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.gogidix.rapidassist</groupId>
+    <artifactId>shared-libraries</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Gogidix Shared Libraries</name>
+    <description>Parent POM for all shared libraries in the Rapid Assist SaaS platform</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lombok.version>1.18.28</lombok.version>
+        <spring.boot.version>3.2.0</spring.boot.version>
+        <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
+    </properties>
+
+    <modules>
+        <module>common-domain-models</module>
+        <module>event-schemas</module>
+        <module>shared-ai-contracts</module>
+        <module>shared-audit-library</module>
+        <module>shared-dto-library</module>
+        <module>shared-exception-library</module>
+        <module>shared-idempotency-library</module>
+        <module>shared-mapper-library</module>
+        <module>shared-observability-library</module>
+        <module>shared-persistence-library</module>
+        <module>shared-request-context-library</module>
+        <module>shared-security-library</module>
+        <module>shared-validation-library</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>${jakarta.persistence.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>17</source>
+                        <target>17</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

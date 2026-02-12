@@ -1,0 +1,21 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/actuator/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+numReplicas = 1
+
+[[services]]
+name = "feature-flags-service"
+sourceDir = "/"
+
+[[services.ports]]
+port = 8000
+type = "HTTP"
+
+[env]
+PORT = "8000"
+SPRING_PROFILES_ACTIVE = "production"

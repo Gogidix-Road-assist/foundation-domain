@@ -1,0 +1,111 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: config-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/config_service}
+      auto-index-creation: true
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 5
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:}
+
+app:
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+      allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS,PATCH}
+      allowed-headers: ${CORS_ALLOWED_HEADERS:*}
+      allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
+      max-age: ${CORS_MAX_AGE:3600}
+    users:
+      admin:
+        username: ${SECURITY_ADMIN_USERNAME:config-admin}
+        password: ${SECURITY_ADMIN_PASSWORD:}
+      reader:
+        username: ${SECURITY_READER_USERNAME:config-reader}
+        password: ${SECURITY_READER_PASSWORD:}
+      approver:
+        username: ${SECURITY_APPROVER_USERNAME:config-approver}
+        password: ${SECURITY_APPROVER_PASSWORD:}
+  openapi:
+    description: ${OPENAPI_DESCRIPTION:Configuration Management Service API - Manage application configurations with multi-tenant support}
+    contact-email: ${OPENAPI_CONTACT:support@gogidix.com}
+    license: ${OPENAPI_LICENSE:Proprietary}
+    server-url: ${OPENAPI_SERVER_URL:http://localhost:8080}
+    server-description: ${OPENAPI_SERVER_DESC:Development Server}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:true}
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_UI_ENABLED:true}
+    path: /swagger-ui.html
+    display-request-duration: true
+    display-operation-id: true
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    try-it-out-enabled: true
+  show-actuator: false
+
+gogidix:
+  config:
+    cache:
+      provider: ${CONFIG_CACHE_PROVIDER:redis}
+      ttl: ${CONFIG_CACHE_TTL:PT30M}
+    validation:
+      auto-validate: ${CONFIG_AUTO_VALIDATE:true}
+      strict-mode: ${CONFIG_STRICT_MODE:false}
+    approval:
+      required: ${CONFIG_APPROVAL_REQUIRED:false}
+      auto-approve: ${CONFIG_AUTO_APPROVE:true}
+    encryption:
+      enabled: ${CONFIG_ENCRYPTION_ENABLED:false}
+      algorithm: ${CONFIG_ENCRYPTION_ALGORITHM:AES256}
+    audit:
+      enabled: ${CONFIG_AUDIT_ENABLED:true}
+      retention-days: ${CONFIG_AUDIT_RETENTION_DAYS:365}
+    limits:
+      max-config-size: ${CONFIG_MAX_SIZE_KB:1024}
+      max-history-versions: ${CONFIG_MAX_HISTORY_VERSIONS:50}
+      batch-size: ${CONFIG_BATCH_SIZE:100}
+
+logging:
+  level:
+    com.gogidix.rapidassist.config: DEBUG
+    org.springframework.data.mongodb: INFO
+    org.springframework.data.redis: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true

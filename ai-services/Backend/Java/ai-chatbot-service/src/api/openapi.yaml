@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: ai-chatbot-service API
+  description: REST API for ai-chatbot-service
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: chatbot
+    description: chatbot operations
+
+paths:
+  /chatbot:
+    post:
+      tags:
+        - chatbot
+      summary: Create entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRequest'
+      responses:
+        '201':
+          description: Created
+    get:
+      tags:
+        - chatbot
+      summary: Get all entities
+      responses:
+        '200':
+          description: Success
+
+  /chatbot/{id}:
+    get:
+      tags:
+        - chatbot
+      summary: Get entity by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    tenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-ID
+
+  schemas:
+    CreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string

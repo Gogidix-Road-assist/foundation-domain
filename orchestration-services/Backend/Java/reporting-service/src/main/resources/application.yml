@@ -1,0 +1,63 @@
+server:
+  port: 8092
+  servlet:
+    context-path: /reporting-service
+
+spring:
+  application:
+    name: reporting-service
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: orchestration_reporting_service_db
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: reporting-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.gogidix.rapidassist.orchestration.reporting: DEBUG
+    org.springframework.data.mongodb: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+
+# Report generation settings
+report:
+  storage:
+    path: /reports
+    max-size-mb: 100
+  scheduling:
+    enabled: true
+    thread-pool-size: 5
+  retention:
+    default-days: 30
+    max-days: 365

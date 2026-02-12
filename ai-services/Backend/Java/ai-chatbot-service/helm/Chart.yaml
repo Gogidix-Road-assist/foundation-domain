@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ai-chatbot-service
+description: A Helm chart for ai-chatbot-service
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - ai
+  - chatbot
+  - rapidassist
+
+maintainers:
+  - name: AI Services Team
+    email: ai-team@gogidix.com
+
+home: https://github.com/gogidix/rapid-assist
+sources:
+  - https://github.com/gogidix/rapid-assist/tree/main/Foundation-Domain/ai-services/Backend/Java/ai-chatbot-service

@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "name": "rapid-assist-dashboard",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://rapid-assist-foundation.railway.app/api/$1"
+    },
+    {
+      "src": "/ws/(.*)",
+      "dest": "wss://rapid-assist-foundation.railway.app/ws/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://rapid-assist-foundation.railway.app/api/:path*"
+    }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "https://rapid-assist-foundation.railway.app",
+    "VITE_WS_URL": "wss://rapid-assist-foundation.railway.app",
+    "VITE_SUPABASE_URL": "@supabase-url",
+    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key"
+  },
+  "build": {
+    "env": {
+      "VITE_API_BASE_URL": "https://rapid-assist-foundation.railway.app",
+      "VITE_WS_URL": "wss://rapid-assist-foundation.railway.app"
+    }
+  }
+}

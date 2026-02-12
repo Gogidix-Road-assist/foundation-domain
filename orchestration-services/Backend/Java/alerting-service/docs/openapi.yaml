@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: Alerting Service API
+  description: Alerting Service for Roadside Assistance Platform
+  version: 1.0.0
+  contact:
+    name: Gogidix Support
+    email: support@gogidix.com
+  license:
+    name: Proprietary
+    url: https://www.gogidix.com
+
+servers:
+  - url: http://localhost:8083
+    description: Development server
+
+tags:
+  - name: Alert Management
+    description: APIs for managing roadside assistance alerts
+
+paths:
+  /api/v1/alerts:
+    post:
+      tags:
+        - Alert Management
+      summary: Create a new alert
+      description: Creates a new alert for emergency or roadside assistance
+      operationId: createAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertCommand'
+      responses:
+        '201':
+          description: Alert created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    get:
+      tags:
+        - Alert Management
+      summary: List alerts
+      description: Lists alerts with optional filters
+      operationId: listAlerts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [EMERGENCY, BREAKDOWN, ACCIDENT, TOW_REQUEST, FUEL_DELIVERY, TIRE_CHANGE, LOCKOUT]
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertDTO'
+
+  /api/v1/alerts/{alertId}:
+    get:
+      tags:
+        - Alert Management
+      summary: Get alert by ID
+      operationId: getAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+        '404':
+          description: Alert not found
+
+    delete:
+      tags:
+        - Alert Management
+      summary: Delete an alert
+      operationId: deleteAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Alert deleted successfully
+        '404':
+          description: Alert not found
+
+  /api/v1/alerts/{alertId}/acknowledge:
+    post:
+      tags:
+        - Alert Management
+      summary: Acknowledge an alert
+      operationId: acknowledgeAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgeAlertCommand'
+      responses:
+        '200':
+          description: Alert acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+
+  /api/v1/alerts/{alertId}/escalate:
+    post:
+      tags:
+        - Alert Management
+      summary: Escalate an alert
+      operationId: escalateAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscalateAlertCommand'
+      responses:
+        '200':
+          description: Alert escalated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+
+  /api/v1/alerts/{alertId}/resolve:
+    post:
+      tags:
+        - Alert Management
+      summary: Resolve an alert
+      operationId: resolveAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveAlertCommand'
+      responses:
+        '200':
+          description: Alert resolved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+
+  /api/v1/alerts/{alertId}/close:
+    post:
+      tags:
+        - Alert Management
+      summary: Close an alert
+      operationId: closeAlert
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDTO'
+
+components:
+  schemas:
+    CreateAlertCommand:
+      type: object
+      required:
+        - requestId
+        - tenantId
+        - type
+        - severity
+        - title
+        - source
+      properties:
+        requestId:
+          type: string
+        tenantId:
+          type: string
+        type:
+          type: string
+          enum: [EMERGENCY, BREAKDOWN, ACCIDENT, TOW_REQUEST, FUEL_DELIVERY, TIRE_CHANGE, LOCKOUT]
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        title:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        vehicleInfo:
+          $ref: '#/components/schemas/VehicleInfo'
+        customerInfo:
+          $ref: '#/components/schemas/CustomerInfo'
+
+    AcknowledgeAlertCommand:
+      type: object
+      required:
+        - acknowledgedBy
+        - assignedTo
+      properties:
+        acknowledgedBy:
+          type: string
+        assignedTo:
+          type: string
+
+    EscalateAlertCommand:
+      type: object
+      required:
+        - escalationLevel
+        - assignedTo
+      properties:
+        escalationLevel:
+          type: integer
+          minimum: 1
+        assignedTo:
+          type: string
+        escalationNotes:
+          type: string
+
+    ResolveAlertCommand:
+      type: object
+      required:
+        - resolvedBy
+        - resolutionNotes
+      properties:
+        resolvedBy:
+          type: string
+        resolutionNotes:
+          type: string
+
+    AlertDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        alertId:
+          type: string
+        requestId:
+          type: string
+        tenantId:
+          type: string
+        type:
+          type: string
+          enum: [EMERGENCY, BREAKDOWN, ACCIDENT, TOW_REQUEST, FUEL_DELIVERY, TIRE_CHANGE, LOCKOUT]
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        title:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, ESCALATED, CLOSED]
+        assignedTo:
+          type: string
+        acknowledgedAt:
+          type: string
+          format: date-time
+        acknowledgedBy:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+        resolutionNotes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        escalationLevel:
+          type: integer
+        escalationRequired:
+          type: boolean
+        location:
+          $ref: '#/components/schemas/Location'
+        vehicleInfo:
+          $ref: '#/components/schemas/VehicleInfo'
+        customerInfo:
+          $ref: '#/components/schemas/CustomerInfo'
+
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+
+    VehicleInfo:
+      type: object
+      properties:
+        vehicleId:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: string
+        licensePlate:
+          type: string
+        vin:
+          type: string
+
+    CustomerInfo:
+      type: object
+      properties:
+        customerId:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        membershipId:
+          type: string

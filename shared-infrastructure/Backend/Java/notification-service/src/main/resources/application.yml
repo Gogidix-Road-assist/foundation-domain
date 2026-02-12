@@ -1,0 +1,106 @@
+server:
+  port: 0
+
+gogidix:
+  notification:
+    persistence:
+      type: ${GOGIDIX_NOTIFICATION_PERSISTENCE:mongodb} # mongodb or memory
+    cache:
+      ttl-seconds: ${GOGIDIX_NOTIFICATION_CACHE_TTL:900} # 15 minutes default
+    email:
+      provider: ${GOGIDIX_NOTIFICATION_EMAIL_PROVIDER:sendgrid} # sendgrid or smtp
+      sendgrid:
+        api-key: ${GOGIDIX_SENDGRID_API_KEY:}
+      smtp:
+        host: ${GOGIDIX_SMTP_HOST:smtp.gmail.com}
+        port: ${GOGIDIX_SMTP_PORT:587}
+        username: ${GOGIDIX_SMTP_USERNAME:}
+        password: ${GOGIDIX_SMTP_PASSWORD:}
+        from-email: ${GOGIDIX_NOTIFICATION_FROM_EMAIL:noreply@gogidix.com}
+        from-name: ${GOGIDIX_NOTIFICATION_FROM_NAME:Gogidix RapidAssist}
+    sms:
+      provider: ${GOGIDIX_NOTIFICATION_SMS_PROVIDER:twilio} # twilio
+      twilio:
+        account-sid: ${GOGIDIX_TWILIO_ACCOUNT_SID:}
+        auth-token: ${GOGIDIX_TWILIO_AUTH_TOKEN:}
+        from-number: ${GOGIDIX_TWILIO_FROM_NUMBER:}
+    push:
+      provider: ${GOGIDIX_NOTIFICATION_PUSH_PROVIDER:firebase} # firebase or apns
+      firebase:
+        server-key: ${GOGIDIX_FIREBASE_SERVER_KEY:}
+    rate-limit:
+      per-minute: ${GOGIDIX_NOTIFICATION_RATE_LIMIT_PER_MINUTE:100}
+      per-hour: ${GOGIDIX_NOTIFICATION_RATE_LIMIT_PER_HOUR:1000}
+      per-day: ${GOGIDIX_NOTIFICATION_RATE_LIMIT_PER_DAY:10000}
+    retry:
+      max-attempts: ${GOGIDIX_NOTIFICATION_RETRY_MAX_ATTEMPTS:3}
+      backoff-ms: ${GOGIDIX_NOTIFICATION_RETRY_BACKOFF_MS:5000}
+    batch:
+      size: ${GOGIDIX_NOTIFICATION_BATCH_SIZE:100}
+
+spring:
+  data:
+    mongodb:
+      host: ${GOGIDIX_MONGODB_HOST:localhost}
+      port: ${GOGIDIX_MONGODB_PORT:27017}
+      database: ${GOGIDIX_MONGODB_DATABASE:rapidassist_notification}
+      username: ${GOGIDIX_MONGODB_USERNAME:}
+      password: ${GOGIDIX_MONGODB_PASSWORD:}
+      uri: ${GOGIDIX_MONGODB_URI:}
+
+  redis:
+    host: ${GOGIDIX_REDIS_HOST:localhost}
+    port: ${GOGIDIX_REDIS_PORT:6379}
+    password: ${GOGIDIX_REDIS_PASSWORD:}
+    timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
+    lettuce:
+      pool:
+        max-active: ${GOGIDIX_REDIS_POOL_MAX_ACTIVE:8}
+        max-idle: ${GOGIDIX_REDIS_POOL_MAX_IDLE:8}
+        min-idle: ${GOGIDIX_REDIS_POOL_MIN_IDLE:0}
+
+  mail:
+    host: ${GOGIDIX_SMTP_HOST:smtp.gmail.com}
+    port: ${GOGIDIX_SMTP_PORT:587}
+    username: ${GOGIDIX_SMTP_USERNAME:}
+    password: ${GOGIDIX_SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: false
+
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: notificationScheduler
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            useProperties: false
+          threadPool:
+            threadCount: 5
+            threadPriority: 5
+            class: org.quartz.simpl.SimpleThreadPool
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-allowed
+      show-components: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true

@@ -1,0 +1,85 @@
+﻿[
+    {
+        "Port":  8083,
+        "Service":  "alerting-service",
+        "BuildTime":  606.81,
+        "JarSize":  53.51,
+        "Reason":  "JAR: alerting-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8084,
+        "Status":  "FAIL",
+        "Service":  "dispatching-service",
+        "Reason":  "Maven error (exit: 1)",
+        "BuildTime":  14.18
+    },
+    {
+        "Port":  8085,
+        "Service":  "fleet-assistance-service",
+        "BuildTime":  138.05,
+        "JarSize":  53.47,
+        "Reason":  "JAR: fleet-assistance-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8086,
+        "Service":  "fleet-organization-service",
+        "BuildTime":  91.3,
+        "JarSize":  53.56,
+        "Reason":  "JAR: fleet-organization-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8087,
+        "Service":  "fleet-policy-service",
+        "BuildTime":  90.49,
+        "JarSize":  47.95,
+        "Reason":  "JAR: fleet-policy-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8088,
+        "Service":  "fleet-vehicles-service",
+        "BuildTime":  87.41,
+        "JarSize":  53.56,
+        "Reason":  "JAR: fleet-vehicles-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8089,
+        "Status":  "FAIL",
+        "Service":  "location-service",
+        "Reason":  "Maven error (exit: 1)",
+        "BuildTime":  39.41
+    },
+    {
+        "Port":  8090,
+        "Status":  "FAIL",
+        "Service":  "matching-service",
+        "Reason":  "Maven error (exit: 1)",
+        "BuildTime":  51.21
+    },
+    {
+        "Port":  8091,
+        "Status":  "FAIL",
+        "Service":  "monitoring-service",
+        "Reason":  "Maven error (exit: 1)",
+        "BuildTime":  6.2
+    },
+    {
+        "Port":  8092,
+        "Service":  "reporting-service",
+        "BuildTime":  87.13,
+        "JarSize":  47.95,
+        "Reason":  "JAR: reporting-service-1.0.0.jar",
+        "Status":  "SUCCESS"
+    },
+    {
+        "Port":  8093,
+        "Status":  "FAIL",
+        "Service":  "transaction-orchestration-service",
+        "Reason":  "Maven error (exit: 1)",
+        "BuildTime":  10.79
+    }
+]

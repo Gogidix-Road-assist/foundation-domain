@@ -1,0 +1,21 @@
+{
+  "name": "client-sdk-typescript",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node ./src/bootstrap/server.js",
+    "dev": "node ./src/bootstrap/server.js",
+    "lint": "eslint .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pino": "^9.5.0",
+    "pino-http": "^10.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3"
+  }
+}
