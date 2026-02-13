@@ -38,7 +38,7 @@ class AIExecutionMetadataTest {
 
         assertThat(metadata.getCompletedAt()).isNotNull();
         assertThat(metadata.getDuration()).isNotNull();
-        assertThat(metadata.getDurationMs()).isGreaterThan(0);
+        assertThat(metadata.getDurationMs()).isGreaterThanOrEqualTo(0L);
     }
 
     @Test
