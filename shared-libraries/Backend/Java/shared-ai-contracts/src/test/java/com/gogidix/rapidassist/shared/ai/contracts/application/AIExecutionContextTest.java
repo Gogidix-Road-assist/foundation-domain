@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AIExecutionContextTest {
 
     private static final String TENANT_ID = "tenant-123";
-    private static final String REQUEST_ID = "req-456";
+    private static final String REQUEST_ID = "550e8400-e29b-41d4-a716-446655440000";
     private static final String CORRELATION_ID = "corr-789";
     private static final String USER_ID = "user-abc";
 

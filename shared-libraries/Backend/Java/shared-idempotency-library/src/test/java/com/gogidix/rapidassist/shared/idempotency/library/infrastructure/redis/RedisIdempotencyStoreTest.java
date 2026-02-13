@@ -58,7 +58,7 @@ class RedisIdempotencyStoreTest {
                 "response-hash-456"
         );
 
-        when(redisTemplate.opsForValue().get(anyString())).thenReturn(record);
+        when(valueOperations.get(anyString())).thenReturn(record);
 
         // Act
         Optional<IdempotencyStore.IdempotencyRecord> result = store.find(key);
@@ -68,13 +68,14 @@ class RedisIdempotencyStoreTest {
         assertEquals(key, result.get().key());
         assertEquals(IdempotencyStore.Status.COMPLETED, result.get().status());
         verify(redisTemplate).opsForValue();
+        verify(valueOperations).get(anyString());
     }
 
     @Test
     void testFindWhenKeyDoesNotExist() {
         // Arrange
         String key = "non-existent-key";
-        when(redisTemplate.opsForValue().get(anyString())).thenReturn(null);
+        when(valueOperations.get(anyString())).thenReturn(null);
 
         // Act
         Optional<IdempotencyStore.IdempotencyRecord> result = store.find(key);
@@ -82,6 +83,7 @@ class RedisIdempotencyStoreTest {
         // Assert
         assertFalse(result.isPresent());
         verify(redisTemplate).opsForValue();
+        verify(valueOperations).get(anyString());
     }
 
     @Test
