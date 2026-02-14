@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -49,6 +51,23 @@ class IdempotencyKeyFilterTest {
         IdempotencyContextHolder.clear();
     }
 
+    /**
+     * Helper method to capture the context during filter execution.
+     * The filter clears the context in finally block, so we must capture it
+     * during the filter chain invocation, not after doFilter returns.
+     */
+    private IdempotencyContext captureContextDuringFilter() throws ServletException, IOException {
+        final IdempotencyContext[] contextHolder = new IdempotencyContext[1];
+        doAnswer((Answer<Void>) invocation -> {
+            contextHolder[0] = IdempotencyContextHolder.get().orElse(null);
+            return null;
+        }).when(filterChain).doFilter(request, response);
+        filter.doFilter(request, response, filterChain);
+        // Verify the filterChain was called (this also records the interaction)
+        verify(filterChain).doFilter(request, response);
+        return contextHolder[0];
+    }
+
     @Test
     void testFilterWithValidKeyHeader() throws ServletException, IOException {
         // Arrange
@@ -57,13 +76,13 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         assertEquals(key, context.idempotencyKey());
+        // Context is cleared after filter completes
+        assertTrue(IdempotencyContextHolder.get().isEmpty());
     }
 
     @Test
@@ -151,11 +170,9 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("X-Custom-Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         assertEquals(key, context.idempotencyKey());
     }
@@ -201,11 +218,9 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         // Key is stored as-is (no trimming)
         assertEquals(key, context.idempotencyKey());
@@ -219,11 +234,9 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         assertEquals(key, context.idempotencyKey());
     }
@@ -236,11 +249,9 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         assertEquals(key, context.idempotencyKey());
     }
@@ -255,11 +266,9 @@ class IdempotencyKeyFilterTest {
         when(request.getHeader("Idempotency-Key")).thenReturn(key);
 
         // Act
-        filter.doFilter(request, response, filterChain);
+        IdempotencyContext context = captureContextDuringFilter();
 
         // Assert
-        verify(filterChain).doFilter(request, response);
-        IdempotencyContext context = IdempotencyContextHolder.get().orElse(null);
         assertNotNull(context);
         assertEquals(key, context.idempotencyKey());
     }
