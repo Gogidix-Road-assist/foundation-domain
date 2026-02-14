@@ -41,7 +41,6 @@ public class SharedIdempotencyAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "gogidix.idempotency", name = "store", havingValue = "database", matchIfMissing = false)
-    @ConditionalOnClass(name = "org.springframework.data.jpa.repository.JpaRepository")
     public IdempotencyStore databaseIdempotencyStore(
             com.gogidix.rapidassist.shared.idempotency.library.infrastructure.database.IdempotencyKeyRepository repository,
             IdempotencyProperties properties) {
