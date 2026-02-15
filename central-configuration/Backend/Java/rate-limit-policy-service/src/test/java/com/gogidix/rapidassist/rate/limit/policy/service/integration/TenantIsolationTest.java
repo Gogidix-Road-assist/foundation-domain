@@ -275,20 +275,20 @@ public class TenantIsolationTest {
         repository.save(RateLimitPolicyDocument.fromDomain(policyB1));
 
         // When: Querying MongoDB directly for Tenant A
-        List<RateLimitPolicyDocument> directQueryA = repository.findByTenantId(TENANT_A, Pageable.unpaged());
+        Page<RateLimitPolicyDocument> directQueryA = repository.findByTenantId(TENANT_A, Pageable.unpaged());
 
         // Then: Should return only Tenant A's policy
-        assertThat(directQueryA).hasSize(1);
-        assertThat(directQueryA.get(0).tenantId()).isEqualTo(TENANT_A);
-        assertThat(directQueryA.get(0).name()).isEqualTo("Policy A1");
+        assertThat(directQueryA.getContent()).hasSize(1);
+        assertThat(directQueryA.getContent().get(0).tenantId()).isEqualTo(TENANT_A);
+        assertThat(directQueryA.getContent().get(0).name()).isEqualTo("Policy A1");
 
         // When: Querying MongoDB directly for Tenant B
-        List<RateLimitPolicyDocument> directQueryB = repository.findByTenantId(TENANT_B, Pageable.unpaged());
+        Page<RateLimitPolicyDocument> directQueryB = repository.findByTenantId(TENANT_B, Pageable.unpaged());
 
         // Then: Should return only Tenant B's policy
-        assertThat(directQueryB).hasSize(1);
-        assertThat(directQueryB.get(0).tenantId()).isEqualTo(TENANT_B);
-        assertThat(directQueryB.get(0).name()).isEqualTo("Policy B1");
+        assertThat(directQueryB.getContent()).hasSize(1);
+        assertThat(directQueryB.getContent().get(0).tenantId()).isEqualTo(TENANT_B);
+        assertThat(directQueryB.getContent().get(0).name()).isEqualTo("Policy B1");
     }
 
     @AfterAll
