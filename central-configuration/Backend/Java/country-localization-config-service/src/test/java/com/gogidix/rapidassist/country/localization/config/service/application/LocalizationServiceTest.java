@@ -55,13 +55,13 @@ class LocalizationServiceTest {
         return CountryLocalization.builder()
             .countryCode(COUNTRY_CODE)
             .countryName("Ireland")
-            .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-            .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-            .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-            .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}, {county}", "{street}\n{city}\n{county}", "postal", "IE"))
-            .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-            .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-            .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+            .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+            .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+            .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+            .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}, {county}", List.of("street", "city", "county"), false, "County", false))
+            .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+            .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+            .legalRequirements(CountryLocalization.LegalRequirements.standard())
             .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
             .active(true)
             .createdBy(USER)
@@ -77,13 +77,13 @@ class LocalizationServiceTest {
             LocalizationCommand.CreateCountryCommand command = new LocalizationCommand.CreateCountryCommand(
                 COUNTRY_CODE,
                 "Ireland",
-                new CountryLocalization.LocaleConfig("en-IE", "en", "IE"),
-                new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"),
-                new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"),
-                new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"),
-                new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"),
-                new CountryLocalization.EmergencyServices("112", "999", "112", "112"),
-                new CountryLocalization.LegalRequirements("GDPR", "English", "21", true),
+                CountryLocalization.LocaleConfig.of("en", "IE"),
+                CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"),
+                CountryLocalization.DateTimeConfig.of("Europe/Dublin"),
+                new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "County", false),
+                CountryLocalization.PhoneFormat.of("+353"),
+                CountryLocalization.EmergencyServices.of("112", "999"),
+                CountryLocalization.LegalRequirements.standard(),
                 CountryLocalization.MeasurementSystem.METRIC,
                 USER
             );
@@ -115,13 +115,13 @@ class LocalizationServiceTest {
             LocalizationCommand.CreateCountryCommand command = new LocalizationCommand.CreateCountryCommand(
                 "XX",
                 "Invalid Country",
-                new CountryLocalization.LocaleConfig("en-XX", "en", "XX"),
-                new CountryLocalization.CurrencyConfig("USD", "$", 2, "left"),
-                new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "UTC"),
-                new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "XX"),
-                new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+1", "1", "10", "^[0-9]{10}$"),
-                new CountryLocalization.EmergencyServices("911", "911", "911", "911"),
-                new CountryLocalization.LegalRequirements("None", "English", "18", false),
+                CountryLocalization.LocaleConfig.of("en", "XX"),
+                CountryLocalization.CurrencyConfig.of("USD", "$"),
+                CountryLocalization.DateTimeConfig.of("UTC"),
+                new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "County", false),
+                CountryLocalization.PhoneFormat.of("+1"),
+                CountryLocalization.EmergencyServices.of("911", "911"),
+                CountryLocalization.LegalRequirements.standard(),
                 CountryLocalization.MeasurementSystem.IMPERIAL,
                 USER
             );
@@ -139,13 +139,13 @@ class LocalizationServiceTest {
             LocalizationCommand.CreateCountryCommand command = new LocalizationCommand.CreateCountryCommand(
                 COUNTRY_CODE,
                 "Ireland",
-                new CountryLocalization.LocaleConfig("en-IE", "en", "IE"),
-                new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"),
-                new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"),
-                new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"),
-                new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"),
-                new CountryLocalization.EmergencyServices("112", "999", "112", "112"),
-                new CountryLocalization.LegalRequirements("GDPR", "English", "21", true),
+                CountryLocalization.LocaleConfig.of("en", "IE"),
+                CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"),
+                CountryLocalization.DateTimeConfig.of("Europe/Dublin"),
+                new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "County", false),
+                CountryLocalization.PhoneFormat.of("+353"),
+                CountryLocalization.EmergencyServices.of("112", "999"),
+                CountryLocalization.LegalRequirements.standard(),
                 CountryLocalization.MeasurementSystem.METRIC,
                 USER
             );
