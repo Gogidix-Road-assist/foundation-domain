@@ -1,0 +1,28 @@
+spring:
+  data:
+    mongodb:
+      auto-index-creation: false
+  redis:
+    host: localhost
+    port: 6379
+    database: 7
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: false
+    ping:
+      enabled: true
+
+logging:
+  level:
+    com.gogidix: WARN
+    org.springframework: WARN
+    org.mongodb: WARN
