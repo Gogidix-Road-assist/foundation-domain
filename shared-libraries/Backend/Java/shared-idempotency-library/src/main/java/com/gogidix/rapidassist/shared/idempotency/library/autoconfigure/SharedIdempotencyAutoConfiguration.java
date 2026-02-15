@@ -42,9 +42,13 @@ public class SharedIdempotencyAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "gogidix.idempotency", name = "store", havingValue = "database", matchIfMissing = false)
     public IdempotencyStore databaseIdempotencyStore(
-            com.gogidix.rapidassist.shared.idempotency.library.infrastructure.database.IdempotencyKeyRepository repository,
+            Object repository,
             IdempotencyProperties properties) {
-        return new DatabaseIdempotencyStore(repository, properties.getTtl());
+        // Cast to IdempotencyKeyRepository - this only executes when the bean is created
+        // (after @ConditionalOnProperty check passes, meaning JPA is on the classpath)
+        com.gogidix.rapidassist.shared.idempotency.library.infrastructure.database.IdempotencyKeyRepository repo =
+                (com.gogidix.rapidassist.shared.idempotency.library.infrastructure.database.IdempotencyKeyRepository) repository;
+        return new DatabaseIdempotencyStore(repo, properties.getTtl());
     }
 
     @Bean
