@@ -359,14 +359,14 @@ class SentimentAnalysisApplicationServiceTest {
         GetUserSentimentAnalysesQuery query = GetUserSentimentAnalysesQuery.builder()
                 .tenantId(tenantId)
                 .userId(userId)
-                .status(AnalysisStatus.COMPLETED)
+                .status("COMPLETED")
                 .page(0)
                 .size(20)
                 .build();
 
         List<SentimentAnalysis> analyses = List.of(testAnalysis);
 
-        when(repository.findByTenantIdAndStatus(tenantId, AnalysisStatus.COMPLETED))
+        when(repository.findByTenantIdAndStatus(tenantId, "COMPLETED"))
                 .thenReturn(analyses);
         when(mapper.toDto(testAnalysis)).thenReturn(testDto);
 
@@ -375,7 +375,7 @@ class SentimentAnalysisApplicationServiceTest {
         assertNotNull(results);
         assertEquals(1, results.size());
 
-        verify(repository, times(1)).findByTenantIdAndStatus(tenantId, AnalysisStatus.COMPLETED);
+        verify(repository, times(1)).findByTenantIdAndStatus(tenantId, "COMPLETED");
     }
 
     @Test

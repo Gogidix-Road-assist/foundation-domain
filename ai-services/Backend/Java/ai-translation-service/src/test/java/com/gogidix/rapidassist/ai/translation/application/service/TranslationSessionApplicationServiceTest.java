@@ -364,16 +364,20 @@ class TranslationSessionApplicationServiceTest {
     @Test
     @DisplayName("Should throw exception for invalid status transition")
     void testUpdateStatusInvalidTransition() {
+        // Set session to COMPLETED status
+        testSession.setStatus(SessionStatus.COMPLETED);
+
+        // Try to transition back to PENDING (invalid transition)
         UpdateSessionStatusCommand command = UpdateSessionStatusCommand.builder()
                 .tenantId(tenantId)
                 .sessionId(sessionId)
-                .status(SessionStatus.valueOf("INVALID_STATUS"))
+                .status(SessionStatus.PENDING)
                 .build();
 
         when(sessionRepository.findById(tenantId, sessionId))
                 .thenReturn(Optional.of(testSession));
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalStateException.class, () -> {
             applicationService.updateStatus(command);
         });
 

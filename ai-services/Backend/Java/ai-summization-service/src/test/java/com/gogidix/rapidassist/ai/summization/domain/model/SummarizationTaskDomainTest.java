@@ -409,6 +409,9 @@ class SummarizationTaskDomainTest {
     @Test
     @DisplayName("Should check if has input correctly")
     void testHasInput() {
+        // First clear the input from setUp
+        task.setInputText(null);
+        task.setInputUrl(null);
         assertFalse(task.hasInput());
 
         task.setInputText("Some text");

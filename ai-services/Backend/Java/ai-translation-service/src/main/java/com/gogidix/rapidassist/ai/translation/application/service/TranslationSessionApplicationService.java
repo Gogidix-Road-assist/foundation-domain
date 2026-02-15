@@ -117,7 +117,7 @@ public class TranslationSessionApplicationService {
                 command.getTargetLanguage()
         );
 
-        if (command.getMetadata() != null) {
+        if (command.getMetadata() != null && request.getMetadata() != null) {
             command.getMetadata().forEach(request.getMetadata()::put);
         }
 
