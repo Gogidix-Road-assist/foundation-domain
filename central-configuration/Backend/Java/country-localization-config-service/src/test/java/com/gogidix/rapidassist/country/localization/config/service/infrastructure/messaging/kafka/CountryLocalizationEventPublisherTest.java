@@ -16,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,13 +55,13 @@ class CountryLocalizationEventPublisherTest {
             .id("country-id-1")
             .countryCode("IE")
             .countryName("Ireland")
-            .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-            .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-            .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-            .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-            .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-            .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-            .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+            .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+            .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+            .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+            .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+            .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+            .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+            .legalRequirements(CountryLocalization.LegalRequirements.standard())
             .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
             .active(true)
             .createdBy("test-user")
@@ -125,13 +126,13 @@ class CountryLocalizationEventPublisherTest {
                 .id("country-id-1")
                 .countryCode("IE")
                 .countryName("Ireland Updated")
-                .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-                .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-                .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-                .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-                .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-                .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+                .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+                .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+                .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+                .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+                .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+                .legalRequirements(CountryLocalization.LegalRequirements.standard())
                 .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
                 .active(true)
                 .createdBy("test-user")
@@ -164,10 +165,10 @@ class CountryLocalizationEventPublisherTest {
 
             CountryLocalizationUpdatedEvent capturedEvent = eventCaptor.getValue();
             assertEquals("IE", capturedEvent.countryCode());
-            assertEquals("Ireland", capturedEvent.oldCountryName());
-            assertEquals("Ireland Updated", capturedEvent.newCountryName());
-            assertEquals(1, capturedEvent.previousVersion());
-            assertEquals(2, capturedEvent.newVersion());
+            assertEquals("Ireland", capturedEvent.oldValue().countryName());
+            assertEquals("Ireland Updated", capturedEvent.newValue().countryName());
+            assertEquals(1, capturedEvent.oldValue().version());
+            assertEquals(2, capturedEvent.newValue().version());
             assertEquals("Update country name", capturedEvent.reason());
         }
 
@@ -179,13 +180,13 @@ class CountryLocalizationEventPublisherTest {
                 .id("country-id-1")
                 .countryCode("IE")
                 .countryName("Ireland")
-                .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-                .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-                .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-                .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-                .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-                .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+                .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+                .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+                .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+                .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+                .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+                .legalRequirements(CountryLocalization.LegalRequirements.standard())
                 .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
                 .active(true)
                 .createdBy("test-user")
@@ -329,13 +330,13 @@ class CountryLocalizationEventPublisherTest {
                 .id("country-id-1")
                 .countryCode("IE")
                 .countryName("Ireland")
-                .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-                .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-                .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-                .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-                .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-                .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+                .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+                .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+                .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+                .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+                .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+                .legalRequirements(CountryLocalization.LegalRequirements.standard())
                 .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
                 .active(true)
                 .createdBy("test-user")
@@ -436,13 +437,13 @@ class CountryLocalizationEventPublisherTest {
                 .id("country-id-1")
                 .countryCode("IE")
                 .countryName("Ireland")
-                .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-                .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-                .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-                .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-                .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-                .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+                .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+                .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+                .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+                .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+                .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+                .legalRequirements(CountryLocalization.LegalRequirements.standard())
                 .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
                 .active(true)
                 .createdBy("test-user")
@@ -520,13 +521,13 @@ class CountryLocalizationEventPublisherTest {
                 .id("country-id-1")
                 .countryCode("IE")
                 .countryName("Ireland")
-                .locale(new CountryLocalization.LocaleConfig("en-IE", "en", "IE"))
-                .currency(new CountryLocalization.CurrencyConfig("EUR", "\u20ac", 2, "left"))
-                .dateTime(new CountryLocalization.DateTimeConfig("dd/MM/yyyy", "HH:mm", "UTC+0", "GMT", "Europe/Dublin"))
-                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", "{street}\n{city}", "postal", "IE"))
-                .phoneFormat(new CountryLocalization.PhoneFormat("(XXX) XXX-XXXX", "+353", "8", "10", "^(\\+353)?[0-9]{10}$"))
-                .emergencyServices(new CountryLocalization.EmergencyServices("112", "999", "112", "112"))
-                .legalRequirements(new CountryLocalization.LegalRequirements("GDPR", "English", "21", true))
+                .locale(CountryLocalization.LocaleConfig.of("en", "IE"))
+                .currency(CountryLocalization.CurrencyConfig.of("EUR", "\u20ac"))
+                .dateTime(CountryLocalization.DateTimeConfig.of("Europe/Dublin"))
+                .addressFormat(new CountryLocalization.AddressFormat("{street}, {city}", List.of("street", "city"), false, "Eircode", false))
+                .phoneFormat(CountryLocalization.PhoneFormat.of("+353"))
+                .emergencyServices(CountryLocalization.EmergencyServices.of("112", "999"))
+                .legalRequirements(CountryLocalization.LegalRequirements.standard())
                 .measurementSystem(CountryLocalization.MeasurementSystem.METRIC)
                 .active(true)
                 .createdBy("test-user")
