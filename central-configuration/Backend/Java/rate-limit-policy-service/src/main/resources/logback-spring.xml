@@ -36,10 +36,10 @@
     <springProfile name="prod,production">
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/var/log/${appName}/${appName}.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/var/log/${appName}/${appName}.%d{yyyy-MM-dd}.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>/var/log/${appName}/${appName}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                 <maxFileSize>100MB</maxFileSize>
+                <maxHistory>30</maxHistory>
             </rollingPolicy>
             <encoder>
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg [tenantId=%X{tenantId}][traceId=%X{traceId},spanId=%X{spanId}]%n</pattern>
