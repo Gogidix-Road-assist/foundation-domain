@@ -32,7 +32,7 @@ public class MongoFeatureFlagRepository implements FeatureFlagRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -229,18 +229,22 @@ public class MongoFeatureFlagRepository implements FeatureFlagRepository {
     @Override
     public CompletableFuture<Void> cacheFlag(FeatureFlag flag) {
         return CompletableFuture.runAsync(() -> {
-            String key = buildCacheKey(flag.tenantId(), flag.key(), flag.environment());
-            redisTemplate.opsForValue().set(key, flag, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            if (redisTemplate != null) {
+                String key = buildCacheKey(flag.tenantId(), flag.key(), flag.environment());
+                redisTemplate.opsForValue().set(key, flag, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            }
         });
     }
 
     @Override
     public CompletableFuture<Optional<FeatureFlag>> getCachedFlag(String tenantId, String key, String environment) {
         return CompletableFuture.supplyAsync(() -> {
-            String cacheKey = buildCacheKey(tenantId, key, environment);
-            Object cached = redisTemplate.opsForValue().get(cacheKey);
-            if (cached instanceof FeatureFlag) {
-                return Optional.of((FeatureFlag) cached);
+            if (redisTemplate != null) {
+                String cacheKey = buildCacheKey(tenantId, key, environment);
+                Object cached = redisTemplate.opsForValue().get(cacheKey);
+                if (cached instanceof FeatureFlag) {
+                    return Optional.of((FeatureFlag) cached);
+                }
             }
             return Optional.empty();
         });
@@ -249,17 +253,21 @@ public class MongoFeatureFlagRepository implements FeatureFlagRepository {
     @Override
     public CompletableFuture<Void> evictFlag(String tenantId, String key, String environment) {
         return CompletableFuture.runAsync(() -> {
-            String cacheKey = buildCacheKey(tenantId, key, environment);
-            redisTemplate.delete(cacheKey);
+            if (redisTemplate != null) {
+                String cacheKey = buildCacheKey(tenantId, key, environment);
+                redisTemplate.delete(cacheKey);
+            }
         });
     }
 
     @Override
     public CompletableFuture<Void> evictAll(String tenantId) {
         return CompletableFuture.runAsync(() -> {
-            Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + tenantId + ":*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
+            if (redisTemplate != null) {
+                Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + tenantId + ":*");
+                if (keys != null && !keys.isEmpty()) {
+                    redisTemplate.delete(keys);
+                }
             }
         });
     }
