@@ -1,5 +1,7 @@
 package com.gogidix.rapidassist.country.localization.config.service.infrastructure.messaging.kafka;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.gogidix.rapidassist.country.localization.config.service.domain.event.CountryLocalizationCreatedEvent;
 import com.gogidix.rapidassist.country.localization.config.service.domain.event.CountryLocalizationDeletedEvent;
 import com.gogidix.rapidassist.country.localization.config.service.domain.event.CountryLocalizationUpdatedEvent;
@@ -35,10 +37,22 @@ class CountryLocalizationEventPublisherTest {
 
     private CountryLocalizationEventPublisher publisher;
     private static final String TEST_TOPIC = "country-localization.events";
+    private final ObjectMapper objectMapper = JsonMapper.builder()
+            .findAndAddModules()
+            .build()
+            .setVisibility(
+                    new com.fasterxml.jackson.databind.introspect.VisibilityChecker.Std(
+                            com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.DEFAULT
+                    )
+                    .withFieldVisibility(com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
+                    .withGetterVisibility(com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                    .withSetterVisibility(com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE)
+                    .withCreatorVisibility(com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE)
+            );
 
     @BeforeEach
     void setUp() {
-        publisher = new CountryLocalizationEventPublisher(kafkaTemplate, TEST_TOPIC);
+        publisher = new CountryLocalizationEventPublisher(kafkaTemplate, objectMapper, TEST_TOPIC);
     }
 
     private SendResult<String, Object> createMockSendResult(long offset) {

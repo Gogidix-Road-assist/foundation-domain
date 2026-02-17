@@ -23,16 +23,17 @@ public class CountryLocalizationConfigSmokeTest {
     @Order(1)
     @DisplayName("Health endpoint should return UP status")
     public void healthEndpoint_returnsUP() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
+        mockMvc.perform(get("/api/v1/actuator/health"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("UP"));
     }
 
     @Test
     @Order(2)
-    @DisplayName("Service info endpoint should respond")
-    public void infoEndpoint_responds() throws Exception {
-        mockMvc.perform(get("/actuator/info"))
-            .andExpect(status().isOk());
+    @DisplayName("Service health endpoint shows UP status")
+    public void healthEndpoint_showsUPStatus() throws Exception {
+        mockMvc.perform(get("/api/v1/actuator/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
     }
 }

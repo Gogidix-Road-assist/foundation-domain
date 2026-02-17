@@ -24,6 +24,13 @@ public class RequestContextFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Bypass tenant context validation for actuator endpoints and error pages
+        return path.startsWith("/actuator") || path.startsWith("/error");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 

@@ -1,16 +1,31 @@
 package com.gogidix.rapidassist.country.localization.config.service.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Domain event published when a CountryLocalization is deleted.
  * This event contains the deleted localization data for audit trail.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CountryLocalizationDeletedEvent extends DomainEvent<Object> {
 
+    @JsonProperty("id")
     private final String id;
+
+    @JsonProperty("countryCode")
     private final String countryCode;
+
+    @JsonProperty("countryName")
     private final String countryName;
+
+    @JsonProperty("version")
     private final Integer version;
+
+    @JsonProperty("deletedBy")
     private final String deletedBy;
+
+    @JsonProperty("reason")
     private final String reason;
 
     public CountryLocalizationDeletedEvent(

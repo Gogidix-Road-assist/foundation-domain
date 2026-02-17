@@ -1,15 +1,23 @@
 package com.gogidix.rapidassist.country.localization.config.service.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gogidix.rapidassist.country.localization.config.service.domain.model.CountryLocalization;
 
 /**
  * Domain event published when a new CountryLocalization is created.
  * This event can be consumed by other services to react to new country localizations.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CountryLocalizationCreatedEvent extends DomainEvent<CountryLocalization> {
 
+    @JsonProperty("countryCode")
     private final String countryCode;
+
+    @JsonProperty("countryName")
     private final String countryName;
+
+    @JsonProperty("createdBy")
     private final String createdBy;
 
     public CountryLocalizationCreatedEvent(CountryLocalization localization, String createdBy) {

@@ -1,13 +1,14 @@
 spring:
   application:
     name: country-localization-config-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 
   # MongoDB Test Configuration
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: test_country_localization_db
+      uri: mongodb://localhost:27017/test_country_localization_db
       auto-index-creation: true
 
   # Redis Test Configuration (disabled for tests)
@@ -32,6 +33,10 @@ management:
   endpoint:
     health:
       show-details: always
+  # Disable Redis health check for tests (Redis is optional)
+  health:
+    redis:
+      enabled: false
 
 # Logging Configuration
 logging:

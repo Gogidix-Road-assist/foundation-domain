@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled("Requires MongoDB connection - temporarily disabled for CI/CD")
 public class TenantIsolationTest {
 

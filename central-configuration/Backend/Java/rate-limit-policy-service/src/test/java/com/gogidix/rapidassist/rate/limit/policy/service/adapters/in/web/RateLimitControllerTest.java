@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
@@ -86,13 +85,9 @@ class RateLimitControllerTest {
             when(rateLimitService.getPolicies("tenant-1"))
                     .thenReturn(CompletableFuture.completedFuture(policies));
 
-            // Act
-            MvcResult result = mockMvc.perform(get("/api/rate-limits/policies")
+            // Act & Assert
+            mockMvc.perform(get("/api/rate-limits/policies")
                             .param("tenantId", "tenant-1"))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].policyKey").value("LIMIT1"))
                     .andExpect(jsonPath("$[1].policyKey").value("LIMIT2"));
@@ -104,13 +99,9 @@ class RateLimitControllerTest {
             when(rateLimitService.getPolicies("tenant-1"))
                     .thenReturn(CompletableFuture.completedFuture(List.of()));
 
-            // Act
-            MvcResult result = mockMvc.perform(get("/api/rate-limits/policies")
+            // Act & Assert
+            mockMvc.perform(get("/api/rate-limits/policies")
                             .param("tenantId", "tenant-1"))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isEmpty());
         }
@@ -127,13 +118,9 @@ class RateLimitControllerTest {
             when(rateLimitService.getPolicy("tenant-1", "API_LIMIT"))
                     .thenReturn(CompletableFuture.completedFuture(policy));
 
-            // Act
-            MvcResult result = mockMvc.perform(get("/api/rate-limits/policies/API_LIMIT")
+            // Act & Assert
+            mockMvc.perform(get("/api/rate-limits/policies/API_LIMIT")
                             .param("tenantId", "tenant-1"))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.policyKey").value("API_LIMIT"));
         }
@@ -169,14 +156,10 @@ class RateLimitControllerTest {
                     }
                     """;
 
-            // Act
-            MvcResult result = mockMvc.perform(post("/api/rate-limits/policies")
+            // Act & Assert
+            mockMvc.perform(post("/api/rate-limits/policies")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.policyKey").value("NEW_LIMIT"));
         }
@@ -191,12 +174,8 @@ class RateLimitControllerTest {
             when(rateLimitService.deletePolicy("policy-1"))
                     .thenReturn(CompletableFuture.completedFuture(true));
 
-            // Act
-            MvcResult result = mockMvc.perform(delete("/api/rate-limits/policies/policy-1"))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
+            // Act & Assert
+            mockMvc.perform(delete("/api/rate-limits/policies/policy-1"))
                     .andExpect(status().isNoContent());
         }
     }
@@ -218,14 +197,10 @@ class RateLimitControllerTest {
                     }
                     """;
 
-            // Act
-            MvcResult result = mockMvc.perform(post("/api/rate-limits/check")
+            // Act & Assert
+            mockMvc.perform(post("/api/rate-limits/check")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.allowed").value(true));
         }
@@ -244,14 +219,10 @@ class RateLimitControllerTest {
                     }
                     """;
 
-            // Act
-            MvcResult result = mockMvc.perform(post("/api/rate-limits/check")
+            // Act & Assert
+            mockMvc.perform(post("/api/rate-limits/check")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.allowed").value(false));
         }
@@ -273,14 +244,10 @@ class RateLimitControllerTest {
                     }
                     """;
 
-            // Act
-            MvcResult result = mockMvc.perform(post("/api/rate-limits/reset")
+            // Act & Assert
+            mockMvc.perform(post("/api/rate-limits/reset")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
-                    .andReturn();
-
-            // Assert
-            mockMvc.perform(asyncDispatch(result))
                     .andExpect(status().isOk());
         }
     }

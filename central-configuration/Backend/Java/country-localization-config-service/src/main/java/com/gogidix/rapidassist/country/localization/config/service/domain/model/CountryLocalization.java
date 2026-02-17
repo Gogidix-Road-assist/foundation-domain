@@ -1,6 +1,14 @@
 package com.gogidix.rapidassist.country.localization.config.service.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -9,6 +17,8 @@ import java.util.*;
  * <p>This model is tenant-scoped for multi-tenancy isolation.
  * All queries and operations must respect tenant boundaries.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CountryLocalization {
 
     private final String id;

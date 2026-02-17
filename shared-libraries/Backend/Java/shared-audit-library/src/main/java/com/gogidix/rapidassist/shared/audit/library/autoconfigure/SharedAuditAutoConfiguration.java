@@ -39,6 +39,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(AuditProperties.class)
+@ConditionalOnClass(name = "org.springframework.data.mongodb.repository.MongoRepository")
+@ConditionalOnBean(name = "mongoTemplate")
 @EnableMongoRepositories(basePackages = "com.gogidix.rapidassist.shared.audit.library.infrastructure.database")
 @Import(AuditRetentionAutoConfiguration.class)
 public class SharedAuditAutoConfiguration {

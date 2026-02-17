@@ -38,10 +38,11 @@ public class CountryLocalizationEventPublisher {
     @Autowired
     public CountryLocalizationEventPublisher(
             KafkaTemplate<String, Object> kafkaTemplate,
+            ObjectMapper objectMapper,
             @Value("${app.kafka.topics.events:country-localization.events}") String eventsTopic) {
         this.kafkaTemplate = kafkaTemplate;
         this.eventsTopic = eventsTopic;
-        this.objectMapper = JsonMapper.builder().findAndAddModules().build();
+        this.objectMapper = objectMapper;
     }
 
     /**

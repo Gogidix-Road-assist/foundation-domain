@@ -1,11 +1,15 @@
 package com.gogidix.rapidassist.country.localization.config.service.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.Instant;
 import java.util.*;
 
 /**
  * Domain model representing localized content/resources
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocalizedResource {
 
     private final String id;

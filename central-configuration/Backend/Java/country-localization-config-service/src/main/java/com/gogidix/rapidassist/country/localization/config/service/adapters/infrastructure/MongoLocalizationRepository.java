@@ -30,7 +30,7 @@ public class MongoLocalizationRepository implements LocalizationRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     // Country localization persistence

@@ -1,5 +1,7 @@
 package com.gogidix.rapidassist.country.localization.config.service.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -10,13 +12,25 @@ import java.util.UUID;
  *
  * @param <T> The type of the aggregate that generated this event
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DomainEvent<T> {
 
+    @JsonProperty("eventId")
     private final String eventId;
+
+    @JsonProperty("aggregateId")
     private final String aggregateId;
+
+    @JsonProperty("eventType")
     private final String eventType;
+
+    @JsonProperty("occurredAt")
     private final Instant occurredAt;
+
+    @JsonProperty("tenantId")
     private final String tenantId;
+
+    @JsonProperty("version")
     private final Integer version;
 
     protected DomainEvent(String aggregateId, String eventType, String tenantId, Integer version) {

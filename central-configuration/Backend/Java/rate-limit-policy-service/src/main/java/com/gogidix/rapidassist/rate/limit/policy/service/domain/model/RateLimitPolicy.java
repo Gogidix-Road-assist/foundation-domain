@@ -1,11 +1,15 @@
 package com.gogidix.rapidassist.rate.limit.policy.service.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.Instant;
 import java.util.*;
 
 /**
  * Domain model for rate limiting policies
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RateLimitPolicy {
 
     private final String id;

@@ -47,14 +47,17 @@
     <logger name="org.springframework.data.mongodb" level="INFO"/>
     <logger name="org.apache.kafka" level="WARN"/>
 
-    <!-- Development Profile -->
-    <if condition='"${activeProfile}".contains("dev")'>
-        <then>
-            <logger name="com.gogidix.rapidassist" level="DEBUG"/>
-            <logger name="org.springframework.web" level="DEBUG"/>
-            <logger name="org.springframework.data.mongodb" level="DEBUG"/>
-        </then>
-    </if>
+    <!-- Spring Profile-specific configuration -->
+    <springProfile name="dev">
+        <logger name="com.gogidix.rapidassist" level="DEBUG"/>
+        <logger name="org.springframework.web" level="DEBUG"/>
+        <logger name="org.springframework.data.mongodb" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="com.gogidix.rapidassist" level="DEBUG"/>
+        <logger name="org.springframework.test" level="DEBUG"/>
+    </springProfile>
 
     <!-- Root Logger -->
     <root level="INFO">

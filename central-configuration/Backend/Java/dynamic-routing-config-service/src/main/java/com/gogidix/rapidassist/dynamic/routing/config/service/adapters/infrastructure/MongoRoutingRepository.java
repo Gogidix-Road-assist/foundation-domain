@@ -28,7 +28,7 @@ public class MongoRoutingRepository implements RoutingRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -116,18 +116,22 @@ public class MongoRoutingRepository implements RoutingRepository {
     @Override
     public CompletableFuture<Void> cacheRule(RoutingRule rule) {
         return CompletableFuture.runAsync(() -> {
-            String key = CACHE_PREFIX + rule.id();
-            redisTemplate.opsForValue().set(key, rule, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            if (redisTemplate != null) {
+                String key = CACHE_PREFIX + rule.id();
+                redisTemplate.opsForValue().set(key, rule, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            }
         });
     }
 
     @Override
     public CompletableFuture<Optional<RoutingRule>> getCachedRule(String ruleId) {
         return CompletableFuture.supplyAsync(() -> {
-            String key = CACHE_PREFIX + ruleId;
-            Object cached = redisTemplate.opsForValue().get(key);
-            if (cached instanceof RoutingRule) {
-                return Optional.of((RoutingRule) cached);
+            if (redisTemplate != null) {
+                String key = CACHE_PREFIX + ruleId;
+                Object cached = redisTemplate.opsForValue().get(key);
+                if (cached instanceof RoutingRule) {
+                    return Optional.of((RoutingRule) cached);
+                }
             }
             return Optional.empty();
         });
@@ -136,10 +140,12 @@ public class MongoRoutingRepository implements RoutingRepository {
     @Override
     public CompletableFuture<List<RoutingRule>> getCachedRules(String tenantId, String environment) {
         return CompletableFuture.supplyAsync(() -> {
-            String key = TENANT_CACHE_PREFIX + tenantId + ":" + environment;
-            Object cached = redisTemplate.opsForValue().get(key);
-            if (cached instanceof List) {
-                return (List<RoutingRule>) cached;
+            if (redisTemplate != null) {
+                String key = TENANT_CACHE_PREFIX + tenantId + ":" + environment;
+                Object cached = redisTemplate.opsForValue().get(key);
+                if (cached instanceof List) {
+                    return (List<RoutingRule>) cached;
+                }
             }
             return List.of();
         });
@@ -148,18 +154,22 @@ public class MongoRoutingRepository implements RoutingRepository {
     @Override
     public CompletableFuture<Void> evictRule(String ruleId) {
         return CompletableFuture.runAsync(() -> {
-            String key = CACHE_PREFIX + ruleId;
-            redisTemplate.delete(key);
+            if (redisTemplate != null) {
+                String key = CACHE_PREFIX + ruleId;
+                redisTemplate.delete(key);
+            }
         });
     }
 
     @Override
     public CompletableFuture<Void> evictAll(String tenantId) {
         return CompletableFuture.runAsync(() -> {
-            Set<String> keys = redisTemplate.keys(CACHE_PREFIX + "*");
-            Set<String> tenantKeys = redisTemplate.keys(TENANT_CACHE_PREFIX + tenantId + ":*");
-            if (keys != null) redisTemplate.delete(keys);
-            if (tenantKeys != null) redisTemplate.delete(tenantKeys);
+            if (redisTemplate != null) {
+                Set<String> keys = redisTemplate.keys(CACHE_PREFIX + "*");
+                Set<String> tenantKeys = redisTemplate.keys(TENANT_CACHE_PREFIX + tenantId + ":*");
+                if (keys != null) redisTemplate.delete(keys);
+                if (tenantKeys != null) redisTemplate.delete(tenantKeys);
+            }
         });
     }
 
