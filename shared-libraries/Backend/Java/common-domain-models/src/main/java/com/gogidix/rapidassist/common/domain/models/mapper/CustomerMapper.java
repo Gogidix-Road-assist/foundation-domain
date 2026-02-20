@@ -14,7 +14,8 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
  */
 @Mapper(
     componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+    unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE
 )
 public interface CustomerMapper {
 
