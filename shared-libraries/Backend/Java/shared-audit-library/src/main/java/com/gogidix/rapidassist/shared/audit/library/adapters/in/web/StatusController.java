@@ -1,5 +1,6 @@
 package com.gogidix.rapidassist.shared.audit.library.adapters.in.web;
 
+// CI/CD Trigger: Test shared-libraries workflow isolation
 import com.gogidix.rapidassist.shared.audit.library.domain.port.in.GetStatusQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
