@@ -24,7 +24,7 @@ import java.util.UUID;
 public abstract class BaseEntity extends TenantAwareEntity {
 
     @Id
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     @Field("created_at")
     private LocalDateTime createdAt;
