@@ -16,6 +16,15 @@
   <version>1.0.0</version>
   <name>policy-configuration-service</name>
 
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/ggx-insurance-saas/Insurance-company-Saas</url>
+    </repository>
+  </repositories>
+
+
   <properties>
     <java.version>21</java.version>
   </properties>
