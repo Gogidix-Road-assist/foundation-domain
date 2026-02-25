@@ -7,7 +7,7 @@ vercel.json.local
 # Build outputs
 **/target/
 **/build/
-**/out/
+# Note: **/out/ removed to allow port/out directories in hexagonal architecture
 
 # IDE
 .idea/
@@ -45,7 +45,7 @@ application-secret.yml
 # Node modules
 **/node_modules/
 **/.next/
-**/out/
+# Note: **/out/ removed to allow port/out directories in hexagonal architecture
 
 # Environment
 .env
