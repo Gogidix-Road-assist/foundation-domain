@@ -90,7 +90,7 @@ public class RedisConfigurationCacheStore implements ConfigurationCacheStore {
 
                 if (configuration.tags() != null && !configuration.tags().isEmpty()) {
                     String tagsKey = buildTagsKey(tenantId);
-                    redisTemplate.opsForSet().add(tagsKey, configuration.tags().toArray(new String[0]));
+                    redisTemplate.opsForSet().add(tagsKey, (Object[]) configuration.tags().toArray(new String[0]));
                     redisTemplate.expire(tagsKey, cacheTtl);
                 }
 
@@ -224,7 +224,7 @@ public class RedisConfigurationCacheStore implements ConfigurationCacheStore {
             try {
                 String tagsKey = buildTagsKey(tenantId);
                 if (tags != null && !tags.isEmpty()) {
-                    redisTemplate.opsForSet().add(tagsKey, tags.toArray(new String[0]));
+                    redisTemplate.opsForSet().add(tagsKey, (Object[]) tags.toArray(new String[0]));
                     redisTemplate.expire(tagsKey, cacheTtl);
                 }
             } catch (Exception e) {

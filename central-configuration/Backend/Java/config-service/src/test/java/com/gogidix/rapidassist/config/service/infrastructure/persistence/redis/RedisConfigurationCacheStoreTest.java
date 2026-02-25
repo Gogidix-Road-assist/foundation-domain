@@ -429,7 +429,7 @@ class RedisConfigurationCacheStoreTest {
             CompletableFuture<Void> result = cacheStore.putTags(tenantId, tags);
 
             assertDoesNotThrow(() -> result.join());
-            verify(setOperations).add(anyString(), eq(tags.toArray(new String[0])));
+            verify(setOperations).add(anyString(), eq((Object[]) tags.toArray(new String[0])));
             verify(redisTemplate).expire(anyString(), eq(testTtl));
         }
 
