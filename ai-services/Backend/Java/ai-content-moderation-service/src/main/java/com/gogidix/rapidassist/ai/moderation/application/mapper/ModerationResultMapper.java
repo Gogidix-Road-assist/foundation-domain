@@ -14,7 +14,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ModerationResultMapper {
 
-    @Mapping(target = "reviewedBy", ignore = true)
     ModerationResultDto toDto(ModerationResult entity);
 
     ModerationResult toEntity(ModerationResultDto dto);
