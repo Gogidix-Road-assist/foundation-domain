@@ -121,13 +121,13 @@ class DetectionRuleDomainModelTest {
                 .build();
 
         // Then
-        assertTrue(rule.isActive());
+        assertTrue(rule.isActiveRule());
 
         // When
         rule.deactivate();
 
         // Then
-        assertFalse(rule.isActive());
+        assertFalse(rule.isActiveRule());
     }
 
     @Test
