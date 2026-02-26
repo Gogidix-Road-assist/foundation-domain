@@ -367,11 +367,11 @@ class TranslationSessionApplicationServiceTest {
         // Set session to COMPLETED status
         testSession.setStatus(SessionStatus.COMPLETED);
 
-        // Try to transition back to PENDING (invalid transition)
+        // Try to transition back to INITIALIZED (invalid transition)
         UpdateSessionStatusCommand command = UpdateSessionStatusCommand.builder()
                 .tenantId(tenantId)
                 .sessionId(sessionId)
-                .status(SessionStatus.PENDING)
+                .status(SessionStatus.INITIALIZED)
                 .build();
 
         when(sessionRepository.findById(tenantId, sessionId))
