@@ -1,6 +1,6 @@
 package com.gogidix.rapidassist.ai.contentanalysis.infrastructure.config;
 
-import com.gogidix.rapidassist.shared.security JwtTokenProvider;
+import com.gogidix.rapidassist.shared.security.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
