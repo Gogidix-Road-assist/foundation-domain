@@ -35,6 +35,7 @@ public class AddCompetitivePriceRequest {
     @Positive(message = "Our price must be positive")
     private BigDecimal ourPrice;
 
+    @Builder.Default
     private boolean inStock = true;
 
     private String createdBy;

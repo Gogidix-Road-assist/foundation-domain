@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.matching.application.mapper;
 import com.gogidix.rapidassist.ai.matching.application.dto.SimilarityScoreDto;
 import com.gogidix.rapidassist.ai.matching.domain.model.SimilarityScore;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
@@ -13,8 +14,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SimilarityScoreMapper {
 
+    @Mapping(target = "matchId", ignore = true)
     SimilarityScoreDto toDto(SimilarityScore domain);
 
+    @Mapping(target = "matchDate", ignore = true)
     SimilarityScore toDomain(SimilarityScoreDto dto);
 
     void updateDomainFromDto(SimilarityScoreDto dto, @MappingTarget SimilarityScore domain);

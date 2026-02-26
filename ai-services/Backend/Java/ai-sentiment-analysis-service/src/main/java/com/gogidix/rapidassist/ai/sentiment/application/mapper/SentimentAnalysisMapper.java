@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.sentiment.application.mapper;
 import com.gogidix.rapidassist.ai.sentiment.application.dto.SentimentAnalysisDto;
 import com.gogidix.rapidassist.ai.sentiment.domain.aggregate.SentimentAnalysis;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -18,6 +19,10 @@ public interface SentimentAnalysisMapper {
     /**
      * Convert aggregate to DTO
      */
+    @Mapping(target = "durationSeconds", ignore = true)
+    @Mapping(target = "positiveAspectCount", ignore = true)
+    @Mapping(target = "negativeAspectCount", ignore = true)
+    @Mapping(target = "neutralAspectCount", ignore = true)
     SentimentAnalysisDto toDto(SentimentAnalysis sentimentAnalysis);
 
     /**

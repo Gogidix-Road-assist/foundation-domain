@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.tagging.application.mapper;
 import com.gogidix.rapidassist.ai.tagging.application.dto.ContentTagDto;
 import com.gogidix.rapidassist.ai.tagging.domain.model.ContentTag;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -20,6 +21,7 @@ public interface ContentTagMapper {
 
     ContentTag toDomain(ContentTagDto dto);
 
+    @Mapping(target = "tag", ignore = true)
     ContentTagDto toDto(ContentTag domain);
 
     List<ContentTagDto> toDtoList(List<ContentTag> domains);

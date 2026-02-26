@@ -23,6 +23,8 @@ public interface ImageAnalysisMapper {
     @Mapping(target = "aspectRatio", ignore = true)
     @Mapping(target = "landscape", ignore = true)
     @Mapping(target = "portrait", ignore = true)
+    @Mapping(target = "confidenceScore", ignore = true)
+    @Mapping(target = "metadata", ignore = true)
     ImageAnalysisDto toDto(ImageAnalysis model);
 
     @Mapping(target = "confidenceLevel", source = "confidenceScore", qualifiedByName = "confidenceToLevel")

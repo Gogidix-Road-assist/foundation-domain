@@ -15,6 +15,8 @@ import java.util.List;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 public interface ConversationMapper {
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "description", ignore = true)
     @Mapping(target = "metadata", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -26,6 +28,8 @@ public interface ConversationMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ChatbotRequest commandToEntity(CreateConversationCommand command);
 
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "description", ignore = true)
     @Mapping(target = "metadata", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

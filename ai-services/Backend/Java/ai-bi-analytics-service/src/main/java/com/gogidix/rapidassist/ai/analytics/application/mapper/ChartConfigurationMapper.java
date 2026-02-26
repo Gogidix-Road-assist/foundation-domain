@@ -22,6 +22,8 @@ import java.util.List;
 public interface ChartConfigurationMapper {
 
     @Mapping(target = "chartType", source = "chartType", qualifiedByName = "chartTypeToString")
+    @Mapping(target = "xAxis", ignore = true)
+    @Mapping(target = "yAxis", ignore = true)
     ChartConfigurationDto toDto(ChartConfiguration chart);
 
     @Mapping(target = "chartType", source = "chartType", qualifiedByName = "stringToChartType")

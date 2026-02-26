@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.tagging.application.mapper;
 import com.gogidix.rapidassist.ai.tagging.application.dto.TagSuggestionDto;
 import com.gogidix.rapidassist.ai.tagging.domain.model.TagSuggestion;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -20,6 +21,7 @@ public interface TagSuggestionMapper {
 
     TagSuggestion toDomain(TagSuggestionDto dto);
 
+    @Mapping(target = "suggestedTag", ignore = true)
     TagSuggestionDto toDto(TagSuggestion domain);
 
     List<TagSuggestionDto> toDtoList(List<TagSuggestion> domains);

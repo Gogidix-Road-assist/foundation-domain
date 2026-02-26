@@ -22,6 +22,7 @@ public interface PatternMatchPersistenceMapper {
     PatternMatchEntity toEntity(PatternMatch domain);
 
     @Mapping(source = "uuid", target = "id")
+    @Mapping(target = "uuid", ignore = true)
     PatternMatch toDomain(PatternMatchEntity entity);
 
     @Mapping(target = "id", ignore = true)

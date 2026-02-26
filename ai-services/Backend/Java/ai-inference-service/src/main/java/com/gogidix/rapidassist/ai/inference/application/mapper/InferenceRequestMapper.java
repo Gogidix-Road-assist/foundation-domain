@@ -15,10 +15,18 @@ public interface InferenceRequestMapper {
     InferenceRequestDto toDto(InferenceRequest inferenceRequest);
 
     @Mappings({
+        @Mapping(target = "createdBy", ignore = true),
+        @Mapping(target = "updatedBy", ignore = true),
+        @Mapping(target = "results", ignore = true),
+        @Mapping(target = "metrics", ignore = true),
         @Mapping(target = "id", ignore = true),
         @Mapping(target = "requestId", ignore = true),
         @Mapping(target = "createdAt", ignore = true),
-        @Mapping(target = "status", ignore = true)
+        @Mapping(target = "status", ignore = true),
+        @Mapping(target = "startedAt", ignore = true),
+        @Mapping(target = "completedAt", ignore = true),
+        @Mapping(target = "errorMessage", ignore = true),
+        @Mapping(target = "retryCount", ignore = true)
     })
     InferenceRequest toEntity(InferenceRequestDto dto);
 }

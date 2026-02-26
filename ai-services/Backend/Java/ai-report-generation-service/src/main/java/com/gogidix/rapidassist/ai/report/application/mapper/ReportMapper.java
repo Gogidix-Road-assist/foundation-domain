@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.report.application.dto.ReportDto;
 import com.gogidix.rapidassist.ai.report.domain.aggregate.Report;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,6 +18,7 @@ public interface ReportMapper {
     @Mapping(target = "readyForDownload", ignore = true)
     @Mapping(target = "successfulDistributions", ignore = true)
     @Mapping(target = "failedDistributions", ignore = true)
+    @Mapping(target = "schedule.isActive", ignore = true)
     ReportDto toDto(Report report);
 
     Report toDomain(ReportDto dto);
