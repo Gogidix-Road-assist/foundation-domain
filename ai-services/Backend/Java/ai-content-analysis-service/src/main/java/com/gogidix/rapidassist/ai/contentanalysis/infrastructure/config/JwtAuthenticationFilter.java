@@ -1,6 +1,6 @@
 package com.gogidix.rapidassist.ai.contentanalysis.infrastructure.config;
 
-import com.gogidix.rapidassist.shared.security.JwtTokenProvider;
+import com.gogidix.rapidassist.shared.security.library.jwt.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenUtil jwtTokenUtil;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -41,9 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = extractJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-                String userId = jwtTokenProvider.getUserIdFromToken(jwt);
-                String tenantId = jwtTokenProvider.getTenantIdFromToken(jwt);
+            if (StringUtils.hasText(jwt) && jwtTokenUtil.validateToken(jwt)) {
+                String userId = jwtTokenUtil.extractUserId(jwt);
+                String tenantId = jwtTokenUtil.extractTenantId(jwt);
 
                 log.debug("Authenticated user {} for tenant {}", userId, tenantId);
 

@@ -16,11 +16,9 @@ public class ConversationContext {
     private String sessionId;
     private String tenantId;
     private String userId;
-    @Builder.Default
     private List<ContextMessage> messageHistory = new ArrayList<>();
     private IntentType currentIntent;
     private String currentTopic;
-    @Builder.Default
     private Integer messageCount = 0;
     private Instant lastActivity;
     private String languageCode;
