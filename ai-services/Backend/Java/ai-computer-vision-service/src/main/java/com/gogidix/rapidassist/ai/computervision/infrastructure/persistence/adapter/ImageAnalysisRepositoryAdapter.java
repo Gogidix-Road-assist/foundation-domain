@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.computervision.domain.aggregate.ImageAnalysisA
 import com.gogidix.rapidassist.ai.computervision.domain.repository.ImageAnalysisRepositoryPort;
 import com.gogidix.rapidassist.ai.computervision.infrastructure.persistence.entity.ImageAnalysisEntity;
 import com.gogidix.rapidassist.ai.computervision.infrastructure.persistence.repository.ImageAnalysisMongoRepository;
+import com.gogidix.rapidassist.ai.computervision.infrastructure.tenant.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -32,7 +33,8 @@ public class ImageAnalysisRepositoryAdapter implements ImageAnalysisRepositoryPo
 
     @Override
     public Optional<ImageAnalysisAggregate> findById(UUID id) {
-        return mongoRepository.findByUuid(id)
+        String tenantId = RequestContextHolder.getTenantId();
+        return mongoRepository.findByTenantIdAndUuid(tenantId, id)
                 .map(this::toAggregate);
     }
 
@@ -51,14 +53,16 @@ public class ImageAnalysisRepositoryAdapter implements ImageAnalysisRepositoryPo
 
     @Override
     public List<ImageAnalysisAggregate> findByUserId(String userId) {
-        return mongoRepository.findByUserId(userId).stream()
+        String tenantId = RequestContextHolder.getTenantId();
+        return mongoRepository.findByTenantIdAndUserId(tenantId, userId).stream()
                 .map(this::toAggregate)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ImageAnalysisAggregate> findByStatus(String status) {
-        return mongoRepository.findByStatus(status).stream()
+        String tenantId = RequestContextHolder.getTenantId();
+        return mongoRepository.findByTenantIdAndStatus(tenantId, status).stream()
                 .map(this::toAggregate)
                 .collect(Collectors.toList());
     }
@@ -72,19 +76,22 @@ public class ImageAnalysisRepositoryAdapter implements ImageAnalysisRepositoryPo
 
     @Override
     public List<ImageAnalysisAggregate> findByAnalysisType(String analysisType) {
-        return mongoRepository.findByAnalysisType(analysisType).stream()
+        String tenantId = RequestContextHolder.getTenantId();
+        return mongoRepository.findByTenantIdAndAnalysisType(tenantId, analysisType).stream()
                 .map(this::toAggregate)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(UUID id) {
-        mongoRepository.deleteByUuid(id);
+        String tenantId = RequestContextHolder.getTenantId();
+        mongoRepository.deleteByTenantIdAndUuid(tenantId, id);
     }
 
     @Override
     public boolean existsById(UUID id) {
-        return mongoRepository.existsByUuid(id);
+        String tenantId = RequestContextHolder.getTenantId();
+        return mongoRepository.existsByTenantIdAndUuid(tenantId, id);
     }
 
     @Override
