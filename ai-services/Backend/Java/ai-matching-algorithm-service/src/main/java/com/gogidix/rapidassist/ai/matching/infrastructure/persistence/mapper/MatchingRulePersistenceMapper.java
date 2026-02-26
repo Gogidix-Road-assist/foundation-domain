@@ -22,11 +22,9 @@ public interface MatchingRulePersistenceMapper {
     MatchingRuleEntity toEntity(MatchingRule domain);
 
     @Mapping(source = "uuid", target = "id")
-    @Mapping(target = "uuid", ignore = true)
     MatchingRule toDomain(MatchingRuleEntity entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "uuid", ignore = true)
     void updateEntityFromDomain(MatchingRule domain, @MappingTarget MatchingRuleEntity entity);
 
     List<MatchingRuleEntity> toEntityList(List<MatchingRule> domains);

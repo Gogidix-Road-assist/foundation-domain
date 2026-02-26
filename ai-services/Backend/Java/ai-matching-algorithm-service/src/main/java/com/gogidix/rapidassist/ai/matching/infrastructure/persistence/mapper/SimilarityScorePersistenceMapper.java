@@ -22,11 +22,9 @@ public interface SimilarityScorePersistenceMapper {
     SimilarityScoreEntity toEntity(SimilarityScore domain);
 
     @Mapping(source = "uuid", target = "id")
-    @Mapping(target = "uuid", ignore = true)
     SimilarityScore toDomain(SimilarityScoreEntity entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "uuid", ignore = true)
     void updateEntityFromDomain(SimilarityScore domain, @MappingTarget SimilarityScoreEntity entity);
 
     List<SimilarityScoreEntity> toEntityList(List<SimilarityScore> domains);

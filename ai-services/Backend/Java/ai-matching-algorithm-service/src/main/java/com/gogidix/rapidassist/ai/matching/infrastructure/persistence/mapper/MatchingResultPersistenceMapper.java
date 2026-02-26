@@ -30,14 +30,12 @@ public interface MatchingResultPersistenceMapper {
      * Convert MongoDB entity to domain model.
      */
     @Mapping(source = "uuid", target = "id")
-    @Mapping(target = "uuid", ignore = true)
     MatchingResult toDomain(MatchingResultEntity entity);
 
     /**
      * Update entity from domain model.
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "uuid", ignore = true)
     void updateEntityFromDomain(MatchingResult domain, @MappingTarget MatchingResultEntity entity);
 
     /**

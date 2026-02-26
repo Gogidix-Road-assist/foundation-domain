@@ -22,11 +22,9 @@ public interface BatchMatchingJobPersistenceMapper {
     BatchMatchingJobEntity toEntity(BatchMatchingJob domain);
 
     @Mapping(source = "uuid", target = "id")
-    @Mapping(target = "uuid", ignore = true)
     BatchMatchingJob toDomain(BatchMatchingJobEntity entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "uuid", ignore = true)
     void updateEntityFromDomain(BatchMatchingJob domain, @MappingTarget BatchMatchingJobEntity entity);
 
     List<BatchMatchingJobEntity> toEntityList(List<BatchMatchingJob> domains);

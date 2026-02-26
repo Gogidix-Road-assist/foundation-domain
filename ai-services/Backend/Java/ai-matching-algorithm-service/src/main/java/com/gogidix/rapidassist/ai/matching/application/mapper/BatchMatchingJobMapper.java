@@ -15,26 +15,25 @@ import java.util.List;
 public interface BatchMatchingJobMapper {
 
     @Mapping(target = "jobId", ignore = true)
-    @Mapping(target = "totalCount", ignore = true)
-    @Mapping(target = "processedCount", ignore = true)
-    @Mapping(target = "successCount", ignore = true)
-    @Mapping(target = "failureCount", ignore = true)
+    @Mapping(target = "totalCount", source = "totalRecords")
+    @Mapping(target = "processedCount", source = "processedRecords")
+    @Mapping(target = "successCount", source = "successfulMatches")
+    @Mapping(target = "failureCount", source = "failedRecords")
     @Mapping(target = "minSimilarityThreshold", ignore = true)
     @Mapping(target = "batchSize", ignore = true)
-    @Mapping(target = "configuration", ignore = true)
+    @Mapping(target = "configuration", source = "jobParameters")
     BatchMatchingJobDto toDto(BatchMatchingJob domain);
 
-    @Mapping(target = "jobCode", ignore = true)
-    @Mapping(target = "description", ignore = true)
-    @Mapping(target = "totalRecords", ignore = true)
-    @Mapping(target = "processedRecords", ignore = true)
-    @Mapping(target = "successfulMatches", ignore = true)
-    @Mapping(target = "failedRecords", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "totalRecords", source = "totalCount")
+    @Mapping(target = "processedRecords", source = "processedCount")
+    @Mapping(target = "successfulMatches", source = "successCount")
+    @Mapping(target = "failedRecords", source = "failureCount")
     @Mapping(target = "progressPercentage", ignore = true)
-    @Mapping(target = "jobParameters", ignore = true)
+    @Mapping(target = "jobParameters", source = "configuration")
     @Mapping(target = "estimatedCompletionAt", ignore = true)
     @Mapping(target = "version", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedAt", source = "completedAt")
     BatchMatchingJob toDomain(BatchMatchingJobDto dto);
 
     void updateDomainFromDto(BatchMatchingJobDto dto, @MappingTarget BatchMatchingJob domain);
