@@ -14,10 +14,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ModerationResultMapper {
 
-    @Mapping(target = "reviewedBy", ignore = true)
+    @Mapping(source = "reviewedBy", target = "moderatedBy")
     ModerationResultDto toDto(ModerationResult entity);
 
-    @Mapping(target = "reviewedBy", ignore = true)
+    @Mapping(source = "moderatedBy", target = "reviewedBy")
     ModerationResult toEntity(ModerationResultDto dto);
 
     List<ModerationResultDto> toDtoList(List<ModerationResult> entities);
