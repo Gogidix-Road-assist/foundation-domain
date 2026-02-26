@@ -4,7 +4,6 @@ import com.gogidix.rapidassist.ai.dataquality.application.command.*;
 import com.gogidix.rapidassist.ai.dataquality.application.dto.*;
 import com.gogidix.rapidassist.ai.dataquality.domain.model.*;
 import com.gogidix.rapidassist.ai.dataquality.domain.repository.*;
-import com.gogidix.rapidassist.ai.dataquality.domain.tenant.TenantContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +50,6 @@ class DataQualityApplicationServiceTest {
     void setUp() {
         tenantId = "test-tenant";
         ruleId = UUID.randomUUID();
-        TenantContext.setTenantId(tenantId);
     }
 
     @Test
