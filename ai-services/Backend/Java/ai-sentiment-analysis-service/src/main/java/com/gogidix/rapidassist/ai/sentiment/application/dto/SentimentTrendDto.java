@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.sentiment.application.dto;
 
 import com.gogidix.rapidassist.ai.sentiment.domain.model.SentimentType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Map;
  * DTO for sentiment trend analysis
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

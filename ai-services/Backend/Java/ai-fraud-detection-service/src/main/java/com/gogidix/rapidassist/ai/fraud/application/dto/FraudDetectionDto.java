@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.fraud.domain.model.FraudRiskLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -15,11 +16,13 @@ import java.util.UUID;
  * DTO for FraudDetection
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class FraudDetectionDto {
 
+    @EqualsAndHashCode.Include
     private UUID id;
     private String tenantId;
     private String entityType;

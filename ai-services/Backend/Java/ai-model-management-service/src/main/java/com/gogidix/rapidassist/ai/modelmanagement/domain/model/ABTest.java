@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.modelmanagement.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Domain model representing an A/B test for model comparison.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ABTest {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.imagerecognition.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
  * Domain model representing a bounding box around a detected object.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,6 +50,7 @@ public class BoundingBox {
     }
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @AllArgsConstructor
     public static class Point {
         private Double x;

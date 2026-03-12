@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.recommendation.domain.model.RecommendationResu
 import com.gogidix.rapidassist.ai.recommendation.domain.model.RecommendationStatus;
 import com.gogidix.rapidassist.ai.recommendation.domain.model.RecommendationType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,14 @@ import java.util.UUID;
  * DTO for RecommendationResult.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecommendationResultDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -44,6 +49,7 @@ public class RecommendationResultDto {
      * Nested DTO for recommended items
      */
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

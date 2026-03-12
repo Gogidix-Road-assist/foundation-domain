@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.categorization.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * Contains the AI-predicted categories for content.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategorizationResult {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -131,6 +136,7 @@ public class CategorizationResult {
      * Nested class for category predictions
      */
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

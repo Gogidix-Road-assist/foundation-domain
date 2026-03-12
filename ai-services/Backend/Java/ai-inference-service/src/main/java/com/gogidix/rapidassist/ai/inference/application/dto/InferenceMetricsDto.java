@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.inference.application.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * DTO for Inference Metrics
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class InferenceMetricsDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private UUID inferenceRequestId;

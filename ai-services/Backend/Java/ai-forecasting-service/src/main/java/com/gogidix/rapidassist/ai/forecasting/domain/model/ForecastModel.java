@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.forecasting.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * Pure domain model without MongoDB annotations.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForecastModel {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

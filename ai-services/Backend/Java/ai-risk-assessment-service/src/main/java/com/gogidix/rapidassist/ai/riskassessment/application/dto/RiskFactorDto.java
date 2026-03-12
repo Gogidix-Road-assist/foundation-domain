@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.riskassessment.application.dto;
 import com.gogidix.rapidassist.ai.riskassessment.domain.model.RiskCategory;
 import com.gogidix.rapidassist.ai.riskassessment.domain.model.RiskLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * DTO for Risk Factor
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RiskFactorDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

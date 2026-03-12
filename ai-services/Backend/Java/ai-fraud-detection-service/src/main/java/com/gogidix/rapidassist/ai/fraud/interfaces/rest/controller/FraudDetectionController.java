@@ -61,7 +61,7 @@ public class FraudDetectionController {
     @GetMapping("/{id}")
     @Operation(summary = "Get detection by ID", description = "Retrieves a fraud detection by ID")
     public ResponseEntity<FraudDetectionDto> getDetectionById(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestHeader("X-Tenant-ID") String tenantId) {
 
         TenantContext.setTenantId(tenantId);
@@ -73,7 +73,7 @@ public class FraudDetectionController {
     @Operation(summary = "List all detections", description = "Lists all fraud detections with optional filtering")
     public ResponseEntity<List<FraudDetectionDto>> getAllDetections(
             @RequestHeader("X-Tenant-ID") String tenantId,
-            @Parameter(description = "Filter by status") @RequestParam(required = false) String status) {
+            @Parameter(description = "Filter by status") @RequestParam(value = "status", required = false) String status) {
 
         TenantContext.setTenantId(tenantId);
 
@@ -90,7 +90,7 @@ public class FraudDetectionController {
     @Operation(summary = "List all alerts", description = "Lists all fraud alerts")
     public ResponseEntity<List<FraudAlertDto>> getAllAlerts(
             @RequestHeader("X-Tenant-ID") String tenantId,
-            @Parameter(description = "Filter by status") @RequestParam(required = false) String status) {
+            @Parameter(description = "Filter by status") @RequestParam(value = "status", required = false) String status) {
 
         TenantContext.setTenantId(tenantId);
 
@@ -104,7 +104,7 @@ public class FraudDetectionController {
     @PostMapping("/alerts/{id}/acknowledge")
     @Operation(summary = "Acknowledge alert", description = "Acknowledges a fraud alert")
     public ResponseEntity<FraudAlertDto> acknowledgeAlert(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestHeader("X-Tenant-ID") String tenantId,
             @Valid @RequestBody AcknowledgeAlertRequest request) {
 
@@ -140,7 +140,7 @@ public class FraudDetectionController {
     @PutMapping("/cases/{id}")
     @Operation(summary = "Update fraud case", description = "Updates an existing fraud case")
     public ResponseEntity<FraudCaseDto> updateCase(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestHeader("X-Tenant-ID") String tenantId,
             @Valid @RequestBody UpdateCaseRequest request) {
 
@@ -226,6 +226,16 @@ public class FraudDetectionController {
         TenantContext.setTenantId(tenantId);
         List<FraudPatternDto> patterns = fraudDetectionService.getAllPatterns(tenantId);
         return ResponseEntity.ok(patterns);
+    }
+
+    // ==================== Exception Handler ====================
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage() != null && ex.getMessage().contains("not found")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
     // ==================== Request DTOs ====================

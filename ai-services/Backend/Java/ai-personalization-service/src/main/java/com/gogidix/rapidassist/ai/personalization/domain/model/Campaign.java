@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.personalization.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,14 @@ import java.util.UUID;
  * Orchestrates multiple personalization rules and recommendations.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Campaign {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

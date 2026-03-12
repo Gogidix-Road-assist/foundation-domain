@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.translation.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Tracks supported source and target language combinations.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LanguagePair {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

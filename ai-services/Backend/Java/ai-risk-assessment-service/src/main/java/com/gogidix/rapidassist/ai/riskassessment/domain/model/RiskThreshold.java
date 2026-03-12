@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.riskassessment.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Defines threshold rules for risk assessment and alert generation
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RiskThreshold {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

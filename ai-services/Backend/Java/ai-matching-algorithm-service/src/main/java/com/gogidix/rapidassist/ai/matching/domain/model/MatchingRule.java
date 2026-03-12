@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.matching.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * Defines custom matching rules for specific entity types.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchingRule {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -42,6 +47,7 @@ public class MatchingRule {
     private String updatedBy;
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

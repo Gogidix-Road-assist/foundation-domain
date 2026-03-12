@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.modelmanagement.application.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gogidix.rapidassist.ai.modelmanagement.domain.model.TrainingJobStatus;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * DTO representing a training job for model training.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingJobDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

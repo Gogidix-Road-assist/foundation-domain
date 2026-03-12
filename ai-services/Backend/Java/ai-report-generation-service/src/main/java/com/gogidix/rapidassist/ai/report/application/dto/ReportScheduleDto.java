@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gogidix.rapidassist.ai.report.domain.model.ReportFormat;
 import com.gogidix.rapidassist.ai.report.domain.model.ScheduleFrequency;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,14 @@ import java.util.UUID;
  * DTO representing a report schedule.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportScheduleDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

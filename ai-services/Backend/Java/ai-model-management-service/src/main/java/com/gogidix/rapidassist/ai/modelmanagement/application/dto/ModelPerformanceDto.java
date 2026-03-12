@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.modelmanagement.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO representing performance metrics for a model.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModelPerformanceDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

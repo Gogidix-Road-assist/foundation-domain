@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.predictive.analytics.application.dto;
 import com.gogidix.rapidassist.ai.predictive.analytics.domain.model.ModelStatus;
 import com.gogidix.rapidassist.ai.predictive.analytics.domain.model.ModelType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,14 @@ import java.util.UUID;
  * DTO for PredictiveModel
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PredictiveModelDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

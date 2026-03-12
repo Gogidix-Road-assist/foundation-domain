@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.imagerecognition.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,10 +12,14 @@ import java.util.UUID;
  * Domain model representing a scene label detected in an image.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SceneLabel {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

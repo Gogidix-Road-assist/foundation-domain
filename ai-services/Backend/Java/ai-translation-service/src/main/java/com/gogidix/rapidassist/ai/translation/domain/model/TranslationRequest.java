@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.translation.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Contains source text, target language, and translation result.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TranslationRequest {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

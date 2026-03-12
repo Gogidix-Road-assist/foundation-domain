@@ -5,6 +5,7 @@ import com.gogidix.rapidassist.ai.riskassessment.domain.model.AlertStatus;
 import com.gogidix.rapidassist.ai.riskassessment.domain.model.RiskCategory;
 import com.gogidix.rapidassist.ai.riskassessment.domain.model.RiskLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,14 @@ import java.util.UUID;
  * DTO for Risk Alert
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RiskAlertDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

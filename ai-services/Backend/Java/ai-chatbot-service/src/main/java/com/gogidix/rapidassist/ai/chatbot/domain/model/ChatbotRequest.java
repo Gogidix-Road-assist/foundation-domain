@@ -5,6 +5,7 @@ import com.gogidix.rapidassist.ai.chatbot.domain.event.ChatbotRequestFailedEvent
 import com.gogidix.rapidassist.ai.chatbot.domain.event.ChatbotRequestRequestedEvent;
 import com.gogidix.rapidassist.ai.chatbot.domain.exception.ChatbotException;
 import lombok.*;
+import lombok.EqualsAndHashCode;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
@@ -20,6 +21,7 @@ import java.util.UUID;
  * Represents a request to interact with the AI chatbot.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.tagging.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * AI-powered tag suggestions for content.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TagSuggestion {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.summarization.domain.model.SummarizationStatus
 import com.gogidix.rapidassist.ai.summarization.domain.model.SummarizationType;
 import com.gogidix.rapidassist.ai.summarization.domain.model.SummaryLength;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,13 @@ import java.util.Map;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SummarizationRequestDto {
+    @EqualsAndHashCode.Include
+
     private UUID id;
     private String tenantId;
     private String requestId;

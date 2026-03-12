@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.dataquality.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Captures details about specific data quality problems.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataQualityIssue {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

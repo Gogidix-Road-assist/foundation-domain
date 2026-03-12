@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.forecasting.domain.model.DataGranularity;
 import com.gogidix.rapidassist.ai.forecasting.domain.model.FrequencyType;
 import com.gogidix.rapidassist.ai.forecasting.domain.model.TimeSeriesData;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,14 @@ import java.util.UUID;
  * DTO for TimeSeriesData.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TimeSeriesDataDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.computervision.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,14 @@ import java.util.stream.Collectors;
  * Pure domain model without MongoDB annotations
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageClassification {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -112,6 +117,7 @@ public class ImageClassification {
      * Inner class representing a class prediction
      */
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

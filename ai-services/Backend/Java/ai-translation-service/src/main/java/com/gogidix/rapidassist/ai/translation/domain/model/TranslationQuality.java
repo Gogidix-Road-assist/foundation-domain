@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.translation.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Used to assess the quality and confidence of translations.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TranslationQuality {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.pricing.application.dto;
 import com.gogidix.rapidassist.ai.pricing.domain.model.PriceRuleStatus;
 import com.gogidix.rapidassist.ai.pricing.domain.model.PricingStrategyType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,14 @@ import java.util.UUID;
  * DTO for PriceRule.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PriceRuleDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -6,6 +6,7 @@ import com.gogidix.rapidassist.ai.optimization.domain.model.OptimizationResult;
 import com.gogidix.rapidassist.ai.optimization.domain.model.OptimizationStatus;
 import com.gogidix.rapidassist.ai.optimization.domain.model.OptimizationType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,14 @@ import java.util.UUID;
  * DTO for OptimizationJob.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OptimizationJobDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

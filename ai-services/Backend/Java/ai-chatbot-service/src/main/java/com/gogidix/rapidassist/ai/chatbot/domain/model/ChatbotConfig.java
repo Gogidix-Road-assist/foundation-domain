@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.chatbot.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Pure domain model with MongoDB annotations for multi-tenancy.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatbotConfig {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
 

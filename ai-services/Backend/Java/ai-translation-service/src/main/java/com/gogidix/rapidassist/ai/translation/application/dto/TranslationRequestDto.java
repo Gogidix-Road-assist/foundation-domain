@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.translation.application.dto;
 import com.gogidix.rapidassist.ai.translation.domain.model.TranslationStatus;
 import com.gogidix.rapidassist.ai.translation.domain.model.TranslationQuality;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for TranslationRequest.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TranslationRequestDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

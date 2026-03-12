@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.recommendation.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,14 @@ import java.util.UUID;
  * Domain model representing similarity between items for recommendations.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemSimilarity {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

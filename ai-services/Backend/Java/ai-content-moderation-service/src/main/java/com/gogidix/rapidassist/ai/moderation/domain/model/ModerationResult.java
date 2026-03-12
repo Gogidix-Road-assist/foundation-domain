@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.moderation.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Map;
  * Contains the outcome of automated moderation analysis.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -103,6 +105,7 @@ public class ModerationResult {
     }
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

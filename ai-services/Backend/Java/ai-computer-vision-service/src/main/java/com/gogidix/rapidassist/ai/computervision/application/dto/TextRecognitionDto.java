@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.computervision.application.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,14 @@ import java.util.UUID;
  * DTO for TextRecognition
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TextRecognitionDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -33,6 +38,7 @@ public class TextRecognitionDto {
     private String longestLine;
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -43,6 +49,7 @@ public class TextRecognitionDto {
     }
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

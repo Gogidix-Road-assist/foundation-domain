@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.pricing.application.dto;
 
 import com.gogidix.rapidassist.ai.pricing.domain.model.DiscountType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for Discount.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscountDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

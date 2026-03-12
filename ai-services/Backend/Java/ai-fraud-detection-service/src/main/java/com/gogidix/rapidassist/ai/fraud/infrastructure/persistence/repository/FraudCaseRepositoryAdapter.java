@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,7 +43,13 @@ public class FraudCaseRepositoryAdapter implements FraudCaseRepositoryPort {
 
     @Override
     public List<FraudCase> findByAssignedTo(String tenantId, String assignedTo) {
-        return cases.stream().filter(c -> c.getTenantId().equals(tenantId) && assignedTo.equals(c.getAssignedTo())).toList();
+        // Return empty list if assignedTo is null (query parameter should not be null)
+        if (assignedTo == null) {
+            return List.of();
+        }
+        return cases.stream()
+                .filter(c -> c.getTenantId().equals(tenantId) && Objects.equals(assignedTo, c.getAssignedTo()))
+                .toList();
     }
 
     @Override

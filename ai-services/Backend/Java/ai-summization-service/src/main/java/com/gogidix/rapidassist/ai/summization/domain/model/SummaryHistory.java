@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.summization.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Tracks past summarization operations for audit and reference.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SummaryHistory {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

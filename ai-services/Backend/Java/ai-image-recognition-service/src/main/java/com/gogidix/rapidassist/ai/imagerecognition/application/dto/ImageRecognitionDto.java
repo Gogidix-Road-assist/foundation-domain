@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.imagerecognition.application.dto;
 import com.gogidix.rapidassist.ai.imagerecognition.domain.model.RecognitionStatus;
 import com.gogidix.rapidassist.ai.imagerecognition.domain.model.RecognitionType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * DTO for ImageRecognition.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageRecognitionDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.tagging.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Stores tagging results with confidence scores.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaggingResult {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

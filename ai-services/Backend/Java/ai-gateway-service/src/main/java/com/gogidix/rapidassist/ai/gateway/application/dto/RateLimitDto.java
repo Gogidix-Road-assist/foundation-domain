@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.gateway.application.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * DTO for RateLimit.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RateLimitDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

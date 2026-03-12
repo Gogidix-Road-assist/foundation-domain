@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.computervision.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,14 @@ import java.util.UUID;
  * Pure domain model without MongoDB annotations
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ObjectDetection {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -81,6 +86,7 @@ public class ObjectDetection {
      * Inner class representing bounding box coordinates
      */
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -105,6 +111,7 @@ public class ObjectDetection {
      * Inner class representing a 2D point
      */
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

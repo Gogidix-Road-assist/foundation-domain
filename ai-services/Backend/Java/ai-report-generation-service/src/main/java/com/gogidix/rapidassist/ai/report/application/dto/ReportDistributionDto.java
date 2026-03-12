@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.report.application.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gogidix.rapidassist.ai.report.domain.model.DistributionType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import java.util.UUID;
  * DTO representing a report distribution record.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportDistributionDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

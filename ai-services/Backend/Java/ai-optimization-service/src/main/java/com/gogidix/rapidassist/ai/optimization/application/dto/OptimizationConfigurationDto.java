@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.optimization.application.dto;
 
 import com.gogidix.rapidassist.ai.optimization.domain.model.OptimizationAlgorithm;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for OptimizationConfiguration.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OptimizationConfigurationDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

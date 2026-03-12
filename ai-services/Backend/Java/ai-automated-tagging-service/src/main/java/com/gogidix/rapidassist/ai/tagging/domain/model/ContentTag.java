@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.tagging.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * This entity tracks which tags are applied to which content.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContentTag {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

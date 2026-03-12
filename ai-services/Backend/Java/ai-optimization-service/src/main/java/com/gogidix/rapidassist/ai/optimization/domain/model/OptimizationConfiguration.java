@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.optimization.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Contains algorithm-specific settings and parameters.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OptimizationConfiguration {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

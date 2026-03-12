@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.dataquality.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Tracks individual validation runs against datasets.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataQualityCheck {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

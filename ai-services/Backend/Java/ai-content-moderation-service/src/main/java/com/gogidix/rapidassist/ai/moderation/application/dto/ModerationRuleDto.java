@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.moderation.application.dto;
 
 import com.gogidix.rapidassist.ai.moderation.domain.model.ModerationRule;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.Map;
  * DTO for ModerationRule
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.categorization.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Requests content to be categorized by the AI service.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategorizationRequest {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

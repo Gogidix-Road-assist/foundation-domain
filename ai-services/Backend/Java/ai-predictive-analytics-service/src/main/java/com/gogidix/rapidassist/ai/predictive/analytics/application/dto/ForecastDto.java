@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.predictive.analytics.application.dto;
 
 import com.gogidix.rapidassist.ai.predictive.analytics.domain.model.Forecast;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for Forecast
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForecastDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -35,6 +40,7 @@ public class ForecastDto {
     private LocalDateTime generatedAt;
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

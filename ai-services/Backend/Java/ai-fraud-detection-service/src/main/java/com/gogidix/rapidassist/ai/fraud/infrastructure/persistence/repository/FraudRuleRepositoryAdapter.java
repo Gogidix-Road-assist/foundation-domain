@@ -16,6 +16,10 @@ public class FraudRuleRepositoryAdapter implements FraudRuleRepositoryPort {
 
     @Override
     public FraudRule save(String tenantId, FraudRule rule) {
+        // Remove existing rule with same ID if it exists (for updates)
+        if (rule.getId() != null) {
+            rules.removeIf(r -> rule.getId().equals(r.getId()));
+        }
         rules.add(rule);
         return rule;
     }

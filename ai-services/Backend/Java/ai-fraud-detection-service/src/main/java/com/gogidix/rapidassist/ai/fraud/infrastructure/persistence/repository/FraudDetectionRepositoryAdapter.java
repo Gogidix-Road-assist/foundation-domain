@@ -6,6 +6,7 @@ import com.gogidix.rapidassist.ai.fraud.infrastructure.persistence.entity.FraudD
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,18 +24,29 @@ public class FraudDetectionRepositoryAdapter implements FraudDetectionRepository
     @Override
     public FraudDetection save(String tenantId, FraudDetection detection) {
         FraudDetectionEntity entity = toEntity(detection);
+        // Set timestamps for new entities
+        if (entity.getCreatedAt() == null) {
+            entity.setCreatedAt(LocalDateTime.now());
+        }
+        entity.setUpdatedAt(LocalDateTime.now());
         FraudDetectionEntity saved = springDataRepository.save(entity);
         return toDomain(saved);
     }
 
     @Override
     public Optional<FraudDetection> findById(String tenantId, UUID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return springDataRepository.findById(id)
                 .map(this::toDomain);
     }
 
     @Override
     public List<FraudDetection> findByTenantId(String tenantId) {
+        if (tenantId == null || tenantId.isEmpty()) {
+            return List.of();
+        }
         return springDataRepository.findByTenantId(tenantId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -49,11 +61,18 @@ public class FraudDetectionRepositoryAdapter implements FraudDetectionRepository
 
     @Override
     public List<FraudDetection> findByRiskLevel(String tenantId, String riskLevel) {
-        return springDataRepository.findByTenantIdAndRiskLevel(
-                tenantId, com.gogidix.rapidassist.ai.fraud.domain.model.FraudRiskLevel.valueOf(riskLevel)
-        ).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        if (riskLevel == null || riskLevel.isEmpty()) {
+            return List.of();
+        }
+        try {
+            return springDataRepository.findByTenantIdAndRiskLevel(
+                    tenantId, com.gogidix.rapidassist.ai.fraud.domain.model.FraudRiskLevel.valueOf(riskLevel)
+            ).stream()
+                    .map(this::toDomain)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            return List.of();
+        }
     }
 
     @Override
@@ -72,17 +91,23 @@ public class FraudDetectionRepositoryAdapter implements FraudDetectionRepository
 
     @Override
     public void delete(String tenantId, UUID id) {
+        if (id == null) {
+            return;
+        }
         springDataRepository.deleteById(id);
     }
 
     @Override
     public boolean exists(String tenantId, UUID id) {
+        if (id == null) {
+            return false;
+        }
         return springDataRepository.existsById(id);
     }
 
     private FraudDetectionEntity toEntity(FraudDetection domain) {
         return FraudDetectionEntity.builder()
-                .id(domain.getId())
+                .id(domain.getId() != null ? domain.getId() : UUID.randomUUID())
                 .tenantId(domain.getTenantId())
                 .entityType(domain.getEntityType())
                 .entityId(domain.getEntityId())

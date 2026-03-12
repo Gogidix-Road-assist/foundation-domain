@@ -1,0 +1,277 @@
+###############################################################################
+# Distributed Tracing Configuration - AI Fraud Detection Service
+# Financial-Grade Testing Standard - Phase 4
+#
+# This file defines distributed tracing configuration using OpenTelemetry.
+# Enables end-to-end request tracing across microservices.
+###############################################################################
+
+tracing:
+  enabled: true
+  service-name: ai-fraud-detection-service
+  exporter:
+    type: otlp
+    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4317}
+  sampler:
+    type: parentbased_traceidratio
+    ratio: ${OTEL_TRACES_SAMPLER:0.1}  # 10% sampling in production
+    arg: ${OTEL_TRACES_SAMPLER_ARG:0.1}
+
+###############################################################################
+# OpenTelemetry Configuration
+###############################################################################
+
+opentelemetry:
+  traces:
+    exporter:
+      otlp:
+        enabled: true
+        endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://jaeger:4317}
+        protocol: grpc
+        compression: gzip
+    sampler:
+      type: traceidratio
+      ratio: ${OTEL_TRACES_SAMPLER_RATIO:0.1}
+    batch:
+      enabled: true
+      timeout: 30s
+      max-queue-size: 2048
+      max-export-batch-size: 512
+
+  metrics:
+    exporter:
+      otlp:
+        enabled: true
+        endpoint: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://jaeger:4317}
+        protocol: grpc
+    export-interval: 60s
+
+  logs:
+    batch:
+      enabled: true
+      export-timeout: 30s
+
+###############################################################################
+# Span Configuration
+###############################################################################
+
+spans:
+  # HTTP Server Spans
+  http.server:
+    enabled: true
+    include-payload:
+      max-length: 1024
+      request-headers:
+        - X-Tenant-ID
+        - X-Request-ID
+        - X-Correlation-ID
+      response-headers:
+        - X-Request-ID
+
+  # HTTP Client Spans
+  http.client:
+    enabled: true
+
+  # Database Spans
+  database:
+    enabled: true
+    include-statement: true  # Sanitize in production
+    statement-sanitizer: regex  # Remove sensitive data
+
+  # Kafka Spans
+  kafka:
+    enabled: true
+    include-payload:
+      max-length: 512
+
+###############################################################################
+# Trace Propagation
+###############################################################################
+
+propagation:
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+
+###############################################################################
+# Baggage Configuration
+###############################################################################
+
+baggage:
+  enabled: true
+  limits:
+    max-value-length: 4096
+    max-entries-per-baggage: 64
+    max-baggage-size: 8192
+
+###############################################################################
+# Resource Attributes
+###############################################################################
+
+resource:
+  attributes:
+    service.name: ai-fraud-detection-service
+    service.version: ${APPLICATION_VERSION:1.0.0}
+    deployment.environment: ${SPRING_PROFILES_ACTIVE:production}
+    service.namespace: gogidix.platform
+    provider: gogidix
+    team: platform-team
+
+###############################################################################
+# Instrumentation Configuration
+###############################################################################
+
+instrumentation:
+  # Spring Web MVC
+  web:
+    enabled: true
+    skip-pattern: /actuator/health,/actuator/info
+    capture-experimental-span-attributes: true
+
+  # Spring Data MongoDB
+  mongodb:
+    enabled: true
+    capture-command-attributes: true
+
+  # Kafka
+  kafka:
+    enabled: true
+    capture-headers: true
+    capture-payload: false  # Disable for security
+
+  # Spring Scheduling
+  scheduling:
+    enabled: true
+
+  # RxJava
+  rxjava:
+    enabled: true
+    capture-operation-name: true
+
+###############################################################################
+# Trace Filters
+###############################################################################
+
+filters:
+  # Health check endpoint - exclude from tracing
+  - name: HealthCheckFilter
+    paths:
+      - /actuator/health
+      - /health
+    action: exclude
+
+  # Metrics endpoint - exclude from tracing
+  - name: MetricsFilter
+    paths:
+      - /actuator/prometheus
+      - /actuator/metrics
+    action: exclude
+
+###############################################################################
+# Custom Span Attributes
+###############################################################################
+
+span-attributes:
+  # Tenant Context
+  tenant:
+    - tenant.id
+    - tenant.region
+
+  # Fraud Detection
+  fraud:
+    - fraud.detection.id
+    - fraud.entity.type
+    - fraud.entity.id
+    - fraud.risk.level
+    - fraud.detection.method
+
+  # AI Model
+  ai:
+    - ai.model.name
+    - ai.model.version
+    - ai.prediction.class
+    - ai.prediction.confidence
+
+###############################################################################
+# Trace Sampling Rules
+###############################################################################
+
+sampling:
+  rules:
+    # High-value traces - sample at 100%
+    - name: CriticalOperations
+      condition:
+        span-kind: server
+        attributes:
+          http.target: /api/v1/fraud-detection/detect
+      sampler:
+        type: always_on
+
+    # Health checks - sample at 0%
+    - name: HealthChecks
+      condition:
+        span-kind: server
+        attributes:
+          http.target: /actuator/health
+      sampler:
+        type: always_off
+
+    # Default sampling
+    - name: Default
+      sampler:
+        type: traceidratio
+        ratio: 0.1
+
+###############################################################################
+# Correlation ID Configuration
+###############################################################################
+
+correlation:
+  enabled: true
+  header-name: X-Correlation-ID
+  fallback-to-request-id: true
+
+###############################################################################
+# Trace Export Retry Configuration
+###############################################################################
+
+retry:
+  enabled: true
+  max-attempts: 5
+  initial-backoff: 1s
+  max-backoff: 30s
+  backoff-multiplier: 2
+
+###############################################################################
+# Jaeger Specific Configuration (for local development)
+###############################################################################
+
+jaeger:
+  agent:
+    enabled: ${JAEGER_AGENT_ENABLED:false}
+    host: ${JAEGER_AGENT_HOST:localhost}
+    port: ${JAEGER_AGENT_PORT:6831}
+  collector:
+    enabled: ${JAEGER_COLLECTOR_ENABLED:true}
+    endpoint: ${JAEGER_COLLECTOR_ENDPOINT:http://localhost:14250/api/traces}
+  propagation: ${JAEGER_PROPAGATION:b3}
+  sampler:
+    type: ${JAEGER_SAMPLER_TYPE:probabilistic}
+    param: ${JAEGER_SAMPLER_PARAM:0.1}
+  reporter:
+    max-queue-size: 1000
+    flush-interval: 10s
+    log-spans: false
+
+###############################################################################
+# Trace Quality Metrics
+###############################################################################
+
+quality-metrics:
+  dropped-spans:
+    enabled: true
+  export-failures:
+    enabled: true
+  span-attribute-errors:
+    enabled: true

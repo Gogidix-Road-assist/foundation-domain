@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.inference.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.UUID;
  * Domain model representing a batch inference request
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +26,8 @@ import java.util.UUID;
 public class BatchInferenceRequest {
 
     @Id
+    @EqualsAndHashCode.Include
+
     private UUID id;
 
     @Indexed

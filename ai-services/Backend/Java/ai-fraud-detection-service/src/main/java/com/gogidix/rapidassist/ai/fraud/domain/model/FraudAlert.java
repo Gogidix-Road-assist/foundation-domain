@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.fraud.domain.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -14,11 +15,13 @@ import java.util.UUID;
  * Generated when fraud is detected and requires attention.
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class FraudAlert {
 
+    @EqualsAndHashCode.Include
     private UUID id;
     private String tenantId;
     private UUID fraudDetectionId;

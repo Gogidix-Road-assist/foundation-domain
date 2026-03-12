@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.predictive.analytics.application.dto;
 
 import com.gogidix.rapidassist.ai.predictive.analytics.domain.model.PredictionStatus;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for Prediction
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PredictionDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

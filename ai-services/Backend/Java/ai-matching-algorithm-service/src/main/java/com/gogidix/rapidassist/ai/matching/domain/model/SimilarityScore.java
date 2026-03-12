@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.matching.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Stores detailed similarity metrics between entities.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SimilarityScore {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

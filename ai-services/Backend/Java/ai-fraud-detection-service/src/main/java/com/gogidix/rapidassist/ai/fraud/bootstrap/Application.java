@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * It provides AI-powered fraud detection capabilities.
  */
 @SpringBootApplication
-@EnableMongoRepositories
+@EnableMongoRepositories(basePackages = "com.gogidix.rapidassist.ai.fraud.infrastructure.persistence.repository")
 public class Application {
 
     /**

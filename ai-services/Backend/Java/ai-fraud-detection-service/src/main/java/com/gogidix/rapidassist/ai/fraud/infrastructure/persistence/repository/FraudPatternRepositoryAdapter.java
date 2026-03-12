@@ -16,6 +16,10 @@ public class FraudPatternRepositoryAdapter implements FraudPatternRepositoryPort
 
     @Override
     public FraudPattern save(String tenantId, FraudPattern pattern) {
+        // Remove existing pattern with same ID if it exists (for updates)
+        if (pattern.getId() != null) {
+            patterns.removeIf(p -> pattern.getId().equals(p.getId()));
+        }
         patterns.add(pattern);
         return pattern;
     }

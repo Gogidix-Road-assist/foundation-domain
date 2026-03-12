@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.tagging.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * Defines tag categories, rules, and AI tagging configuration.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TagDefinition {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

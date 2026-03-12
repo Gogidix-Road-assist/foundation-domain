@@ -13,7 +13,7 @@ spring:
         enabled: true
 
   kafka:
-    bootstrap-servers: \${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -33,7 +33,7 @@ spring:
     default-property-inclusion: non_null
 
 server:
-  port: \${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8080}
   error:
     include-message: always
     include-binding-errors: always
@@ -66,7 +66,7 @@ logging:
   level:
     root: INFO
     com.gogidix.rapidassist.ai.fraud: DEBUG
-    org.hibernate.SQL: \${SQL_LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:DEBUG}
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

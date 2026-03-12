@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.ai.forecasting.domain.model.ForecastModel;
 import com.gogidix.rapidassist.ai.forecasting.domain.model.ForecastModelType;
 import com.gogidix.rapidassist.ai.forecasting.domain.model.ModelStatus;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,14 @@ import java.util.UUID;
  * DTO for ForecastModel.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForecastModelDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

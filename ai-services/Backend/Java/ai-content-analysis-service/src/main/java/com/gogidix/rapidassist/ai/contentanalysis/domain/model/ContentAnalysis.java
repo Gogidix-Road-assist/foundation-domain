@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.ai.contentanalysis.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * Contains comprehensive analysis metrics for content quality, readability, sentiment, and SEO.
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContentAnalysis {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;

@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.computervision.application.dto;
 
 import com.gogidix.rapidassist.ai.computervision.domain.model.FaceEmotion;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,14 @@ import java.util.UUID;
  * DTO for FaceDetection
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FaceDetectionDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
@@ -37,6 +42,7 @@ public class FaceDetectionDto {
     private Boolean smiling;
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -47,6 +53,7 @@ public class FaceDetectionDto {
     }
 
     @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

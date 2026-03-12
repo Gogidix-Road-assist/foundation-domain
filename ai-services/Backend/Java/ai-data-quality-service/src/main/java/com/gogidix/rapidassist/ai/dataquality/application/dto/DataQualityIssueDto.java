@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.dataquality.application.dto;
 
 import com.gogidix.rapidassist.ai.dataquality.domain.model.DataQualityIssue;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,14 @@ import java.util.UUID;
  * DTO for DataQualityIssue
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataQualityIssueDto {
+
+    @EqualsAndHashCode.Include
+
 
     private UUID id;
     private String tenantId;
