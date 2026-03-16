@@ -1,0 +1,9 @@
+# Foundation-Domain Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: foundation
+  labels:
+    domain: foundation
+    environment: production
+    project: rapid-assist
