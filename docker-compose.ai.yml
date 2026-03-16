@@ -1,0 +1,432 @@
+# Foundation-Domain AI Services Docker Compose
+# This file contains all 31 AI services
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.ai.yml up -d
+
+version: '3.8'
+
+services:
+  # AI Gateway - Central entry point for all AI services
+  ai-gateway-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-gateway-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-gateway
+    ports:
+      - "8200:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@foundation-mongodb:27017
+      REDIS_URL: redis://foundation-redis:6379
+    depends_on:
+      - foundation-mongodb
+      - foundation-redis
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # AI Core Services
+  ai-inference-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-inference-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-inference
+    ports:
+      - "8201:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@foundation-mongodb:27017
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-model-management-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-model-management-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-model-mgmt
+    ports:
+      - "8202:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@foundation-mongodb:27017
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # NLP & Language Services
+  ai-nlp-processing-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-nlp-processing-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-nlp
+    ports:
+      - "8210:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@foundation-mongodb:27017
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-translation-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-translation-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-translation
+    ports:
+      - "8211:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-sentiment-analysis-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-sentiment-analysis-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-sentiment
+    ports:
+      - "8212:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-summarization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-summarization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-summarization
+    ports:
+      - "8213:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-chatbot-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-chatbot-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-chatbot
+    ports:
+      - "8214:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@foundation-mongodb:27017
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Computer Vision Services
+  ai-computer-vision-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-computer-vision-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-cv
+    ports:
+      - "8220:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-image-recognition-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-image-recognition-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-image-rec
+    ports:
+      - "8221:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-content-analysis-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-content-analysis-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-content-analysis
+    ports:
+      - "8222:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-content-moderation-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-content-moderation-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-content-moderation
+    ports:
+      - "8223:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Analytics & Insights Services
+  ai-anomaly-detection-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-anomaly-detection-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-anomaly
+    ports:
+      - "8230:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-predictive-analytics-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-predictive-analytics-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-predictive
+    ports:
+      - "8231:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-forecasting-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-forecasting-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-forecasting
+    ports:
+      - "8232:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-bi-analytics-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-bi-analytics-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-bi
+    ports:
+      - "8233:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  analytics-service:
+    build:
+      context: ./ai-services/Backend/Java/analytics-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-analytics
+    ports:
+      - "8234:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Specialized AI Services
+  ai-fraud-detection-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-fraud-detection-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-fraud
+    ports:
+      - "8240:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-risk-assessment-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-risk-assessment-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-risk
+    ports:
+      - "8241:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-matching-algorithm-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-matching-algorithm-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-matching
+    ports:
+      - "8242:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-recommendation-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-recommendation-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-recommendation
+    ports:
+      - "8243:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-personalization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-personalization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-personalization
+    ports:
+      - "8244:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-optimization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-optimization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-optimization
+    ports:
+      - "8245:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-search-optimization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-search-optimization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-search-opt
+    ports:
+      - "8246:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Content & Tagging Services
+  ai-automated-tagging-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-automated-tagging-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-tagging
+    ports:
+      - "8250:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-categorization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-categorization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-categorization
+    ports:
+      - "8251:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-data-quality-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-data-quality-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-data-quality
+    ports:
+      - "8252:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Speech & Audio Services
+  ai-speech-recognition-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-speech-recognition-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-speech
+    ports:
+      - "8260:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Reporting Services
+  ai-report-generation-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-report-generation-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-report-gen
+    ports:
+      - "8270:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-pricing-engine-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-pricing-engine-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-pricing
+    ports:
+      - "8271:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Legacy Service Name (kept for compatibility)
+  ai-summization-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-summization-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-summization
+    ports:
+      - "8280:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+networks:
+  foundation-network:
+    external: true

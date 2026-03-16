@@ -1,0 +1,144 @@
+# Prometheus Configuration for Foundation-Domain
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'foundation-domain'
+    environment: 'development'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Rule files
+rule_files:
+  - "/etc/prometheus/alerts/*.yml"
+
+# Service discovery configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8304']
+        labels:
+          service: 'api-gateway'
+          domain: 'shared-infrastructure'
+
+  # Identity Service
+  - job_name: 'identity-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['identity-service:8316']
+        labels:
+          service: 'identity-service'
+          domain: 'shared-infrastructure'
+
+  # Config Service
+  - job_name: 'config-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['config-service:8000']
+        labels:
+          service: 'config-service'
+          domain: 'central-configuration'
+
+  # AI Gateway
+  - job_name: 'ai-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['ai-gateway-service:8080']
+        labels:
+          service: 'ai-gateway'
+          domain: 'ai-services'
+
+  # AI Inference
+  - job_name: 'ai-inference'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['ai-inference-service:8080']
+        labels:
+          service: 'ai-inference'
+          domain: 'ai-services'
+
+  # Monitoring Service
+  - job_name: 'monitoring-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['monitoring-service:8091']
+        labels:
+          service: 'monitoring-service'
+          domain: 'orchestration-services'
+
+  # Notification Service
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['notification-service:8323']
+        labels:
+          service: 'notification-service'
+          domain: 'shared-infrastructure'
+
+  # Service Registry
+  - job_name: 'service-registry'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-registry-discovery:8761']
+        labels:
+          service: 'service-registry'
+          domain: 'shared-infrastructure'
+
+  # Rate Limiting Service
+  - job_name: 'rate-limiting'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['rate-limiting-service:8080']
+        labels:
+          service: 'rate-limiting'
+          domain: 'shared-infrastructure'
+
+  # Node Exporter - Host Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+
+  # cAdvisor - Container Metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+
+  # MongoDB Exporter (if available)
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb:27017']
+        labels:
+          service: 'mongodb'
+    metrics_path: '/metrics'
+
+  # Redis Exporter (if available)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          service: 'redis'
+
+  # PostgreSQL Exporter (if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+        labels:
+          service: 'postgres'

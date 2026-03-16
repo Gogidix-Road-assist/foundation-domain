@@ -1,0 +1,120 @@
+# Foundation-Domain Alert Rules
+groups:
+  - name: foundation_service_alerts
+    interval: 30s
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.service }} is down"
+          description: "{{ $labels.service }} has been down for more than 2 minutes"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} has error rate above 5% for 5 minutes"
+
+      # High Latency
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High latency on {{ $labels.service }}"
+          description: "95th percentile latency above 1 second for 10 minutes"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes / jvm_memory_max_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Memory usage above 90% for 5 minutes"
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "CPU usage above 80% for 10 minutes"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space below 10% on {{ $labels.instance }}"
+
+  - name: foundation_database_alerts
+    interval: 30s
+    rules:
+      # MongoDB Connection High
+      - alert: MongoConnectionsHigh
+        expr: mongodb_connections{state="current"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "MongoDB connections high"
+          description: "MongoDB has {{ $value }} active connections"
+
+      # Redis Memory High
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage above 90%"
+
+  - name: foundation_container_alerts
+    interval: 30s
+    rules:
+      # Container CPU High
+      - alert: ContainerCPUHigh
+        expr: rate(container_cpu_usage_seconds_total{name!=""}[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Container CPU high"
+          description: "Container {{ $labels.name }} CPU above 80%"
+
+      # Container Memory High
+      - alert: ContainerMemoryHigh
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Container memory high"
+          description: "Container {{ $labels.name }} memory above 90%"
