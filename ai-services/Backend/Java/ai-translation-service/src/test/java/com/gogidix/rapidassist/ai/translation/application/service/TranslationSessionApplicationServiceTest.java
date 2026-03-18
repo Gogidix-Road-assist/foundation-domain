@@ -537,9 +537,9 @@ class TranslationSessionApplicationServiceTest {
         String uuidStr = id.replace("id-", "00000000-0000-0000-0000-00000000");
         // Pad or truncate to get valid UUID format
         if (uuidStr.length() < 36) {
-            uuidStr = String.format("%08d-%04d-%04d-%04d-%012d",
-                Integer.parseInt(uuidStr.substring(0, Math.min(8, uuidStr.length()).replace("-", "0"))),
-                0, 0, 0, 0);
+            String prefix = uuidStr.substring(0, Math.min(8, uuidStr.length()));
+            int numericValue = Integer.parseInt(prefix.replace("-", "0"));
+            uuidStr = String.format("%08d-%04d-%04d-%04d-%012d", numericValue, 0, 0, 0, 0);
         }
         return TranslationSession.builder()
                 .id(UUID.randomUUID()) // Use random UUID for valid UUID
@@ -568,7 +568,4 @@ class TranslationSessionApplicationServiceTest {
                 .channel("api")
                 .translationRequests(new ArrayList<>())
                 .createdAt(LocalDateTime.now())
-                .lastActivityAt(LocalDateTime.now())
-                .build();
-    }
-}
+                .lastActivityAt(LocalD

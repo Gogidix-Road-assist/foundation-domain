@@ -496,7 +496,18 @@ class ChatbotSessionApplicationServiceTest {
         dto.setId(sessionId);
 
         when(sessionRepository.findById(tenantId, sessionId)).thenReturn(Optional.of(session));
-        when(contextRepository.save(eq(tenantId), any())).thenReturn(any());
+        when(contextRepository.save(eq(tenantId), any())).thenAnswer(invocation -> {
+            com.gogidix.rapidassist.ai.chatbot.domain.model.ChatbotContext ctx =
+                invocation.getArgument(1);
+            if (ctx.getId() == null) {
+                ctx.setId(UUID.randomUUID());
+            }
+            if (ctx.getCreatedAt() == null) {
+                ctx.setCreatedAt(LocalDateTime.now());
+            }
+            ctx.setUpdatedAt(LocalDateTime.now());
+            return ctx;
+        });
         when(sessionRepository.save(eq(tenantId), any())).thenReturn(session);
         when(mapper.toDto(session)).thenReturn(dto);
 
@@ -683,7 +694,18 @@ class ChatbotSessionApplicationServiceTest {
         dto.setId(sessionId);
 
         when(sessionRepository.findById(tenantId, sessionId)).thenReturn(Optional.of(session));
-        when(contextRepository.save(eq(tenantId), any())).thenReturn(any());
+        when(contextRepository.save(eq(tenantId), any())).thenAnswer(invocation -> {
+            com.gogidix.rapidassist.ai.chatbot.domain.model.ChatbotContext ctx =
+                invocation.getArgument(1);
+            if (ctx.getId() == null) {
+                ctx.setId(UUID.randomUUID());
+            }
+            if (ctx.getCreatedAt() == null) {
+                ctx.setCreatedAt(LocalDateTime.now());
+            }
+            ctx.setUpdatedAt(LocalDateTime.now());
+            return ctx;
+        });
         when(sessionRepository.save(eq(tenantId), any())).thenReturn(session);
         when(mapper.toDto(session)).thenReturn(dto);
 
