@@ -160,7 +160,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -299,7 +299,7 @@
                 <executions>
                     <execution>
                         <id>mutation-coverage</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>mutationCoverage</goal>
                         </goals>

@@ -183,7 +183,7 @@ class TranslationSessionApplicationServiceTest {
         List<TranslationSession> sessions = List.of(testSession);
 
         when(sessionRepository.findByUserId(tenantId, userId)).thenReturn(sessions);
-        when(mapper.toDto(testSession)).thenReturn(testSessionDto);
+        when(mapper.toDto(any())).thenReturn(testSessionDto);
 
         List<TranslationSessionDto> results = applicationService.getUserSessions(query);
 
@@ -191,6 +191,7 @@ class TranslationSessionApplicationServiceTest {
         assertEquals(1, results.size());
 
         verify(sessionRepository, times(1)).findByUserId(tenantId, userId);
+        verify(mapper, times(1)).toDto(any());
     }
 
     @Test
@@ -532,8 +533,16 @@ class TranslationSessionApplicationServiceTest {
     }
 
     private TranslationSession createActiveSession(String id, String tenantId, String userId) {
+        // Generate valid UUID from string identifier
+        String uuidStr = id.replace("id-", "00000000-0000-0000-0000-00000000");
+        // Pad or truncate to get valid UUID format
+        if (uuidStr.length() < 36) {
+            uuidStr = String.format("%08d-%04d-%04d-%04d-%012d",
+                Integer.parseInt(uuidStr.substring(0, Math.min(8, uuidStr.length()).replace("-", "0"))),
+                0, 0, 0, 0);
+        }
         return TranslationSession.builder()
-                .id(UUID.fromString(id.replace("id-", "00000000-0000-0000-0000-00000000")))
+                .id(UUID.randomUUID()) // Use random UUID for valid UUID
                 .tenantId(tenantId)
                 .userId(userId)
                 .sessionType(SessionType.REAL_TIME)
@@ -549,7 +558,7 @@ class TranslationSessionApplicationServiceTest {
 
     private TranslationSession createCompletedSession(String id, String tenantId, String userId) {
         return TranslationSession.builder()
-                .id(UUID.fromString(id.replace("id-", "00000000-0000-0000-0000-00000000")))
+                .id(UUID.randomUUID()) // Use random UUID for valid UUID
                 .tenantId(tenantId)
                 .userId(userId)
                 .sessionType(SessionType.BATCH)

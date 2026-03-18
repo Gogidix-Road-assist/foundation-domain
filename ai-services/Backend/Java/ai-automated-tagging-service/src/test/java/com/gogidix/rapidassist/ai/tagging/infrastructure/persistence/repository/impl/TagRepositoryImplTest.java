@@ -76,13 +76,13 @@ class TagRepositoryImplTest {
     @Test
     @DisplayName("Should find tag by ID")
     void shouldFindTagById() {
-        when(springDataTagRepository.findById(tag.getId().toString())).thenReturn(Optional.of(tagEntity));
+        when(springDataTagRepository.findByUuid(tag.getId())).thenReturn(Optional.of(tagEntity));
 
         Optional<Tag> result = tagRepository.findById(tag.getId());
 
         assertTrue(result.isPresent());
         assertEquals(tag.getId(), result.get().getId());
-        verify(springDataTagRepository, times(1)).findById(tag.getId().toString());
+        verify(springDataTagRepository, times(1)).findByUuid(tag.getId());
     }
 
     @Test
@@ -159,7 +159,10 @@ class TagRepositoryImplTest {
     @Test
     @DisplayName("Should handle null entity when converting to domain")
     void shouldHandleNullEntityWhenConverting() {
-        Optional<Tag> result = tagRepository.findById(UUID.randomUUID());
+        UUID unknownId = UUID.randomUUID();
+        when(springDataTagRepository.findByUuid(unknownId)).thenReturn(Optional.empty());
+
+        Optional<Tag> result = tagRepository.findById(unknownId);
 
         assertFalse(result.isPresent());
     }

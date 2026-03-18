@@ -2,6 +2,7 @@ package com.gogidix.rapidassist.ai.dataquality.application.service;
 
 import com.gogidix.rapidassist.ai.dataquality.application.command.*;
 import com.gogidix.rapidassist.ai.dataquality.application.dto.*;
+import com.gogidix.rapidassist.ai.dataquality.application.mapper.DataQualityMapper;
 import com.gogidix.rapidassist.ai.dataquality.domain.model.*;
 import com.gogidix.rapidassist.ai.dataquality.domain.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,9 @@ class DataQualityApplicationServiceTest {
     @Mock
     private DataQualityMetricRepositoryPort metricRepository;
 
+    @Mock
+    private DataQualityMapper mapper;
+
     @InjectMocks
     private DataQualityApplicationService applicationService;
 
@@ -50,6 +54,132 @@ class DataQualityApplicationServiceTest {
     void setUp() {
         tenantId = "test-tenant";
         ruleId = UUID.randomUUID();
+
+        // Setup default mapper stubs for toDto methods
+        setupMapperStubs();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setupMapperStubs() {
+        // DataQualityRule to DataQualityRuleDto
+        when(mapper.toDto(any(DataQualityRule.class))).thenAnswer(invocation -> {
+            DataQualityRule rule = invocation.getArgument(0);
+            return DataQualityRuleDto.builder()
+                    .id(rule.getId())
+                    .tenantId(rule.getTenantId())
+                    .name(rule.getName())
+                    .ruleType(rule.getRuleType())
+                    .entityType(rule.getEntityType())
+                    .severity(rule.getSeverity())
+                    .active(rule.isActive())
+                    .build();
+        });
+
+        // DataQualityCheck to DataQualityCheckDto
+        when(mapper.toDto(any(DataQualityCheck.class))).thenAnswer(invocation -> {
+            DataQualityCheck check = invocation.getArgument(0);
+            return DataQualityCheckDto.builder()
+                    .id(check.getId())
+                    .tenantId(check.getTenantId())
+                    .ruleId(check.getRuleId())
+                    .checkName(check.getCheckName())
+                    .entityType(check.getEntityType())
+                    .status(check.getStatus())
+                    .build();
+        });
+
+        // DataQualityIssue to DataQualityIssueDto
+        when(mapper.toDto(any(DataQualityIssue.class))).thenAnswer(invocation -> {
+            DataQualityIssue issue = invocation.getArgument(0);
+            return DataQualityIssueDto.builder()
+                    .id(issue.getId())
+                    .tenantId(issue.getTenantId())
+                    .severity(issue.getSeverity())
+                    .entityType(issue.getEntityType())
+                    .status(issue.getStatus())
+                    .build();
+        });
+
+        // DataQualityReport to DataQualityReportDto
+        when(mapper.toDto(any(DataQualityReport.class))).thenAnswer(invocation -> {
+            DataQualityReport report = invocation.getArgument(0);
+            return DataQualityReportDto.builder()
+                    .id(report.getId())
+                    .tenantId(report.getTenantId())
+                    .reportName(report.getReportName())
+                    .status(report.getStatus())
+                    .build();
+        });
+
+        // DataQualityMetric to DataQualityMetricDto
+        when(mapper.toDto(any(DataQualityMetric.class))).thenAnswer(invocation -> {
+            DataQualityMetric metric = invocation.getArgument(0);
+            return DataQualityMetricDto.builder()
+                    .id(metric.getId())
+                    .tenantId(metric.getTenantId())
+                    .metricName(metric.getMetricName())
+                    .entityType(metric.getEntityType())
+                    .metricValue(metric.getMetricValue())
+                    .metricTimestamp(metric.getMetricTimestamp())
+                    .build();
+        });
+
+        // List mappings
+        when(mapper.toRuleDtoList(any(List.class))).thenAnswer(invocation -> {
+            List<DataQualityRule> rules = invocation.getArgument(0);
+            return rules.stream()
+                    .map(rule -> DataQualityRuleDto.builder()
+                            .id(rule.getId())
+                            .tenantId(rule.getTenantId())
+                            .name(rule.getName())
+                            .ruleType(rule.getRuleType())
+                            .entityType(rule.getEntityType())
+                            .severity(rule.getSeverity())
+                            .active(rule.isActive())
+                            .build())
+                    .toList();
+        });
+
+        when(mapper.toCheckDtoList(any(List.class))).thenAnswer(invocation -> {
+            List<DataQualityCheck> checks = invocation.getArgument(0);
+            return checks.stream()
+                    .map(check -> DataQualityCheckDto.builder()
+                            .id(check.getId())
+                            .tenantId(check.getTenantId())
+                            .ruleId(check.getRuleId())
+                            .checkName(check.getCheckName())
+                            .entityType(check.getEntityType())
+                            .status(check.getStatus())
+                            .build())
+                    .toList();
+        });
+
+        when(mapper.toIssueDtoList(any(List.class))).thenAnswer(invocation -> {
+            List<DataQualityIssue> issues = invocation.getArgument(0);
+            return issues.stream()
+                    .map(issue -> DataQualityIssueDto.builder()
+                            .id(issue.getId())
+                            .tenantId(issue.getTenantId())
+                            .severity(issue.getSeverity())
+                            .entityType(issue.getEntityType())
+                            .status(issue.getStatus())
+                            .build())
+                    .toList();
+        });
+
+        when(mapper.toMetricDtoList(any(List.class))).thenAnswer(invocation -> {
+            List<DataQualityMetric> metrics = invocation.getArgument(0);
+            return metrics.stream()
+                    .map(metric -> DataQualityMetricDto.builder()
+                            .id(metric.getId())
+                            .tenantId(metric.getTenantId())
+                            .metricName(metric.getMetricName())
+                            .entityType(metric.getEntityType())
+                            .metricValue(metric.getMetricValue())
+                            .metricTimestamp(metric.getMetricTimestamp())
+                            .build())
+                    .toList();
+        });
     }
 
     @Test

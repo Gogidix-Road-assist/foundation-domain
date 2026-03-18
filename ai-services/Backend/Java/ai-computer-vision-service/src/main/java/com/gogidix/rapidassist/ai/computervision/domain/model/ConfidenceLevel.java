@@ -19,11 +19,10 @@ public enum ConfidenceLevel {
     }
 
     public static ConfidenceLevel fromScore(double score) {
-        for (ConfidenceLevel level : values()) {
-            if (score >= level.min && score < level.max) {
-                return level;
-            }
-        }
+        if (score >= 0.9) return VERY_HIGH;
+        if (score >= 0.7) return HIGH;
+        if (score >= 0.5) return MEDIUM;
+        if (score >= 0.3) return LOW;
         return VERY_LOW;
     }
 

@@ -305,13 +305,14 @@ class ApiKeyRepositoryImplTest {
         expiredEntity.setExpiresAt(LocalDateTime.now().minusDays(10));
 
         when(springDataRepository.findAll()).thenReturn(Arrays.asList(apiKeyEntity, expiredEntity));
-        when(persistenceMapper.toDomain(apiKeyEntity)).thenReturn(apiKey);
 
         ApiKey expiredKey = new ApiKey();
         expiredKey.setId(expiredEntity.getUuid());
         expiredKey.setTenantId(tenantId);
         expiredKey.setExpiresAt(expiredEntity.getExpiresAt());
 
+        // Note: apiKeyEntity is not expired (expiresAt is future), so its toDomain is never called
+        lenient().when(persistenceMapper.toDomain(apiKeyEntity)).thenReturn(apiKey);
         when(persistenceMapper.toDomain(expiredEntity)).thenReturn(expiredKey);
 
         // When

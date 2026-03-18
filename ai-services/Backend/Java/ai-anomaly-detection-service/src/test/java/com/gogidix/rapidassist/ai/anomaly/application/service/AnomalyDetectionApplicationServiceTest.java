@@ -3,6 +3,9 @@ package com.gogidix.rapidassist.ai.anomaly.application.service;
 import com.gogidix.rapidassist.ai.anomaly.application.command.CreateDetectionRuleCommand;
 import com.gogidix.rapidassist.ai.anomaly.application.dto.AnomalyDetectionDto;
 import com.gogidix.rapidassist.ai.anomaly.application.dto.DetectionRuleDto;
+import com.gogidix.rapidassist.ai.anomaly.application.mapper.AnomalyAlertMapper;
+import com.gogidix.rapidassist.ai.anomaly.application.mapper.AnomalyDetectionMapper;
+import com.gogidix.rapidassist.ai.anomaly.application.mapper.DetectionRuleMapper;
 import com.gogidix.rapidassist.ai.anomaly.domain.model.*;
 import com.gogidix.rapidassist.ai.anomaly.domain.repository.AnomalyAlertRepositoryPort;
 import com.gogidix.rapidassist.ai.anomaly.domain.repository.AnomalyDetectionRepositoryPort;
@@ -38,6 +41,15 @@ class AnomalyDetectionApplicationServiceTest {
 
     @Mock
     private AnomalyAlertRepositoryPort alertRepository;
+
+    @Mock
+    private AnomalyDetectionMapper detectionMapper;
+
+    @Mock
+    private DetectionRuleMapper ruleMapper;
+
+    @Mock
+    private AnomalyAlertMapper alertMapper;
 
     @InjectMocks
     private AnomalyDetectionApplicationService service;
@@ -79,6 +91,17 @@ class AnomalyDetectionApplicationServiceTest {
                 .build();
 
         when(ruleRepository.save(anyString(), any(DetectionRule.class))).thenReturn(testRule);
+        when(ruleMapper.toDto(any(DetectionRule.class))).thenReturn(
+            DetectionRuleDto.builder()
+                .id(ruleId)
+                .name("Test Rule")
+                .ruleType(RuleType.THRESHOLD)
+                .conditions(new HashMap<>())
+                .dataSource("test-source")
+                .priority(5)
+                .isActive(true)
+                .build()
+        );
 
         DetectionRuleDto result = service.createRule(command);
 
@@ -90,6 +113,13 @@ class AnomalyDetectionApplicationServiceTest {
     @Test
     void testGetRuleById() {
         when(ruleRepository.findById(tenantId, ruleId)).thenReturn(Optional.of(testRule));
+        when(ruleMapper.toDto(any(DetectionRule.class))).thenReturn(
+            DetectionRuleDto.builder()
+                .id(ruleId)
+                .name("Test Rule")
+                .ruleType(RuleType.THRESHOLD)
+                .build()
+        );
 
         DetectionRuleDto result = service.getRuleById(tenantId, ruleId);
 
@@ -108,6 +138,13 @@ class AnomalyDetectionApplicationServiceTest {
     @Test
     void testListRules() {
         when(ruleRepository.findByTenantId(tenantId)).thenReturn(List.of(testRule));
+        when(ruleMapper.toDtoList(anyList())).thenReturn(List.of(
+            DetectionRuleDto.builder()
+                .id(ruleId)
+                .name("Test Rule")
+                .ruleType(RuleType.THRESHOLD)
+                .build()
+        ));
 
         List<DetectionRuleDto> result = service.listRules(tenantId);
 
@@ -141,6 +178,12 @@ class AnomalyDetectionApplicationServiceTest {
                 .build();
 
         when(detectionRepository.findByTenantId(tenantId)).thenReturn(List.of(detection));
+        when(detectionMapper.toDtoList(anyList())).thenReturn(List.of(
+            AnomalyDetectionDto.builder()
+                .id(detection.getId())
+                .tenantId(tenantId)
+                .build()
+        ));
 
         List<AnomalyDetectionDto> result = service.listDetections(tenantId, 0, 20);
 

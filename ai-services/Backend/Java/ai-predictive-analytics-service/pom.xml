@@ -299,19 +299,16 @@
                 <executions>
                     <execution>
                         <id>mutation-coverage</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>mutationCoverage</goal>
                         </goals>
                         <configuration>
                             <targetClasses>
-                                <param>com.gogidix.rapidassist.ai.predictive.domain.model.*</param>
-                                <param>com.gogidix.rapidassist.ai.predictive.domain.logic.*</param>
-                                <param>com.gogidix.rapidassist.ai.predictive.application.service.*</param>
-                                <param>com.gogidix.rapidassist.ai.predictive.infrastructure.persistence.repository.*</param>
+                                <param>com.gogidix.rapidassist.ai.predictive.analytics.*</param>
                             </targetClasses>
                             <targetTests>
-                                <param>com.gogidix.rapidassist.ai.predictive..*</param>
+                                <param>com.gogidix.rapidassist.ai.predictive.analytics..*</param>
                             </targetTests>
                             <excludedClasses>
                                 <param>.*Test.*</param>

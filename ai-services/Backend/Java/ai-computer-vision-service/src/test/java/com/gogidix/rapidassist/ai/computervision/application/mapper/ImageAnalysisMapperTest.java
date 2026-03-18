@@ -197,7 +197,7 @@ class ImageAnalysisMapperTest {
         assertEquals(testModel.getUserId(), dto.getUserId());
         assertEquals(testModel.getImageUrl(), dto.getImageUrl());
         assertEquals(testModel.getFormat(), dto.getFormat());
-        assertEquals(testModel.getStatus().name(), dto.getStatus());
+        assertEquals(testModel.getStatus(), dto.getStatus());
         assertEquals(testModel.getConfidenceScore(), dto.getConfidenceScore());
     }
 

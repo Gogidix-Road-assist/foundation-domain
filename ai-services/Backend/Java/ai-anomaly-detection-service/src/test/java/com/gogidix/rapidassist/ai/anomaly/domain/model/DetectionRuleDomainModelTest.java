@@ -224,7 +224,7 @@ class DetectionRuleDomainModelTest {
         assertEquals(RuleType.THRESHOLD, thresholdRule.getRuleType());
 
         // Verify enum values
-        assertEquals(3, RuleType.values().length);
+        assertEquals(6, RuleType.values().length);
     }
 
     @Test

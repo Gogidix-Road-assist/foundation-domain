@@ -3,6 +3,7 @@ package com.gogidix.rapidassist.ai.gateway.interfaces.rest.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogidix.rapidassist.ai.gateway.application.dto.*;
 import com.gogidix.rapidassist.ai.gateway.application.service.GatewayApplicationService;
+import com.gogidix.rapidassist.ai.gateway.bootstrap.Application;
 import com.gogidix.rapidassist.ai.gateway.domain.tenant.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests REST API endpoints, request handling, and responses.
  */
 @WebMvcTest(controllers = GatewayRestController.class)
+@ContextConfiguration(classes = {Application.class, GatewayRestController.class})
 @DisplayName("Gateway REST Controller Tests")
 class GatewayRestControllerTest {
 

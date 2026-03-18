@@ -2,8 +2,17 @@ package com.gogidix.rapidassist.ai.tagging.application.service;
 
 import com.gogidix.rapidassist.ai.tagging.application.command.CreateTagCommand;
 import com.gogidix.rapidassist.ai.tagging.application.dto.TagDto;
+import com.gogidix.rapidassist.ai.tagging.application.mapper.ContentTagMapper;
+import com.gogidix.rapidassist.ai.tagging.application.mapper.TagCategoryMapper;
+import com.gogidix.rapidassist.ai.tagging.application.mapper.TagMapper;
+import com.gogidix.rapidassist.ai.tagging.application.mapper.TaggingRuleMapper;
+import com.gogidix.rapidassist.ai.tagging.application.mapper.TagSuggestionMapper;
 import com.gogidix.rapidassist.ai.tagging.domain.model.Tag;
+import com.gogidix.rapidassist.ai.tagging.domain.repository.ContentTagRepositoryPort;
+import com.gogidix.rapidassist.ai.tagging.domain.repository.TagCategoryRepositoryPort;
 import com.gogidix.rapidassist.ai.tagging.domain.repository.TagRepositoryPort;
+import com.gogidix.rapidassist.ai.tagging.domain.repository.TaggingRuleRepositoryPort;
+import com.gogidix.rapidassist.ai.tagging.domain.repository.TagSuggestionRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,11 +38,39 @@ class TaggingApplicationServiceTest {
     @Mock
     private TagRepositoryPort tagRepository;
 
+    @Mock
+    private TagCategoryRepositoryPort categoryRepository;
+
+    @Mock
+    private ContentTagRepositoryPort contentTagRepository;
+
+    @Mock
+    private TaggingRuleRepositoryPort ruleRepository;
+
+    @Mock
+    private TagSuggestionRepositoryPort suggestionRepository;
+
+    @Mock
+    private TagMapper tagMapper;
+
+    @Mock
+    private TagCategoryMapper categoryMapper;
+
+    @Mock
+    private ContentTagMapper contentTagMapper;
+
+    @Mock
+    private TaggingRuleMapper ruleMapper;
+
+    @Mock
+    private TagSuggestionMapper suggestionMapper;
+
     @InjectMocks
     private TaggingApplicationService taggingApplicationService;
 
     private CreateTagCommand createTagCommand;
     private Tag tag;
+    private TagDto tagDto;
 
     @BeforeEach
     void setUp() {
@@ -55,6 +92,17 @@ class TaggingApplicationServiceTest {
                 .usageCount(0)
                 .version(1L)
                 .build();
+
+        tagDto = TagDto.builder()
+                .id(tag.getId())
+                .tenantId("tenant-123")
+                .name("Urgent")
+                .description("Urgent items")
+                .color("#FF0000")
+                .status(Tag.TagStatus.ACTIVE)
+                .usageCount(0)
+                .version(1L)
+                .build();
     }
 
     @Test
@@ -62,6 +110,7 @@ class TaggingApplicationServiceTest {
     void shouldCreateTagSuccessfully() {
         when(tagRepository.existsByTenantIdAndName("tenant-123", "Urgent")).thenReturn(false);
         when(tagRepository.save(any(Tag.class))).thenReturn(tag);
+        when(tagMapper.toDto(tag)).thenReturn(tagDto);
 
         TagDto result = taggingApplicationService.createTag(createTagCommand);
 
@@ -69,6 +118,7 @@ class TaggingApplicationServiceTest {
         assertEquals("Urgent", result.getName());
         assertEquals("tenant-123", result.getTenantId());
         verify(tagRepository, times(1)).save(any(Tag.class));
+        verify(tagMapper, times(1)).toDto(tag);
     }
 
     @Test
@@ -88,6 +138,7 @@ class TaggingApplicationServiceTest {
     void shouldGetTagById() {
         UUID tagId = tag.getId();
         when(tagRepository.findByTenantIdAndId("tenant-123", tagId)).thenReturn(Optional.of(tag));
+        when(tagMapper.toDto(tag)).thenReturn(tagDto);
 
         TagDto result = taggingApplicationService.getTag(
                 com.gogidix.rapidassist.ai.tagging.application.query.GetTagQuery.builder()
@@ -99,6 +150,7 @@ class TaggingApplicationServiceTest {
         assertNotNull(result);
         assertEquals(tagId, result.getId());
         verify(tagRepository, times(1)).findByTenantIdAndId("tenant-123", tagId);
+        verify(tagMapper, times(1)).toDto(tag);
     }
 
     @Test
@@ -121,6 +173,7 @@ class TaggingApplicationServiceTest {
     @DisplayName("Should list tags for tenant")
     void shouldListTagsForTenant() {
         when(tagRepository.findByTenantId("tenant-123")).thenReturn(java.util.List.of(tag));
+        when(tagMapper.toDtoList(java.util.List.of(tag))).thenReturn(java.util.List.of(tagDto));
 
         var result = taggingApplicationService.listTags(
                 com.gogidix.rapidassist.ai.tagging.application.query.ListTagsQuery.builder()
@@ -132,6 +185,7 @@ class TaggingApplicationServiceTest {
         assertEquals(1, result.size());
         assertEquals("Urgent", result.get(0).getName());
         verify(tagRepository, times(1)).findByTenantId("tenant-123");
+        verify(tagMapper, times(1)).toDtoList(java.util.List.of(tag));
     }
 
     @Test
@@ -139,7 +193,7 @@ class TaggingApplicationServiceTest {
     void shouldDeleteTagSuccessfully() {
         UUID tagId = tag.getId();
         when(tagRepository.findByTenantIdAndId("tenant-123", tagId)).thenReturn(Optional.of(tag));
-        when(tagRepository.countByTenantIdAndTagId("tenant-123", tagId)).thenReturn(0L);
+        when(contentTagRepository.countByTenantIdAndTagId("tenant-123", tagId)).thenReturn(0L);
 
         taggingApplicationService.deleteTag("tenant-123", tagId);
 
@@ -151,7 +205,7 @@ class TaggingApplicationServiceTest {
     void shouldThrowExceptionWhenDeletingTagInUse() {
         UUID tagId = tag.getId();
         when(tagRepository.findByTenantIdAndId("tenant-123", tagId)).thenReturn(Optional.of(tag));
-        when(tagRepository.countByTenantIdAndTagId("tenant-123", tagId)).thenReturn(5L);
+        when(contentTagRepository.countByTenantIdAndTagId("tenant-123", tagId)).thenReturn(5L);
 
         assertThrows(IllegalStateException.class, () -> {
             taggingApplicationService.deleteTag("tenant-123", tagId);

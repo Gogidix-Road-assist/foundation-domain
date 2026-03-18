@@ -54,6 +54,7 @@ public class Tag {
             this.usageCount = 0;
         }
         this.usageCount++;
+        this.updatedAt = LocalDateTime.now();
     }
 
     /**
@@ -71,6 +72,7 @@ public class Tag {
      */
     public void activate() {
         this.status = TagStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
     }
 
     /**

@@ -4,6 +4,9 @@ import com.gogidix.rapidassist.ai.moderation.application.command.ModerateContent
 import com.gogidix.rapidassist.ai.moderation.application.command.ModerationRuleCommand;
 import com.gogidix.rapidassist.ai.moderation.application.dto.ModerationResultDto;
 import com.gogidix.rapidassist.ai.moderation.application.dto.ModerationRuleDto;
+import com.gogidix.rapidassist.ai.moderation.application.mapper.ModerationQueueMapper;
+import com.gogidix.rapidassist.ai.moderation.application.mapper.ModerationResultMapper;
+import com.gogidix.rapidassist.ai.moderation.application.mapper.ModerationRuleMapper;
 import com.gogidix.rapidassist.ai.moderation.application.port.out.ModerationQueueRepositoryPort;
 import com.gogidix.rapidassist.ai.moderation.application.port.out.ModerationResultRepositoryPort;
 import com.gogidix.rapidassist.ai.moderation.application.port.out.ModerationRuleRepositoryPort;
@@ -43,6 +46,15 @@ class ContentModerationApplicationServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private ModerationRuleMapper ruleMapper;
+
+    @Mock
+    private ModerationResultMapper resultMapper;
+
+    @Mock
+    private ModerationQueueMapper queueMapper;
+
     @InjectMocks
     private ContentModerationApplicationService service;
 
@@ -76,6 +88,14 @@ class ContentModerationApplicationServiceTest {
     void testModerateContent_NoViolations() {
         when(ruleRepository.findActiveByTenantId("tenant1")).thenReturn(Arrays.asList());
         when(resultRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(resultMapper.toDto(any())).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .status(ModerationResult.ModerationStatus.AUTO_APPROVED)
+                .confidenceScore(1.0)
+                .violations(Arrays.asList())
+                .build()
+        );
 
         ModerationResultDto result = service.moderateContent(moderateCommand);
 
@@ -99,6 +119,19 @@ class ContentModerationApplicationServiceTest {
 
         when(ruleRepository.findActiveByTenantId("tenant1")).thenReturn(Arrays.asList(rule));
         when(resultRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(resultMapper.toDto(any())).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .status(ModerationResult.ModerationStatus.AUTO_REJECTED)
+                .confidenceScore(0.95)
+                .violations(Arrays.asList(ModerationResultDto.Violation.builder()
+                    .ruleId("rule1")
+                    .ruleName("Profanity Filter")
+                    .severity(ModerationRule.RuleSeverity.HIGH)
+                    .matchedKeywords(Arrays.asList("bad"))
+                    .build()))
+                .build()
+        );
 
         ModerateContentCommand command = ModerateContentCommand.builder()
             .tenantId("tenant1")
@@ -118,6 +151,14 @@ class ContentModerationApplicationServiceTest {
     void testCreateRule() {
         when(ruleRepository.existsByTenantIdAndName("tenant1", "Test Rule")).thenReturn(false);
         when(ruleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ruleMapper.toDto(any())).thenReturn(
+            ModerationRuleDto.builder()
+                .id("rule1")
+                .name("Test Rule")
+                .ruleType(ModerationRule.RuleType.KEYWORD)
+                .severity(ModerationRule.RuleSeverity.MEDIUM)
+                .build()
+        );
 
         ModerationRuleDto result = service.createRule(ruleCommand);
 
@@ -150,6 +191,12 @@ class ContentModerationApplicationServiceTest {
             .build();
 
         when(ruleRepository.findByTenantId("tenant1")).thenReturn(Arrays.asList(rule1, rule2));
+        when(ruleMapper.toDto(rule1)).thenReturn(
+            ModerationRuleDto.builder().id("rule1").name("Rule 1").build()
+        );
+        when(ruleMapper.toDto(rule2)).thenReturn(
+            ModerationRuleDto.builder().id("rule2").name("Rule 2").build()
+        );
 
         List<ModerationRuleDto> rules = service.getRules("tenant1");
 
@@ -166,6 +213,13 @@ class ContentModerationApplicationServiceTest {
             .build();
 
         when(resultRepository.findById("result1")).thenReturn(Optional.of(result));
+        when(resultMapper.toDto(result)).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .contentId("content1")
+                .status(ModerationResult.ModerationStatus.APPROVED)
+                .build()
+        );
 
         ModerationResultDto dto = service.getModerationResult("result1");
 
@@ -197,6 +251,14 @@ class ContentModerationApplicationServiceTest {
 
         when(ruleRepository.findById("rule1")).thenReturn(Optional.of(existingRule));
         when(ruleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ruleMapper.toDto(any())).thenReturn(
+            ModerationRuleDto.builder()
+                .id("rule1")
+                .name("Test Rule")
+                .ruleType(ModerationRule.RuleType.KEYWORD)
+                .severity(ModerationRule.RuleSeverity.MEDIUM)
+                .build()
+        );
 
         ModerationRuleDto result = service.updateRule("rule1", ruleCommand);
 
@@ -226,6 +288,14 @@ class ContentModerationApplicationServiceTest {
 
         when(ruleRepository.findActiveByTenantId("tenant1")).thenReturn(Arrays.asList(rule));
         when(resultRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(resultMapper.toDto(any())).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .status(ModerationResult.ModerationStatus.FLAGGED)
+                .confidenceScore(0.7)
+                .violations(Arrays.asList())
+                .build()
+        );
 
         ModerateContentCommand command = ModerateContentCommand.builder()
             .tenantId("tenant1")
@@ -324,6 +394,12 @@ class ContentModerationApplicationServiceTest {
 
         when(resultRepository.findByTenantId("tenant1"))
             .thenReturn(Arrays.asList(result1, result2));
+        when(resultMapper.toDto(any())).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .status(ModerationResult.ModerationStatus.APPROVED)
+                .build()
+        );
 
         java.util.List<ModerationResultDto> results = service.getModerationResults("tenant1", 0, 10);
 
@@ -342,6 +418,12 @@ class ContentModerationApplicationServiceTest {
 
         when(queueRepository.findPendingByTenantId("tenant1"))
             .thenReturn(Arrays.asList(queue1));
+        when(queueMapper.toDto(queue1)).thenReturn(
+            com.gogidix.rapidassist.ai.moderation.application.dto.ModerationQueueDto.builder()
+                .id("queue1")
+                .contentId("content1")
+                .build()
+        );
 
         java.util.List<com.gogidix.rapidassist.ai.moderation.application.dto.ModerationQueueDto> queues =
             service.getQueueItems("tenant1");
@@ -372,6 +454,23 @@ class ContentModerationApplicationServiceTest {
 
         when(ruleRepository.findActiveByTenantId("tenant1")).thenReturn(Arrays.asList(rule1, rule2));
         when(resultRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(resultMapper.toDto(any())).thenReturn(
+            ModerationResultDto.builder()
+                .id("result1")
+                .status(ModerationResult.ModerationStatus.AUTO_REJECTED)
+                .confidenceScore(0.95)
+                .violations(Arrays.asList(
+                    ModerationResultDto.Violation.builder()
+                        .ruleId("rule1")
+                        .severity(ModerationRule.RuleSeverity.HIGH)
+                        .build(),
+                    ModerationResultDto.Violation.builder()
+                        .ruleId("rule2")
+                        .severity(ModerationRule.RuleSeverity.CRITICAL)
+                        .build()
+                ))
+                .build()
+        );
 
         ModerateContentCommand command = ModerateContentCommand.builder()
             .tenantId("tenant1")
@@ -405,6 +504,15 @@ class ContentModerationApplicationServiceTest {
 
         when(ruleRepository.existsByTenantIdAndName("tenant1", "Complete Rule")).thenReturn(false);
         when(ruleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ruleMapper.toDto(any())).thenReturn(
+            ModerationRuleDto.builder()
+                .id("rule1")
+                .name("Complete Rule")
+                .ruleType(ModerationRule.RuleType.PATTERN)
+                .severity(ModerationRule.RuleSeverity.CRITICAL)
+                .priority(100)
+                .build()
+        );
 
         ModerationRuleDto result = service.createRule(fullRuleCommand);
 
