@@ -38,6 +38,7 @@
     </properties>
 
     <modules>
+        <module>shared-request-context-library</module>
         <module>common-domain-models</module>
         <module>event-schemas</module>
         <module>shared-ai-contracts</module>
@@ -48,7 +49,6 @@
         <module>shared-idempotency-library</module>
         <module>shared-mapper-library</module>
         <module>shared-observability-library</module>
-        <module>shared-request-context-library</module>
         <module>shared-persistence-library</module>
         <module>shared-security-library</module>
         <module>shared-validation-library</module>
