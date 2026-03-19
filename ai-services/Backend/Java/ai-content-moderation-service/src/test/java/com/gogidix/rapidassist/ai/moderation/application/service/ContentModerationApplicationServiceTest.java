@@ -124,11 +124,11 @@ class ContentModerationApplicationServiceTest {
                 .id("result1")
                 .status(ModerationResult.ModerationStatus.AUTO_REJECTED)
                 .confidenceScore(0.95)
-                .violations(Arrays.asList(ModerationResultDto.Violation.builder()
+                .violations(Arrays.asList(ModerationResult.RuleViolation.builder()
                     .ruleId("rule1")
                     .ruleName("Profanity Filter")
                     .severity(ModerationRule.RuleSeverity.HIGH)
-                    .matchedKeywords(Arrays.asList("bad"))
+                    .matchedText("bad")
                     .build()))
                 .build()
         );
@@ -460,11 +460,11 @@ class ContentModerationApplicationServiceTest {
                 .status(ModerationResult.ModerationStatus.AUTO_REJECTED)
                 .confidenceScore(0.95)
                 .violations(Arrays.asList(
-                    ModerationResultDto.Violation.builder()
+                    ModerationResult.RuleViolation.builder()
                         .ruleId("rule1")
                         .severity(ModerationRule.RuleSeverity.HIGH)
                         .build(),
-                    ModerationResultDto.Violation.builder()
+                    ModerationResult.RuleViolation.builder()
                         .ruleId("rule2")
                         .severity(ModerationRule.RuleSeverity.CRITICAL)
                         .build()

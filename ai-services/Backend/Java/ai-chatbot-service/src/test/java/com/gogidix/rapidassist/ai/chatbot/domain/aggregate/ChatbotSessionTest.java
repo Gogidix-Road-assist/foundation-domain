@@ -381,13 +381,14 @@ class ChatbotSessionTest {
 
     @Test
     @DisplayName("Should check if session is idle")
-    void shouldCheckIfSessionIsIdle() throws InterruptedException {
+    void shouldCheckIfSessionIsIdle() {
         assertFalse(session.isIdle(1));
 
-        Thread.sleep(1100);
+        // Simulate idle time by setting old activity time (2 minutes ago)
+        session.setLastActivityAt(LocalDateTime.now().minusMinutes(2));
 
-        assertTrue(session.isIdle(1));
-        assertFalse(session.isIdle(2));
+        assertTrue(session.isIdle(1));  // Idle for more than 1 minute
+        assertFalse(session.isIdle(2)); // Not idle for more than 2 minutes (only 2)
     }
 
     @Test

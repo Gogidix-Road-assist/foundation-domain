@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Comprehensive unit tests for ChatbotRestController.
  * Tests all REST endpoints, request/response handling, and error scenarios.
  */
-@WebMvcTest(ChatbotRestController.class)
+@WebMvcTest(controllers = ChatbotRestController.class)
 @DisplayName("ChatbotRestController Tests")
 class ChatbotRestControllerTest {
 

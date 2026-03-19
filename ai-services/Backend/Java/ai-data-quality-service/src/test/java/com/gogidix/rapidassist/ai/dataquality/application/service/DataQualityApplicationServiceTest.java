@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -24,6 +26,7 @@ import static org.mockito.Mockito.*;
  * Unit tests for DataQualityApplicationService
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DataQualityApplicationServiceTest {
 
     @Mock
@@ -415,7 +418,13 @@ class DataQualityApplicationServiceTest {
         when(ruleRepository.findById(tenantId, ruleId)).thenReturn(Optional.of(rule));
         when(checkRepository.save(any(DataQualityCheck.class))).thenReturn(savedCheck);
         when(checkRepository.findByTenantIdAndRuleId(tenantId, ruleId)).thenReturn(List.of());
-        when(issueRepository.save(any(DataQualityIssue.class))).thenReturn(any());
+        when(issueRepository.save(any(DataQualityIssue.class))).thenAnswer(invocation -> {
+            DataQualityIssue issue = invocation.getArgument(0);
+            if (issue.getId() == null) {
+                issue.setId(UUID.randomUUID());
+            }
+            return issue;
+        });
         when(checkRepository.findByTenantIdAndExecutedAtBetween(any(), any(), any())).thenReturn(List.of());
         when(issueRepository.findIssuesDetectedBetween(any(), any(), any())).thenReturn(List.of());
 

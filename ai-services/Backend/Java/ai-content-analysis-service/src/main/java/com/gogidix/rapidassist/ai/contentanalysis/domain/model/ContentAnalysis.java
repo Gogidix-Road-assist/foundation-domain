@@ -62,9 +62,9 @@ public class ContentAnalysis {
         double seoWeight = 0.25;
 
         double qualityScore = this.metrics.getQualityScore() != null ? this.metrics.getQualityScore() : 0.0;
-        double readabilityScore = this.readability != null ? this.readability.getReadabilityScore() : 0.0;
-        double sentimentScore = this.sentiment != null ? Math.abs(this.sentiment.getSentimentScore()) : 0.0;
-        double seoScore = this.seoAnalysis != null ? this.seoAnalysis.getSeoScore() : 0.0;
+        double readabilityScore = this.readability != null && this.readability.getReadabilityScore() != null ? this.readability.getReadabilityScore() : 0.0;
+        double sentimentScore = this.sentiment != null && this.sentiment.getSentimentScore() != null ? Math.abs(this.sentiment.getSentimentScore()) : 0.0;
+        double seoScore = this.seoAnalysis != null && this.seoAnalysis.getSeoScore() != null ? this.seoAnalysis.getSeoScore() : 0.0;
 
         this.overallScore = (qualityScore * qualityWeight) +
                            (readabilityScore * readabilityWeight) +

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * This service is part of the RapidAssist AI Services suite.
  * It provides AI-powered capabilities.
  */
+@SpringBootApplication
 public class Application {
 
     /**

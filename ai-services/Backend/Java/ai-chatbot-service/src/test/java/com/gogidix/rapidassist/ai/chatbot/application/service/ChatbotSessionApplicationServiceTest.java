@@ -608,8 +608,8 @@ class ChatbotSessionApplicationServiceTest {
             com.gogidix.rapidassist.ai.chatbot.domain.aggregate.ChatbotSession
                 .initialize(tenantId, userId, channel);
         idleSession.activate();
-        // Simulate idle by setting old activity time
-        idleSession.setLastActivityAt(LocalDateTime.now().minusMinutes(10));
+        // Simulate idle by setting old activity time (must be >= 30 minutes for policy to auto-complete)
+        idleSession.setLastActivityAt(LocalDateTime.now().minusMinutes(31));
 
         List<com.gogidix.rapidassist.ai.chatbot.domain.aggregate.ChatbotSession> idleSessions = List.of(idleSession);
 

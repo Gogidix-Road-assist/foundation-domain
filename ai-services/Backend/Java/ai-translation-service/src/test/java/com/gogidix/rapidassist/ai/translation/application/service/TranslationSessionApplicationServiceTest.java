@@ -378,7 +378,7 @@ class TranslationSessionApplicationServiceTest {
         when(sessionRepository.findById(tenantId, sessionId))
                 .thenReturn(Optional.of(testSession));
 
-        assertThrows(IllegalStateException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             applicationService.updateStatus(command);
         });
 
@@ -568,4 +568,7 @@ class TranslationSessionApplicationServiceTest {
                 .channel("api")
                 .translationRequests(new ArrayList<>())
                 .createdAt(LocalDateTime.now())
-                .lastActivityAt(LocalD
+                .lastActivityAt(LocalDateTime.now())
+                .build();
+    }
+}

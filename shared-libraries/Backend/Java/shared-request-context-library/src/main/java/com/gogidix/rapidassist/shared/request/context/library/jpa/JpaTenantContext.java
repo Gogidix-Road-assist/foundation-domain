@@ -65,9 +65,8 @@ public final class JpaTenantContext {
      * @throws NumberFormatException if the tenant ID cannot be parsed as a Long
      */
     public static Long getTenantIdOrThrow() {
-        return com.gogidix.rapidassist.shared.request.context.library.domain.TenantContext.getTenantIdOrThrow()
-                .thenApply(JpaTenantContext::parseLongOrThrow)
-                .join();
+        String tenantId = com.gogidix.rapidassist.shared.request.context.library.domain.TenantContext.getTenantIdOrThrow();
+        return parseLongOrThrow(tenantId);
     }
 
     /**
