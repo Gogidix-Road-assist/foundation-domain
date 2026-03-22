@@ -1,16 +1,13 @@
 package com.gogidix.rapidassist.shared.persistence.infrastructure.jpa.config;
 
-import com.gogidix.rapidassist.shared.request.context.library.autoconfigure.SharedRequestContextAutoConfiguration;
+import com.gogidix.rapidassist.shared.persistence.infrastructure.jpa.repository.TenantAwareJpaRepository;
 import com.gogidix.rapidassist.shared.request.context.library.autoconfigure.SharedRequestContextAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
 
 /**
  * Auto-configuration for tenant-aware JPA persistence.
@@ -61,8 +58,8 @@ import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtensi
 @EnableJpaRepositories(
         basePackages = "${spring.data.jpa.repositories.packages:com.gogidix}",
         repositoryFactoryBeanClass = TenantRepositoryFactoryBean.class,
-        includeFilters = @ComponentScan.Filter(type = ComponentScan.FilterType.ASSIGNABLE_TYPE,
-                classes = com.gogidix.rapidassist.shared.persistence.infrastructure.jpa.repository.TenantAwareJpaRepository.class)
+        includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+                classes = {TenantAwareJpaRepository.class})
 )
 @EntityScan("${spring.data.jpa.entities.packages:com.gogidix}")
 public class TenantConfiguration {

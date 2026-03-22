@@ -37,20 +37,13 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * </p>
  *
  * @param <R> the repository type
- * @param <I> the ID type
  * @param <T> the entity type
+ * @param <I> the ID type
  * @author Gogidix Platform Team
  * @version 1.0
  * @since 2026-03-10
  */
-public class TenantRepositoryFactoryBean<R extends JpaRepository<?, ?>, I, T> extends JpaRepositoryFactoryBean<R, I, T> {
-
-    /**
-     * Creates a new TenantRepositoryFactoryBean.
-     */
-    public TenantRepositoryFactoryBean() {
-        super();
-    }
+public class TenantRepositoryFactoryBean<R extends JpaRepository<T, I>, T, I> extends JpaRepositoryFactoryBean<R, T, I> {
 
     /**
      * Creates a new TenantRepositoryFactoryBean for the given repository interface.

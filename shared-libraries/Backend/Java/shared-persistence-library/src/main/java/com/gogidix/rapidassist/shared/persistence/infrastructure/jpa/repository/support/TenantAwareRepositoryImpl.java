@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -100,7 +101,7 @@ public class TenantAwareRepositoryImpl<T, ID extends Serializable> extends Simpl
      */
     @Override
     @Transactional
-    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(Iterable<S> entities) {
         entities.forEach(this::setTenantIdIfPresent);
         return super.saveAll(entities);
     }
