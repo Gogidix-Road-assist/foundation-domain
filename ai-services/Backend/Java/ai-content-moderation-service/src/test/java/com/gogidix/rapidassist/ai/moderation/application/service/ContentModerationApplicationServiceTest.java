@@ -103,7 +103,7 @@ class ContentModerationApplicationServiceTest {
         assertEquals(ModerationResult.ModerationStatus.AUTO_APPROVED, result.getStatus());
         assertEquals(1.0, result.getConfidenceScore());
         verify(resultRepository).save(any());
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher).publishEvent(any(Object.class));
     }
 
     @Test
@@ -166,7 +166,7 @@ class ContentModerationApplicationServiceTest {
         assertEquals("Test Rule", result.getName());
         assertEquals(ModerationRule.RuleType.KEYWORD, result.getRuleType());
         verify(ruleRepository).save(any());
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher).publishEvent(any(Object.class));
     }
 
     @Test
@@ -309,7 +309,7 @@ class ContentModerationApplicationServiceTest {
         assertEquals(ModerationResult.ModerationStatus.FLAGGED, result.getStatus());
         assertTrue(result.getConfidenceScore() < 0.8);
         verify(queueRepository).save(any());
-        verify(eventPublisher, times(2)).publishEvent(any());
+        verify(eventPublisher, times(2)).publishEvent(any(Object.class));
     }
 
     @Test
@@ -522,6 +522,6 @@ class ContentModerationApplicationServiceTest {
         assertEquals(ModerationRule.RuleSeverity.CRITICAL, result.getSeverity());
         assertEquals(100, result.getPriority());
         verify(ruleRepository).save(any());
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher).publishEvent(any(Object.class));
     }
 }

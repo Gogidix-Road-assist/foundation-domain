@@ -1,71 +1,76 @@
 # Foundation-Domain - TODO List
 
-**Last Updated:** 2026-03-15
-**Current Status:** Configuration Complete, Execution Pending
+**Last Updated:** 2026-03-22
+**Current Status:** Cloud CI/CD Build Triggered (No Local Docker Required)
 
 ---
 
-## 🔴 CRITICAL PATH (Must Complete Before Production)
+## 🔴 CRITICAL PATH (Cloud-Based Deployment)
 
-### 1. Start Docker Desktop [5 minutes]
-- [ ] Open Docker Desktop application
-- [ ] Wait for Docker daemon to start
-- [ ] Verify with: `docker ps`
+### 1. Fix CI/CD Workflow Dependencies ✅ COMPLETED
+- [x] Fixed security-scan job dependencies in foundation-domain-ci.yml
+- [x] Corrected dependency chain: build-docker-images-core → security-scan
+- [x] Corrected dependency chain: build-docker-images-ai → security-scan
 
-### 2. Start Infrastructure Databases [10 minutes]
-- [ ] Navigate to Foundation-Domain
-- [ ] Run: `docker-compose up -d mongodb postgres redis`
-- [ ] Verify databases are healthy
-- [ ] Test connections:
-  - MongoDB: `mongodb://admin:password123@localhost:27017`
-  - PostgreSQL: `postgresql://admin:password123@localhost:5432/foundation`
-  - Redis: `redis://localhost:6379`
+### 2. Trigger GitHub Actions Build ✅ IN PROGRESS
+- [ ] Stage Foundation Domain changes: `git add Foundation-Domain/`
+- [ ] Commit CI workflow changes
+- [ ] Push to dev branch: `git push origin dev`
+- [ ] Monitor build at: https://github.com/ggx-insurance-saas/Insurance-company-Saas/actions
 
-### 3. Build All Services [2-13 hours]
-**Choose one option:**
+### 3. Verify Docker Images Built [1-2 hours after push]
+- [ ] Check GitHub Actions workflow completion
+- [ ] Verify images pushed to: `ghcr.io/ggx-insurance-saas/Insurance-company-Saas/`
+- [ ] Core services images:
+  - [ ] api-gateway:dev
+  - [ ] identity-service:dev
+  - [ ] notification-service:dev
+  - [ ] config-service:dev
+- [ ] AI services images:
+  - [ ] ai-gateway-service:dev
+  - [ ] ai-inference-service:dev
+  - [ ] ai-chatbot-service:dev
 
-**Option A: Full Build Verification (Recommended)**
+### 4. Cloud Deployment Options (Choose One)
+
+**Option A: Kubernetes Cloud Deployment (Recommended)**
 ```bash
-./scripts/build-verify-all.sh
+# Deploy to cloud Kubernetes cluster
+kubectl apply -f Foundation-Domain/k8s/
 ```
-- Builds all 97 services sequentially
-- Runs unit tests
-- Takes ~13 hours (8 min per service)
-- Most thorough
+- Requires: Cloud K8s cluster (GKE, EKS, AKS)
+- Includes: Auto-scaling, monitoring, ingress
+- Best for: Production environments
 
-**Option B: Quick Compile Check**
+**Option B: Pull Images to Cloud Server**
 ```bash
-./scripts/quick-build.sh
+# On cloud server with Docker
+docker pull ghcr.io/ggx-insurance-saas/Insurance-company-Saas/api-gateway:dev
+docker-compose -f docker-compose.yml up -d
 ```
-- Only compiles, skips tests
-- Takes ~2 hours
-- Faster but no test validation
+- Requires: Cloud VM with Docker installed
+- Simpler than K8s
+- Good for: Dev/Staging environments
 
-**Option C: CI/CD Build (Fastest)**
-```bash
-git add .
-git commit -m "Trigger CI build"
-git push origin main
-```
-- Parallel builds on GitHub
-- Takes ~1-2 hours
-- Requires GitHub Actions setup
+### 5. Verify Cloud Deployment [30 minutes]
+- [ ] Check service health endpoints
+- [ ] Verify API Gateway is accessible
+- [ ] Test service-to-service communication
+- [ ] Check monitoring dashboards (Prometheus/Grafana)
 
-### 4. Run All Tests [1-2 hours]
-- [ ] Run: `./scripts/run-tests.sh`
-- [ ] Fix any failing tests
-- [ ] Re-run until all pass
+---
 
-### 5. Docker Build Test [1-2 hours]
-- [ ] Run: `./scripts/docker-build-all.sh`
-- [ ] Verify all images build successfully
-- [ ] Check image sizes
+## 🟡 LOCAL DEVELOPMENT (Optional - MongoDB Only)
 
-### 6. Local Deployment Test [30 minutes]
-- [ ] Run: `docker-compose up -d`
-- [ ] Run: `./scripts/health-check.sh`
-- [ ] Verify all services respond
-- [ ] Check logs: `docker-compose logs`
+### MongoDB Compass Connection
+- [x] MongoDB Compass running locally
+- [ ] Connection string: `mongodb://localhost:27017`
+- [ ] Can connect to cloud MongoDB if needed
+
+### Notes:
+- ⚠️ **Docker Desktop is unstable locally** - using cloud-based builds
+- ✅ **GitHub Actions CI/CD is fully configured**
+- ✅ **Images will be pushed to GitHub Container Registry (ghcr.io)**
 
 ---
 
@@ -118,13 +123,16 @@ git push origin main
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| Docker | Installed but NOT running | v29.2.1 |
-| MongoDB | Configured only | In docker-compose.yml |
-| PostgreSQL | Configured only | In docker-compose.yml |
-| Redis | Configured only | In docker-compose.yml |
-| Services | 0/97 compiled | Only 1 library tested |
-| Tests | 0/97 run | Not executed |
-| Docker Images | 0/97 built | Dockerfiles ready |
+| GitHub Actions | ✅ Configured | CI/CD pipeline ready |
+| GitHub Container Registry | ✅ Ready | ghcr.io configured |
+| Docker Desktop | ⚠️ Unstable | Crashes on startup - not using locally |
+| MongoDB Compass | ✅ Running | Connected locally |
+| PostgreSQL | ☁️ Cloud only | Will use cloud deployment |
+| Redis | ☁️ Cloud only | Will use cloud deployment |
+| CI/CD Workflow | ✅ Fixed | Dependencies corrected |
+| Services Build | ⏳ Pending | Waiting for push to trigger |
+| Docker Images | ⏳ Pending | Will build in GitHub Actions |
+| Kubernetes Manifests | ✅ Ready | All manifests created |
 
 ---
 
@@ -132,31 +140,32 @@ git push origin main
 
 | Phase | Time | Dependencies |
 |-------|------|--------------|
-| Docker Startup | 5 min | None |
-| Database Start | 10 min | Docker |
-| Full Build + Tests | 15 hours | Databases |
-| Quick Build + Tests | 4 hours | Databases |
-| CI/CD Build + Tests | 3 hours | GitHub |
-| Local Testing | 2 hours | Built services |
+| Commit & Push Changes | 5 min | None |
+| GitHub Actions Build | 1-2 hours | Push complete |
+| Docker Images Pushed | 1-2 hours | Build complete |
+| Cloud Deployment | 30 min | Images available |
+| Verification Testing | 30 min | Deployment complete |
 
-**Total Estimated Time: 3-15 hours** (depending on approach)
+**Total Estimated Time: 2.5-4.5 hours** (mostly waiting for CI/CD)
 
 ---
 
 ## 🚀 Recommended Next Step
 
-**Start Docker Desktop and run the quick build:**
+**Commit and push to trigger CI/CD build:**
 
 ```bash
-# 1. Start Docker Desktop (manual)
-# 2. Start databases
-docker-compose up -d mongodb postgres redis
+# 1. Stage changes
+git add .github/workflows/foundation-domain-ci.yml
 
-# 3. Quick build (2 hours)
-./scripts/quick-build.sh
+# 2. Commit
+git commit -m "ci: Fix Foundation Domain CI workflow dependencies"
 
-# 4. Run tests (1 hour)
-./scripts/run-tests.sh
+# 3. Push to trigger build
+git push origin dev
+
+# 4. Monitor build at:
+# https://github.com/ggx-insurance-saas/Insurance-company-Saas/actions
 ```
 
-This will give you a baseline validation in about 3 hours.
+This will trigger GitHub Actions to build all Docker images and push them to the container registry, ready for cloud deployment.
