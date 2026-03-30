@@ -1,0 +1,491 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import com.gogidix.rapidassist.common.domain.models.common.Address;
+import com.gogidix.rapidassist.common.domain.models.common.GeoLocation;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Provider entity representing service providers (towing companies, mechanics, etc.)
+ */
+@Document(collection = "provider")
+@Table(name = "providers", indexes = {
+    @Index(name = "idx_providers_user", columnList = "user_id"),
+    @Index(name = "idx_providers_email", columnList = "email"),
+    @Index(name = "idx_providers_tenant", columnList = "tenant_id"),
+    @Index(name = "idx_providers_status", columnList = "status")
+})
+public class Provider {
+
+    @Id
+        private String id;
+
+        private String userId; // Link to User if provider is also a system user
+
+    @Size(max = 100)
+        private String providerNumber;
+
+    @NotBlank(message = "Company name is required")
+    @Size(max = 200)
+        private String companyName;
+
+    @Size(max = 200)
+        private String legalName;
+
+    @Size(max = 100)
+        private String contactName;
+
+    @Email
+    @Size(max = 150)
+        private String email;
+
+    @Size(max = 20)
+        private String phoneNumber;
+
+    @Embedded
+    @AttributeOverride(name = "streetLine1", column = @Column(name = "address_street_line1"))
+    @AttributeOverride(name = "streetLine2", column = @Column(name = "address_street_line2"))
+    @AttributeOverride(name = "streetLine3", column = @Column(name = "address_street_line3"))
+    @AttributeOverride(name = "city", column = @Column(name = "address_city"))
+    @AttributeOverride(name = "state", column = @Column(name = "address_state"))
+    @AttributeOverride(name = "postalCode", column = @Column(name = "address_postal_code"))
+    @AttributeOverride(name = "country", column = @Column(name = "address_country"))
+    @AttributeOverride(name = "countryCode", column = @Column(name = "address_country_code"))
+    @AttributeOverride(name = "latitude", column = @Column(name = "address_latitude"))
+    @AttributeOverride(name = "longitude", column = @Column(name = "address_longitude"))
+    @AttributeOverride(name = "formattedAddress", column = @Column(name = "address_formatted"))
+    @AttributeOverride(name = "addressType", column = @Column(name = "address_type"))
+    private Address address;
+
+    @Embedded
+    @AttributeOverride(name = "latitude", column = @Column(name = "hq_location_latitude"))
+    @AttributeOverride(name = "longitude", column = @Column(name = "hq_location_longitude"))
+    @AttributeOverride(name = "altitude", column = @Column(name = "hq_location_altitude"))
+    @AttributeOverride(name = "accuracy", column = @Column(name = "hq_location_accuracy"))
+    private GeoLocation headquartersLocation;
+
+    @Size(max = 50)
+        private String providerType; // TOWING, MECHANIC, LOCKSMITH, FUEL_DELIVERY, MULTI_SERVICE
+
+    @Size(max = 20)
+        private String status = "PENDING"; // PENDING, ACTIVE, INACTIVE, SUSPENDED, BANNED
+
+        private String verificationStatus = "PENDING"; // PENDING, VERIFIED, REJECTED
+
+        private LocalDateTime verifiedAt;
+
+        private String verifiedBy;
+
+    @Size(max = 100)
+        private String taxId;
+
+    @Size(max = 50)
+        private String businessLicense;
+
+        private LocalDateTime licenseExpiry;
+
+        private Boolean insuranceRequired = true;
+
+        private Boolean insuranceVerified = false;
+
+        private LocalDateTime insuranceExpiry;
+
+        private Double rating; // 0-5
+
+        private Integer totalReviews = 0;
+
+        private Integer completedJobs = 0;
+
+        private Integer cancelledJobs = 0;
+
+        private Integer averageResponseTime; // in minutes
+
+        private Integer serviceRadius; // in kilometers
+
+        private String availabilityStatus = "AVAILABLE"; // AVAILABLE, BUSY, OFFLINE
+
+        private String tenantId;
+
+        private String organizationId;
+
+        private Set<ProviderService> services = new HashSet<>();
+
+        private Set<ProviderOperatingArea> operatingAreas = new HashSet<>();
+
+        private Double commissionRate; // Platform commission percentage
+
+        private String paymentTerms; // IMMEDIATE, WEEKLY, MONTHLY
+
+        private String bankDetailsJson;
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+        private String createdBy;
+
+    // Constructors
+    public Provider() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Provider(String companyName) {
+        this();
+        this.companyName = companyName;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getProviderNumber() {
+        return providerNumber;
+    }
+
+    public void setProviderNumber(String providerNumber) {
+        this.providerNumber = providerNumber;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getLegalName() {
+        return legalName;
+    }
+
+    public void setLegalName(String legalName) {
+        this.legalName = legalName;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public GeoLocation getHeadquartersLocation() {
+        return headquartersLocation;
+    }
+
+    public void setHeadquartersLocation(GeoLocation headquartersLocation) {
+        this.headquartersLocation = headquartersLocation;
+    }
+
+    public String getProviderType() {
+        return providerType;
+    }
+
+    public void setProviderType(String providerType) {
+        this.providerType = providerType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public LocalDateTime getVerifiedAt() {
+        return verifiedAt;
+    }
+
+    public void setVerifiedAt(LocalDateTime verifiedAt) {
+        this.verifiedAt = verifiedAt;
+    }
+
+    public String getVerifiedBy() {
+        return verifiedBy;
+    }
+
+    public void setVerifiedBy(String verifiedBy) {
+        this.verifiedBy = verifiedBy;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public String getBusinessLicense() {
+        return businessLicense;
+    }
+
+    public void setBusinessLicense(String businessLicense) {
+        this.businessLicense = businessLicense;
+    }
+
+    public LocalDateTime getLicenseExpiry() {
+        return licenseExpiry;
+    }
+
+    public void setLicenseExpiry(LocalDateTime licenseExpiry) {
+        this.licenseExpiry = licenseExpiry;
+    }
+
+    public Boolean getInsuranceRequired() {
+        return insuranceRequired;
+    }
+
+    public void setInsuranceRequired(Boolean insuranceRequired) {
+        this.insuranceRequired = insuranceRequired;
+    }
+
+    public Boolean getInsuranceVerified() {
+        return insuranceVerified;
+    }
+
+    public void setInsuranceVerified(Boolean insuranceVerified) {
+        this.insuranceVerified = insuranceVerified;
+    }
+
+    public LocalDateTime getInsuranceExpiry() {
+        return insuranceExpiry;
+    }
+
+    public void setInsuranceExpiry(LocalDateTime insuranceExpiry) {
+        this.insuranceExpiry = insuranceExpiry;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getTotalReviews() {
+        return totalReviews;
+    }
+
+    public void setTotalReviews(Integer totalReviews) {
+        this.totalReviews = totalReviews;
+    }
+
+    public Integer getCompletedJobs() {
+        return completedJobs;
+    }
+
+    public void setCompletedJobs(Integer completedJobs) {
+        this.completedJobs = completedJobs;
+    }
+
+    public Integer getCancelledJobs() {
+        return cancelledJobs;
+    }
+
+    public void setCancelledJobs(Integer cancelledJobs) {
+        this.cancelledJobs = cancelledJobs;
+    }
+
+    public Integer getAverageResponseTime() {
+        return averageResponseTime;
+    }
+
+    public void setAverageResponseTime(Integer averageResponseTime) {
+        this.averageResponseTime = averageResponseTime;
+    }
+
+    public Integer getServiceRadius() {
+        return serviceRadius;
+    }
+
+    public void setServiceRadius(Integer serviceRadius) {
+        this.serviceRadius = serviceRadius;
+    }
+
+    public String getAvailabilityStatus() {
+        return availabilityStatus;
+    }
+
+    public void setAvailabilityStatus(String availabilityStatus) {
+        this.availabilityStatus = availabilityStatus;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Set<ProviderService> getServices() {
+        return services;
+    }
+
+    public void setServices(Set<ProviderService> services) {
+        this.services = services;
+    }
+
+    public Set<ProviderOperatingArea> getOperatingAreas() {
+        return operatingAreas;
+    }
+
+    public void setOperatingAreas(Set<ProviderOperatingArea> operatingAreas) {
+        this.operatingAreas = operatingAreas;
+    }
+
+    public Double getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(Double commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public String getPaymentTerms() {
+        return paymentTerms;
+    }
+
+    public void setPaymentTerms(String paymentTerms) {
+        this.paymentTerms = paymentTerms;
+    }
+
+    public String getBankDetailsJson() {
+        return bankDetailsJson;
+    }
+
+    public void setBankDetailsJson(String bankDetailsJson) {
+        this.bankDetailsJson = bankDetailsJson;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
+    }
+
+    public boolean isVerified() {
+        return "VERIFIED".equals(verificationStatus);
+    }
+
+    public boolean isAvailable() {
+        return "AVAILABLE".equals(availabilityStatus) && isActive();
+    }
+
+    public boolean isInsuranceExpiringSoon(int days) {
+        return insuranceExpiry != null &&
+               insuranceExpiry.isBefore(LocalDateTime.now().plusDays(days));
+    }
+
+    public void updateRating(int newRating) {
+        int currentTotal = this.totalReviews == null ? 0 : this.totalReviews;
+        double currentAvg = this.rating == null ? 0 : this.rating;
+
+        double newAverage = ((currentAvg * currentTotal) + newRating) / (currentTotal + 1);
+        this.rating = newAverage;
+        this.totalReviews = currentTotal + 1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Provider)) return false;
+        Provider provider = (Provider) o;
+        return id != null && id.equals(provider.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

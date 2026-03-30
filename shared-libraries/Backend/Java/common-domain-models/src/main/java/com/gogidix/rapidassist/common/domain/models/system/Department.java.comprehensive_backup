@@ -1,0 +1,198 @@
+package com.gogidix.rapidassist.common.domain.models.system;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+/**
+ * Department entity representing departments within an organization.
+ */
+@Document(collection = "department")
+@Table(name = "departments", indexes = {
+    @Index(name = "idx_depts_org", columnList = "organization_id"),
+    @Index(name = "idx_depts_code", columnList = "department_code")
+})
+public class Department {
+
+    @Id
+        private String id;
+
+            private Organization organization;
+
+    @Size(max = 50)
+        private String departmentCode;
+
+    @NotBlank(message = "Department name is required")
+    @Size(max = 200)
+        private String departmentName;
+
+    @Size(max = 500)
+        private String description;
+
+    @Size(max = 100)
+        private String departmentType; // SALES, MARKETING, FINANCE, HR, OPERATIONS, IT, SUPPORT
+
+    @Size(max = 20)
+        private String status = "ACTIVE"; // ACTIVE, INACTIVE
+
+        private String managerId;
+
+        private String parentDepartmentId;
+
+        private Long budgetLimit;
+
+        private String settingsJson;
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+        private String createdBy;
+
+    // Constructors
+    public Department() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Department(String departmentName) {
+        this();
+        this.departmentName = departmentName;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public String getDepartmentCode() {
+        return departmentCode;
+    }
+
+    public void setDepartmentCode(String departmentCode) {
+        this.departmentCode = departmentCode;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDepartmentType() {
+        return departmentType;
+    }
+
+    public void setDepartmentType(String departmentType) {
+        this.departmentType = departmentType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(String managerId) {
+        this.managerId = managerId;
+    }
+
+    public String getParentDepartmentId() {
+        return parentDepartmentId;
+    }
+
+    public void setParentDepartmentId(String parentDepartmentId) {
+        this.parentDepartmentId = parentDepartmentId;
+    }
+
+    public Long getBudgetLimit() {
+        return budgetLimit;
+    }
+
+    public void setBudgetLimit(Long budgetLimit) {
+        this.budgetLimit = budgetLimit;
+    }
+
+    public String getSettingsJson() {
+        return settingsJson;
+    }
+
+    public void setSettingsJson(String settingsJson) {
+        this.settingsJson = settingsJson;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Department)) return false;
+        Department that = (Department) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

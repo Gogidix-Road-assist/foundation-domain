@@ -1,0 +1,148 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * CustomerMembership entity linking customers to membership programs.
+ */
+@Entity
+@Table(name = "customer_memberships", indexes = {
+    @Index(name = "idx_cust_memberships_customer", columnList = "customer_id")
+})
+public class CustomerMembership {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @Column(name = "membership_program_id")
+    private String membershipProgramId;
+
+    @Column(name = "membership_level")
+    private String membershipLevel;
+
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column(name = "auto_renew")
+    private Boolean autoRenew = false;
+
+    @Column(name = "status")
+    private String status = "ACTIVE"; // ACTIVE, EXPIRED, CANCELLED, SUSPENDED
+
+    @Column(name = "benefits_json")
+    private String benefitsJson;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    public CustomerMembership() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public String getMembershipProgramId() {
+        return membershipProgramId;
+    }
+
+    public void setMembershipProgramId(String membershipProgramId) {
+        this.membershipProgramId = membershipProgramId;
+    }
+
+    public String getMembershipLevel() {
+        return membershipLevel;
+    }
+
+    public void setMembershipLevel(String membershipLevel) {
+        this.membershipLevel = membershipLevel;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+
+    public Boolean getAutoRenew() {
+        return autoRenew;
+    }
+
+    public void setAutoRenew(Boolean autoRenew) {
+        this.autoRenew = autoRenew;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getBenefitsJson() {
+        return benefitsJson;
+    }
+
+    public void setBenefitsJson(String benefitsJson) {
+        this.benefitsJson = benefitsJson;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public boolean isActive() {
+        return "ACTIVE".equals(status) &&
+               (endDate == null || endDate.isAfter(LocalDateTime.now()));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CustomerMembership)) return false;
+        CustomerMembership that = (CustomerMembership) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

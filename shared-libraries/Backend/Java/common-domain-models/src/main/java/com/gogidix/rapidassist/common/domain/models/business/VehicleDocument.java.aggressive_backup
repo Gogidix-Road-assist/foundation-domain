@@ -1,0 +1,234 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+/**
+ * VehicleDocument entity for storing vehicle-related documents.
+ */
+@Document(collection = "vehicle_document")
+@Table(name = "vehicle_documents", indexes = {
+    @Index(name = "idx_vehicle_docs_vehicle", columnList = "vehicle_id"),
+    })
+public class VehicleDocument {
+
+    @Id
+        private String id;
+
+            private Vehicle vehicle;
+
+    @NotBlank(message = "Document type is required")
+    @Size(max = 50)
+        private String documentType; // REGISTRATION, INSURANCE, MOT, SERVICE_RECORD
+
+    @Size(max = 200)
+        private String documentName;
+
+        private String documentUrl;
+
+    @Size(max = 100)
+        private String fileName;
+
+    @Size(max = 50)
+        private String fileType;
+
+        private Long fileSize;
+
+        private LocalDateTime issueDate;
+
+        private LocalDateTime expiryDate;
+
+    @Size(max = 100)
+        private String issuingAuthority;
+
+        private String documentNumber;
+
+        private Boolean verified = false;
+
+        private LocalDateTime verifiedAt;
+
+        private String verifiedBy;
+
+        private String status = "ACTIVE"; // ACTIVE, EXPIRED, REVOKED, PENDING
+
+        private LocalDateTime createdAt;
+
+        private String createdBy;
+
+    // Constructors
+    public VehicleDocument() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    public String getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
+
+    public String getDocumentName() {
+        return documentName;
+    }
+
+    public void setDocumentName(String documentName) {
+        this.documentName = documentName;
+    }
+
+    public String getDocumentUrl() {
+        return documentUrl;
+    }
+
+    public void setDocumentUrl(String documentUrl) {
+        this.documentUrl = documentUrl;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public LocalDateTime getIssueDate() {
+        return issueDate;
+    }
+
+    public void setIssueDate(LocalDateTime issueDate) {
+        this.issueDate = issueDate;
+    }
+
+    public LocalDateTime getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDateTime expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public String getIssuingAuthority() {
+        return issuingAuthority;
+    }
+
+    public void setIssuingAuthority(String issuingAuthority) {
+        this.issuingAuthority = issuingAuthority;
+    }
+
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
+
+    public void setDocumentNumber(String documentNumber) {
+        this.documentNumber = documentNumber;
+    }
+
+    public Boolean getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
+    }
+
+    public LocalDateTime getVerifiedAt() {
+        return verifiedAt;
+    }
+
+    public void setVerifiedAt(LocalDateTime verifiedAt) {
+        this.verifiedAt = verifiedAt;
+    }
+
+    public String getVerifiedBy() {
+        return verifiedBy;
+    }
+
+    public void setVerifiedBy(String verifiedBy) {
+        this.verifiedBy = verifiedBy;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public boolean isExpired() {
+        return expiryDate != null && expiryDate.isBefore(LocalDateTime.now());
+    }
+
+    public boolean isExpiringSoon(int days) {
+        return expiryDate != null &&
+               expiryDate.isBefore(LocalDateTime.now().plusDays(days)) &&
+               !isExpired();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VehicleDocument)) return false;
+        VehicleDocument that = (VehicleDocument) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

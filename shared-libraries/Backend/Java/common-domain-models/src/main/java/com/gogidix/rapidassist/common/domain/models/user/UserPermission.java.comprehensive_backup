@@ -1,0 +1,171 @@
+package com.gogidix.rapidassist.common.domain.models.user;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
+/**
+ * UserPermission entity representing user-specific permission grants.
+ * Allows for fine-grained permission overrides at user level.
+ */
+@Document(collection = "user_permission")
+@Table(name = "user_permissions", indexes = {
+    @Index(name = "idx_user_permissions_user", columnList = "user_id"),
+    @Index(name = "idx_user_permissions_permission", columnList = "permission_id")
+})
+public class UserPermission {
+
+    @Id
+        private String id;
+
+            private User user;
+
+            private Permission permission;
+
+        private Boolean granted = true;
+
+        private LocalDateTime grantedAt;
+
+        private String grantedBy;
+
+        private LocalDateTime expiresAt;
+
+        private LocalDateTime revokedAt;
+
+        private String revokedBy;
+
+        private String revocationReason;
+
+        private LocalDateTime createdAt;
+
+    // Constructors
+    public UserPermission() {
+        this.createdAt = LocalDateTime.now();
+        this.grantedAt = LocalDateTime.now();
+    }
+
+    public UserPermission(User user, Permission permission, Boolean granted) {
+        this();
+        this.user = user;
+        this.permission = permission;
+        this.granted = granted;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Permission getPermission() {
+        return permission;
+    }
+
+    public void setPermission(Permission permission) {
+        this.permission = permission;
+    }
+
+    public Boolean getGranted() {
+        return granted;
+    }
+
+    public void setGranted(Boolean granted) {
+        this.granted = granted;
+    }
+
+    public LocalDateTime getGrantedAt() {
+        return grantedAt;
+    }
+
+    public void setGrantedAt(LocalDateTime grantedAt) {
+        this.grantedAt = grantedAt;
+    }
+
+    public String getGrantedBy() {
+        return grantedBy;
+    }
+
+    public void setGrantedBy(String grantedBy) {
+        this.grantedBy = grantedBy;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public LocalDateTime getRevokedAt() {
+        return revokedAt;
+    }
+
+    public void setRevokedAt(LocalDateTime revokedAt) {
+        this.revokedAt = revokedAt;
+    }
+
+    public String getRevokedBy() {
+        return revokedBy;
+    }
+
+    public void setRevokedBy(String revokedBy) {
+        this.revokedBy = revokedBy;
+    }
+
+    public String getRevocationReason() {
+        return revocationReason;
+    }
+
+    public void setRevocationReason(String revocationReason) {
+        this.revocationReason = revocationReason;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public boolean isActive() {
+        return granted &&
+               (revokedAt == null) &&
+               (expiresAt == null || expiresAt.isAfter(LocalDateTime.now()));
+    }
+
+    public void revoke(String revokedBy, String reason) {
+        this.revokedAt = LocalDateTime.now();
+        this.revokedBy = revokedBy;
+        this.revocationReason = reason;
+        this.granted = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserPermission)) return false;
+        UserPermission that = (UserPermission) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

@@ -1,0 +1,179 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+
+import com.gogidix.rapidassist.common.domain.models.common.GeoLocation;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+/**
+ * ProviderOperatingArea entity defining geographic areas served by providers.
+ */
+@Entity
+@Table(name = "provider_operating_areas", indexes = {
+    @Index(name = "idx_provider_areas_provider", columnList = "provider_id")
+})
+public class ProviderOperatingArea {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
+
+    @Size(max = 100)
+    @Column(name = "area_name")
+    private String areaName;
+
+    @Column(name = "area_type")
+    private String areaType; // CIRCLE, POLYGON, POSTAL_CODE, CITY
+
+    @Embedded
+    private GeoLocation centerPoint;
+
+    @Column(name = "radius_km")
+    private Integer radiusKm;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "county")
+    private String county;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "boundary_json")
+    private String boundaryJson; // For polygon areas
+
+    @Column(name = "priority_level")
+    private Integer priorityLevel = 1; // Higher priority gets more jobs
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    public ProviderOperatingArea() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getAreaType() {
+        return areaType;
+    }
+
+    public void setAreaType(String areaType) {
+        this.areaType = areaType;
+    }
+
+    public GeoLocation getCenterPoint() {
+        return centerPoint;
+    }
+
+    public void setCenterPoint(GeoLocation centerPoint) {
+        this.centerPoint = centerPoint;
+    }
+
+    public Integer getRadiusKm() {
+        return radiusKm;
+    }
+
+    public void setRadiusKm(Integer radiusKm) {
+        this.radiusKm = radiusKm;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getBoundaryJson() {
+        return boundaryJson;
+    }
+
+    public void setBoundaryJson(String boundaryJson) {
+        this.boundaryJson = boundaryJson;
+    }
+
+    public Integer getPriorityLevel() {
+        return priorityLevel;
+    }
+
+    public void setPriorityLevel(Integer priorityLevel) {
+        this.priorityLevel = priorityLevel;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ProviderOperatingArea)) return false;
+        ProviderOperatingArea that = (ProviderOperatingArea) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

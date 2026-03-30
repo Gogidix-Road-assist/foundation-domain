@@ -1,0 +1,104 @@
+package com.gogidix.rapidassist.common.domain.models.repository;
+
+import com.gogidix.rapidassist.common.domain.models.business.Vehicle;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Spring Data JPA repository for Vehicle entity.
+ * Provides CRUD operations and custom query methods.
+ */
+@Repository
+public interface VehicleRepository extends JpaRepository<Vehicle, String> {
+
+    /**
+     * Finds vehicles by customer ID.
+     * @param customerId the customer ID
+     * @return list of vehicles belonging to the customer
+     */
+    List<Vehicle> findByCustomerId(String customerId);
+
+    /**
+     * Finds a vehicle by VIN.
+     * @param vin the vehicle identification number
+     * @return Optional containing the vehicle if found
+     */
+    Optional<Vehicle> findByVin(String vin);
+
+    /**
+     * Finds vehicles by registration number.
+     * @param registrationNumber the registration number
+     * @return list of vehicles with the matching registration
+     */
+    List<Vehicle> findByRegistrationNumber(String registrationNumber);
+
+    /**
+     * Finds vehicles by make and model.
+     * @param make the vehicle make
+     * @param model the vehicle model
+     * @return list of vehicles matching the make and model
+     */
+    List<Vehicle> findByMakeAndModel(String make, String model);
+
+    /**
+     * Finds vehicles by tenant ID.
+     * @param tenantId the tenant ID
+     * @return list of vehicles belonging to the tenant
+     */
+    List<Vehicle> findByTenantId(String tenantId);
+
+    /**
+     * Finds vehicles by status.
+     * @param status the status (ACTIVE, INACTIVE, SOLD, etc.)
+     * @return list of vehicles with the specified status
+     */
+    List<Vehicle> findByStatus(String status);
+
+    /**
+     * Finds vehicles by vehicle type.
+     * @param vehicleType the vehicle type (SEDAN, SUV, TRUCK, VAN, MOTORCYCLE, BUS, OTHER)
+     * @return list of vehicles with the specified type
+     */
+    List<Vehicle> findByVehicleType(String vehicleType);
+
+    /**
+     * Searches for vehicles by make.
+     * @param make the make to search for (supports partial matching)
+     * @return list of vehicles with make containing the search term
+     */
+    @Query("SELECT v FROM Vehicle v WHERE v.make LIKE %:make%")
+    List<Vehicle> searchByMake(@Param("make") String make);
+
+    /**
+     * Counts vehicles by customer ID.
+     * @param customerId the customer ID
+     * @return the count of vehicles
+     */
+    long countByCustomerId(String customerId);
+
+    /**
+     * Counts vehicles by tenant ID.
+     * @param tenantId the tenant ID
+     * @return the count of vehicles
+     */
+    long countByTenantId(String tenantId);
+
+    /**
+     * Checks if a vehicle exists by VIN.
+     * @param vin the vehicle identification number
+     * @return true if a vehicle with the VIN exists
+     */
+    boolean existsByVin(String vin);
+
+    /**
+     * Finds vehicles by organization ID.
+     * @param organizationId the organization ID
+     * @return list of vehicles belonging to the organization
+     */
+    List<Vehicle> findByOrganizationId(String organizationId);
+}

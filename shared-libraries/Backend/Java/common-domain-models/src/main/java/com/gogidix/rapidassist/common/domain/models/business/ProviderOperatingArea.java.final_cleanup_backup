@@ -1,0 +1,164 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import com.gogidix.rapidassist.common.domain.models.common.GeoLocation;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+/**
+ * ProviderOperatingArea entity defining geographic areas served by providers.
+ */
+@Document(collection = "provider_operating_area")
+public class ProviderOperatingArea {
+
+    @Id
+        private String id;
+
+            private Provider provider;
+
+    @Size(max = 100)
+        private String areaName;
+
+        private String areaType; // CIRCLE, POLYGON, POSTAL_CODE, CITY
+
+    @Embedded
+    private GeoLocation centerPoint;
+
+        private Integer radiusKm;
+
+        private String postalCode;
+
+        private String city;
+
+        private String county;
+
+        private String country;
+
+        private String boundaryJson; // For polygon areas
+
+        private Integer priorityLevel = 1; // Higher priority gets more jobs
+
+        private LocalDateTime createdAt;
+
+    public ProviderOperatingArea() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getAreaType() {
+        return areaType;
+    }
+
+    public void setAreaType(String areaType) {
+        this.areaType = areaType;
+    }
+
+    public GeoLocation getCenterPoint() {
+        return centerPoint;
+    }
+
+    public void setCenterPoint(GeoLocation centerPoint) {
+        this.centerPoint = centerPoint;
+    }
+
+    public Integer getRadiusKm() {
+        return radiusKm;
+    }
+
+    public void setRadiusKm(Integer radiusKm) {
+        this.radiusKm = radiusKm;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getBoundaryJson() {
+        return boundaryJson;
+    }
+
+    public void setBoundaryJson(String boundaryJson) {
+        this.boundaryJson = boundaryJson;
+    }
+
+    public Integer getPriorityLevel() {
+        return priorityLevel;
+    }
+
+    public void setPriorityLevel(Integer priorityLevel) {
+        this.priorityLevel = priorityLevel;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ProviderOperatingArea)) return false;
+        ProviderOperatingArea that = (ProviderOperatingArea) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

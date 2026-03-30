@@ -1,0 +1,247 @@
+package com.gogidix.rapidassist.common.domain.models.system;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * AuditLog entity for tracking all system events and changes.
+ */
+@Entity
+@Table(name = "audit_logs", indexes = {
+    @Index(name = "idx_audit_logs_entity", columnList = "entity_type, entity_id"),
+    @Index(name = "idx_audit_logs_tenant", columnList = "tenant_id"),
+    @Index(name = "idx_audit_logs_action", columnList = "action_type"),
+    @Index(name = "idx_audit_logs_created", columnList = "created_at"),
+    @Index(name = "idx_audit_logs_user", columnList = "user_id")
+})
+public class AuditLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @Column(name = "tenant_id")
+    private String tenantId;
+
+    @Column(name = "organization_id")
+    private String organizationId;
+
+    @Column(name = "user_id")
+    private String userId;
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "action_type", nullable = false)
+    private String actionType; // CREATE, UPDATE, DELETE, READ, LOGIN, LOGOUT, etc.
+
+    @Column(name = "entity_type")
+    private String entityType; // User, Customer, ServiceRequest, etc.
+
+    @Column(name = "entity_id")
+    private String entityId;
+
+    @Column(name = "entity_name")
+    private String entityName;
+
+    @Column(name = "changes_json", columnDefinition = "TEXT")
+    private String changesJson;
+
+    @Column(name = "old_values_json", columnDefinition = "TEXT")
+    private String oldValuesJson;
+
+    @Column(name = "new_values_json", columnDefinition = "TEXT")
+    private String newValuesJson;
+
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "user_agent")
+    private String userAgent;
+
+    @Column(name = "request_id")
+    private String requestId;
+
+    @Column(name = "session_id")
+    private String sessionId;
+
+    @Column(name = "success")
+    private Boolean success = true;
+
+    @Column(name = "error_message", columnDefinition = "TEXT")
+    private String errorMessage;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Constructors
+    public AuditLog() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    public String getChangesJson() {
+        return changesJson;
+    }
+
+    public void setChangesJson(String changesJson) {
+        this.changesJson = changesJson;
+    }
+
+    public String getOldValuesJson() {
+        return oldValuesJson;
+    }
+
+    public void setOldValuesJson(String oldValuesJson) {
+        this.oldValuesJson = oldValuesJson;
+    }
+
+    public String getNewValuesJson() {
+        return newValuesJson;
+    }
+
+    public void setNewValuesJson(String newValuesJson) {
+        this.newValuesJson = newValuesJson;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AuditLog)) return false;
+        AuditLog auditLog = (AuditLog) o;
+        return id != null && id.equals(auditLog.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

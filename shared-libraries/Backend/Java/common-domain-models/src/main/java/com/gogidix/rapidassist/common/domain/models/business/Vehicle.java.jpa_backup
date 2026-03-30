@@ -1,0 +1,442 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+
+import com.gogidix.rapidassist.common.domain.models.common.Address;
+import com.gogidix.rapidassist.common.domain.models.common.GeoLocation;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Vehicle entity for the Road Assist platform.
+ * Represents vehicles belonging to customers or fleet operators.
+ */
+@Entity
+@Table(name = "vehicles", indexes = {
+    @Index(name = "idx_vehicles_vin", columnList = "vin"),
+    @Index(name = "idx_vehicles_registration", columnList = "registration_number"),
+    @Index(name = "idx_vehicles_customer", columnList = "customer_id"),
+    @Index(name = "idx_vehicles_tenant", columnList = "tenant_id")
+})
+public class Vehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @NotBlank(message = "VIN is required")
+    @Size(min = 17, max = 17)
+    @Column(name = "vin", nullable = false, unique = true, length = 17)
+    private String vin;
+
+    @Size(max = 50)
+    @Column(name = "registration_number")
+    private String registrationNumber;
+
+    @Column(name = "registration_state")
+    private String registrationState;
+
+    @Column(name = "registration_expiry")
+    private LocalDateTime registrationExpiry;
+
+    @Size(max = 100)
+    @Column(name = "make")
+    private String make;
+
+    @Size(max = 100)
+    @Column(name = "model")
+    private String model;
+
+    @Column(name = "\"year\"")
+    private Integer year;
+
+    @Size(max = 50)
+    @Column(name = "trim")
+    private String trim;
+
+    @Size(max = 50)
+    @Column(name = "body_type")
+    private String bodyType; // SEDAN, SUV, TRUCK, VAN, MOTORCYCLE, etc.
+
+    @Size(max = 50)
+    @Column(name = "fuel_type")
+    private String fuelType; // GASOLINE, DIESEL, ELECTRIC, HYBRID, etc.
+
+    @Size(max = 20)
+    @Column(name = "color")
+    private String color;
+
+    @Column(name = "mileage")
+    private Integer mileage; // in kilometers
+
+    @Column(name = "last_service_date")
+    private LocalDateTime lastServiceDate;
+
+    @Column(name = "next_service_date")
+    private LocalDateTime nextServiceDate;
+
+    @Column(name = "mot_due_date")
+    private LocalDateTime motDueDate;
+
+    @Column(name = "insurance_expiry")
+    private LocalDateTime insuranceExpiry;
+
+    @Size(max = 100)
+    @Column(name = "insurance_company")
+    private String insuranceCompany;
+
+    @Size(max = 100)
+    @Column(name = "insurance_policy_number")
+    private String insurancePolicyNumber;
+
+    @Column(name = "customer_id")
+    private String customerId;
+
+    @Column(name = "fleet_id")
+    private String fleetId;
+
+    @Column(name = "tenant_id")
+    private String tenantId;
+
+    @Column(name = "organization_id")
+    private String organizationId;
+
+    @Column(name = "vehicle_type")
+    private String vehicleType; // PRIVATE, COMMERCIAL, FLEET, EMERGENCY
+
+    @Column(name = "status")
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE, STOLEN, SCRAPPED, SOLD
+
+    @Column(name = "ownership_type")
+    private String ownershipType; // OWNED, LEASED, RENTED, COMPANY
+
+    @Embedded
+    private GeoLocation lastKnownLocation;
+
+    @Column(name = "last_location_update")
+    private LocalDateTime lastLocationUpdate;
+
+    @Column(name = "primary_driver_id")
+    private String primaryDriverId;
+
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    private Set<VehicleDocument> documents = new HashSet<>();
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    // Constructors
+    public Vehicle() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Vehicle(String vin) {
+        this();
+        this.vin = vin;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getVin() {
+        return vin;
+    }
+
+    public void setVin(String vin) {
+        this.vin = vin;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    public String getRegistrationState() {
+        return registrationState;
+    }
+
+    public void setRegistrationState(String registrationState) {
+        this.registrationState = registrationState;
+    }
+
+    public LocalDateTime getRegistrationExpiry() {
+        return registrationExpiry;
+    }
+
+    public void setRegistrationExpiry(LocalDateTime registrationExpiry) {
+        this.registrationExpiry = registrationExpiry;
+    }
+
+    public String getMake() {
+        return make;
+    }
+
+    public void setMake(String make) {
+        this.make = make;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public String getTrim() {
+        return trim;
+    }
+
+    public void setTrim(String trim) {
+        this.trim = trim;
+    }
+
+    public String getBodyType() {
+        return bodyType;
+    }
+
+    public void setBodyType(String bodyType) {
+        this.bodyType = bodyType;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Integer getMileage() {
+        return mileage;
+    }
+
+    public void setMileage(Integer mileage) {
+        this.mileage = mileage;
+    }
+
+    public LocalDateTime getLastServiceDate() {
+        return lastServiceDate;
+    }
+
+    public void setLastServiceDate(LocalDateTime lastServiceDate) {
+        this.lastServiceDate = lastServiceDate;
+    }
+
+    public LocalDateTime getNextServiceDate() {
+        return nextServiceDate;
+    }
+
+    public void setNextServiceDate(LocalDateTime nextServiceDate) {
+        this.nextServiceDate = nextServiceDate;
+    }
+
+    public LocalDateTime getMotDueDate() {
+        return motDueDate;
+    }
+
+    public void setMotDueDate(LocalDateTime motDueDate) {
+        this.motDueDate = motDueDate;
+    }
+
+    public LocalDateTime getInsuranceExpiry() {
+        return insuranceExpiry;
+    }
+
+    public void setInsuranceExpiry(LocalDateTime insuranceExpiry) {
+        this.insuranceExpiry = insuranceExpiry;
+    }
+
+    public String getInsuranceCompany() {
+        return insuranceCompany;
+    }
+
+    public void setInsuranceCompany(String insuranceCompany) {
+        this.insuranceCompany = insuranceCompany;
+    }
+
+    public String getInsurancePolicyNumber() {
+        return insurancePolicyNumber;
+    }
+
+    public void setInsurancePolicyNumber(String insurancePolicyNumber) {
+        this.insurancePolicyNumber = insurancePolicyNumber;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getFleetId() {
+        return fleetId;
+    }
+
+    public void setFleetId(String fleetId) {
+        this.fleetId = fleetId;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getOwnershipType() {
+        return ownershipType;
+    }
+
+    public void setOwnershipType(String ownershipType) {
+        this.ownershipType = ownershipType;
+    }
+
+    public GeoLocation getLastKnownLocation() {
+        return lastKnownLocation;
+    }
+
+    public void setLastKnownLocation(GeoLocation lastKnownLocation) {
+        this.lastKnownLocation = lastKnownLocation;
+    }
+
+    public LocalDateTime getLastLocationUpdate() {
+        return lastLocationUpdate;
+    }
+
+    public void setLastLocationUpdate(LocalDateTime lastLocationUpdate) {
+        this.lastLocationUpdate = lastLocationUpdate;
+    }
+
+    public String getPrimaryDriverId() {
+        return primaryDriverId;
+    }
+
+    public void setPrimaryDriverId(String primaryDriverId) {
+        this.primaryDriverId = primaryDriverId;
+    }
+
+    public Set<VehicleDocument> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(Set<VehicleDocument> documents) {
+        this.documents = documents;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public String getFullName() {
+        return make + " " + model + (year != null ? " " + year : "");
+    }
+
+    public boolean isInsuranceExpiringSoon(int days) {
+        return insuranceExpiry != null &&
+               insuranceExpiry.isBefore(LocalDateTime.now().plusDays(days));
+    }
+
+    public boolean isMotDueSoon(int days) {
+        return motDueDate != null &&
+               motDueDate.isBefore(LocalDateTime.now().plusDays(days));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vehicle)) return false;
+        Vehicle vehicle = (Vehicle) o;
+        return id != null && id.equals(vehicle.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

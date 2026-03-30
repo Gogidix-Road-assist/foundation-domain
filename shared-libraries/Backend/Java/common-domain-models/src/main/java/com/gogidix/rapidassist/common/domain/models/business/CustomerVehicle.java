@@ -1,0 +1,111 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import java.time.LocalDateTime;
+
+/**
+ * CustomerVehicle entity linking customers to their vehicles.
+ */
+@Document(collection = "customer_vehicle")
+public class CustomerVehicle {
+
+    @Id
+        private String id;
+
+            private Customer customer;
+
+        private String vehicleId;
+
+        private Boolean isPrimary = false;
+
+        private String nickname;
+
+        private String ownershipType; // OWNED, LEASED, RENTED, COMPANY
+
+        private LocalDateTime purchaseDate;
+
+        private LocalDateTime createdAt;
+
+    public CustomerVehicle() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Boolean getIsPrimary() {
+        return isPrimary;
+    }
+
+    public void setIsPrimary(Boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getOwnershipType() {
+        return ownershipType;
+    }
+
+    public void setOwnershipType(String ownershipType) {
+        this.ownershipType = ownershipType;
+    }
+
+    public LocalDateTime getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDateTime purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CustomerVehicle)) return false;
+        CustomerVehicle that = (CustomerVehicle) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

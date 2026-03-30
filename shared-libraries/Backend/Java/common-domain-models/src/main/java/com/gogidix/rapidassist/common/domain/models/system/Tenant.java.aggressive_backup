@@ -1,0 +1,319 @@
+package com.gogidix.rapidassist.common.domain.models.system;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Tenant entity for multi-tenancy support.
+ * Represents a tenant organization in the SaaS platform.
+ */
+@Document(collection = "tenant")
+@Table(name = "tenants", indexes = {
+    @Index(name = "idx_tenants_code", columnList = "tenant_code"),
+    })
+public class Tenant {
+
+    @Id
+        private String id;
+
+    @NotBlank(message = "Tenant code is required")
+    @Size(min = 2, max = 20)
+        private String tenantCode;
+
+    @NotBlank(message = "Tenant name is required")
+    @Size(max = 200)
+        private String tenantName;
+
+    @Size(max = 500)
+        private String description;
+
+        private String logoUrl;
+
+        private String websiteUrl;
+
+    @Size(max = 20)
+        private String status = "ACTIVE"; // ACTIVE, INACTIVE, SUSPENDED
+
+        private String tenantType = "STANDARD"; // STANDARD, ENTERPRISE, TRIAL
+
+        private String subscriptionTier; // FREE, BASIC, PROFESSIONAL, ENTERPRISE
+
+        private LocalDateTime subscriptionStart;
+
+        private LocalDateTime subscriptionEnd;
+
+        private Integer maxUsers;
+
+        private Integer maxOrganizations;
+
+        private Integer maxStorageGb;
+
+        private String featuresJson;
+
+        private String settingsJson;
+
+        private String brandingJson;
+
+        private String contactEmail;
+
+        private String contactPhone;
+
+        private String billingContact;
+
+        private String technicalContact;
+
+        private Set<Organization> organizations = new HashSet<>();
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+        private String createdBy;
+
+    // Constructors
+    public Tenant() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Tenant(String tenantCode, String tenantName) {
+        this();
+        this.tenantCode = tenantCode;
+        this.tenantName = tenantName;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTenantCode() {
+        return tenantCode;
+    }
+
+    public void setTenantCode(String tenantCode) {
+        this.tenantCode = tenantCode;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(String websiteUrl) {
+        this.websiteUrl = websiteUrl;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getTenantType() {
+        return tenantType;
+    }
+
+    public void setTenantType(String tenantType) {
+        this.tenantType = tenantType;
+    }
+
+    public String getSubscriptionTier() {
+        return subscriptionTier;
+    }
+
+    public void setSubscriptionTier(String subscriptionTier) {
+        this.subscriptionTier = subscriptionTier;
+    }
+
+    public LocalDateTime getSubscriptionStart() {
+        return subscriptionStart;
+    }
+
+    public void setSubscriptionStart(LocalDateTime subscriptionStart) {
+        this.subscriptionStart = subscriptionStart;
+    }
+
+    public LocalDateTime getSubscriptionEnd() {
+        return subscriptionEnd;
+    }
+
+    public void setSubscriptionEnd(LocalDateTime subscriptionEnd) {
+        this.subscriptionEnd = subscriptionEnd;
+    }
+
+    public Integer getMaxUsers() {
+        return maxUsers;
+    }
+
+    public void setMaxUsers(Integer maxUsers) {
+        this.maxUsers = maxUsers;
+    }
+
+    public Integer getMaxOrganizations() {
+        return maxOrganizations;
+    }
+
+    public void setMaxOrganizations(Integer maxOrganizations) {
+        this.maxOrganizations = maxOrganizations;
+    }
+
+    public Integer getMaxStorageGb() {
+        return maxStorageGb;
+    }
+
+    public void setMaxStorageGb(Integer maxStorageGb) {
+        this.maxStorageGb = maxStorageGb;
+    }
+
+    public String getFeaturesJson() {
+        return featuresJson;
+    }
+
+    public void setFeaturesJson(String featuresJson) {
+        this.featuresJson = featuresJson;
+    }
+
+    public String getSettingsJson() {
+        return settingsJson;
+    }
+
+    public void setSettingsJson(String settingsJson) {
+        this.settingsJson = settingsJson;
+    }
+
+    public String getBrandingJson() {
+        return brandingJson;
+    }
+
+    public void setBrandingJson(String brandingJson) {
+        this.brandingJson = brandingJson;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getBillingContact() {
+        return billingContact;
+    }
+
+    public void setBillingContact(String billingContact) {
+        this.billingContact = billingContact;
+    }
+
+    public String getTechnicalContact() {
+        return technicalContact;
+    }
+
+    public void setTechnicalContact(String technicalContact) {
+        this.technicalContact = technicalContact;
+    }
+
+    public Set<Organization> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(Set<Organization> organizations) {
+        this.organizations = organizations;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+        protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
+    }
+
+    public boolean isSubscriptionActive() {
+        return subscriptionEnd == null || subscriptionEnd.isAfter(LocalDateTime.now());
+    }
+
+    public boolean isTrial() {
+        return "TRIAL".equals(tenantType);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tenant)) return false;
+        Tenant tenant = (Tenant) o;
+        return id != null && id.equals(tenant.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

@@ -1,0 +1,181 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
+/**
+ * ServiceRequestPhoto entity for storing photos associated with service requests.
+ */
+@Document(collection = "service_request_photo")
+public class ServiceRequestPhoto {
+
+    @Id
+        private String id;
+
+            private ServiceRequest serviceRequest;
+
+    @Size(max = 500)
+        private String photoUrl;
+
+    @Size(max = 300)
+        private String thumbnailUrl;
+
+    @Size(max = 100)
+        private String fileName;
+
+    @Size(max = 50)
+        private String fileType;
+
+        private Long fileSize;
+
+    @Size(max = 500)
+        private String description;
+
+    @Size(max = 50)
+        private String photoType; // VEHICLE, DAMAGE, LOCATION, RECEIPT, OTHER
+
+        private String uploadedBy;
+
+        private String uploadedByType; // CUSTOMER, PROVIDER, DRIVER, ADMIN
+
+        private LocalDateTime takenAt;
+
+    @Embedded
+    private com.gogidix.rapidassist.common.domain.models.common.GeoLocation location;
+
+        private LocalDateTime createdAt;
+
+    // Constructors
+    public ServiceRequestPhoto() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public ServiceRequest getServiceRequest() {
+        return serviceRequest;
+    }
+
+    public void setServiceRequest(ServiceRequest serviceRequest) {
+        this.serviceRequest = serviceRequest;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPhotoType() {
+        return photoType;
+    }
+
+    public void setPhotoType(String photoType) {
+        this.photoType = photoType;
+    }
+
+    public String getUploadedBy() {
+        return uploadedBy;
+    }
+
+    public void setUploadedBy(String uploadedBy) {
+        this.uploadedBy = uploadedBy;
+    }
+
+    public String getUploadedByType() {
+        return uploadedByType;
+    }
+
+    public void setUploadedByType(String uploadedByType) {
+        this.uploadedByType = uploadedByType;
+    }
+
+    public LocalDateTime getTakenAt() {
+        return takenAt;
+    }
+
+    public void setTakenAt(LocalDateTime takenAt) {
+        this.takenAt = takenAt;
+    }
+
+    public com.gogidix.rapidassist.common.domain.models.common.GeoLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(com.gogidix.rapidassist.common.domain.models.common.GeoLocation location) {
+        this.location = location;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ServiceRequestPhoto)) return false;
+        ServiceRequestPhoto that = (ServiceRequestPhoto) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

@@ -1,0 +1,146 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * ServiceRequestUpdate entity for tracking status changes and updates to service requests.
+ */
+@Entity
+@Table(name = "service_request_updates", indexes = {
+    @Index(name = "idx_sr_updates_request", columnList = "service_request_id"),
+    @Index(name = "idx_sr_updates_created", columnList = "created_at")
+})
+public class ServiceRequestUpdate {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_request_id", nullable = false)
+    private ServiceRequest serviceRequest;
+
+    @Column(name = "status_from")
+    private String statusFrom;
+
+    @Column(name = "status_to")
+    private String statusTo;
+
+    @Column(name = "update_type")
+    private String updateType; // STATUS_CHANGE, LOCATION_UPDATE, NOTE_ADDED, PHOTO_ADDED
+
+    @Column(name = "update_message", columnDefinition = "TEXT")
+    private String updateMessage;
+
+    @Column(name = "updated_by")
+    private String updatedBy;
+
+    @Column(name = "updated_by_type")
+    private String updatedByType; // CUSTOMER, PROVIDER, DRIVER, SYSTEM, ADMIN
+
+    @Embedded
+    private com.gogidix.rapidassist.common.domain.models.common.GeoLocation location;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Constructors
+    public ServiceRequestUpdate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public ServiceRequest getServiceRequest() {
+        return serviceRequest;
+    }
+
+    public void setServiceRequest(ServiceRequest serviceRequest) {
+        this.serviceRequest = serviceRequest;
+    }
+
+    public String getStatusFrom() {
+        return statusFrom;
+    }
+
+    public void setStatusFrom(String statusFrom) {
+        this.statusFrom = statusFrom;
+    }
+
+    public String getStatusTo() {
+        return statusTo;
+    }
+
+    public void setStatusTo(String statusTo) {
+        this.statusTo = statusTo;
+    }
+
+    public String getUpdateType() {
+        return updateType;
+    }
+
+    public void setUpdateType(String updateType) {
+        this.updateType = updateType;
+    }
+
+    public String getUpdateMessage() {
+        return updateMessage;
+    }
+
+    public void setUpdateMessage(String updateMessage) {
+        this.updateMessage = updateMessage;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getUpdatedByType() {
+        return updatedByType;
+    }
+
+    public void setUpdatedByType(String updatedByType) {
+        this.updatedByType = updatedByType;
+    }
+
+    public com.gogidix.rapidassist.common.domain.models.common.GeoLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(com.gogidix.rapidassist.common.domain.models.common.GeoLocation location) {
+        this.location = location;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ServiceRequestUpdate)) return false;
+        ServiceRequestUpdate that = (ServiceRequestUpdate) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

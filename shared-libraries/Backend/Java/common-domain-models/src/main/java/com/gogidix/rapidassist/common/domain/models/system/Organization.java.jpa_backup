@@ -1,0 +1,240 @@
+package com.gogidix.rapidassist.common.domain.models.system;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Organization entity representing an organization within a tenant.
+ */
+@Entity
+@Table(name = "organizations", indexes = {
+    @Index(name = "idx_orgs_tenant", columnList = "tenant_id"),
+    @Index(name = "idx_orgs_code", columnList = "organization_code")
+})
+public class Organization {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Tenant tenant;
+
+    @NotBlank(message = "Organization code is required")
+    @Size(min = 2, max = 50)
+    @Column(name = "organization_code", nullable = false)
+    private String organizationCode;
+
+    @NotBlank(message = "Organization name is required")
+    @Size(max = 200)
+    @Column(name = "organization_name", nullable = false)
+    private String organizationName;
+
+    @Size(max = 500)
+    @Column(name = "description")
+    private String description;
+
+    @Size(max = 100)
+    @Column(name = "organization_type")
+    private String organizationType; // CORPORATE, SME, GOVERNMENT, NON_PROFIT
+
+    @Size(max = 20)
+    @Column(name = "status")
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE, SUSPENDED
+
+    @Size(max = 200)
+    @Column(name = "tax_id")
+    private String taxId;
+
+    @Size(max = 200)
+    @Column(name = "registration_number")
+    private String registrationNumber;
+
+    @Column(name = "max_users")
+    private Integer maxUsers;
+
+    @Column(name = "max_departments")
+    private Integer maxDepartments;
+
+    @Column(name = "settings_json")
+    private String settingsJson;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    private Set<Department> departments = new HashSet<>();
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    // Constructors
+    public Organization() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Organization(String organizationCode, String organizationName) {
+        this();
+        this.organizationCode = organizationCode;
+        this.organizationName = organizationName;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getOrganizationCode() {
+        return organizationCode;
+    }
+
+    public void setOrganizationCode(String organizationCode) {
+        this.organizationCode = organizationCode;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getOrganizationType() {
+        return organizationType;
+    }
+
+    public void setOrganizationType(String organizationType) {
+        this.organizationType = organizationType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    public Integer getMaxUsers() {
+        return maxUsers;
+    }
+
+    public void setMaxUsers(Integer maxUsers) {
+        this.maxUsers = maxUsers;
+    }
+
+    public Integer getMaxDepartments() {
+        return maxDepartments;
+    }
+
+    public void setMaxDepartments(Integer maxDepartments) {
+        this.maxDepartments = maxDepartments;
+    }
+
+    public String getSettingsJson() {
+        return settingsJson;
+    }
+
+    public void setSettingsJson(String settingsJson) {
+        this.settingsJson = settingsJson;
+    }
+
+    public Set<Department> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(Set<Department> departments) {
+        this.departments = departments;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Organization)) return false;
+        Organization that = (Organization) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

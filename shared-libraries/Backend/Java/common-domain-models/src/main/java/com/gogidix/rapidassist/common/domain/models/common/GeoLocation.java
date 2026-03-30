@@ -1,0 +1,153 @@
+package com.gogidix.rapidassist.common.domain.models.common;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.util.Objects;
+
+/**
+ * GeoLocation value object representing geographical coordinates.
+ */
+@Embeddable
+public class GeoLocation {
+
+    private Double latitude;
+
+    private Double longitude;
+
+        private Double altitude;
+
+        private Double accuracy; // in meters
+
+    public GeoLocation() {
+    }
+
+    public GeoLocation(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    // Getters and Setters
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
+    }
+
+    public Double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(Double accuracy) {
+        this.accuracy = accuracy;
+    }
+
+    public boolean isValid() {
+        return latitude != null && longitude != null &&
+               latitude >= -90 && latitude <= 90 &&
+               longitude >= -180 && longitude <= 180;
+    }
+
+    public double distanceTo(GeoLocation other) {
+        if (!this.isValid() || !other.isValid()) {
+            throw new IllegalArgumentException("Invalid coordinates");
+        }
+
+        final int R = 6371; // Radius of the earth in km
+
+        double latDistance = Math.toRadians(other.latitude - this.latitude);
+        double lonDistance = Math.toRadians(other.longitude - this.longitude);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(this.latitude))
+                * Math.cos(Math.toRadians(other.latitude))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c; // Distance in km
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GeoLocation)) return false;
+        GeoLocation that = (GeoLocation) o;
+        return Objects.equals(latitude, that.latitude) &&
+               Objects.equals(longitude, that.longitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(latitude, longitude);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%.6f, %.6f)", latitude, longitude);
+    }
+
+    public String toCoordinatesString() {
+        return latitude + "," + longitude;
+    }
+
+    public static GeoLocation fromString(String coordinates) {
+        if (coordinates == null || !coordinates.contains(",")) {
+            return null;
+        }
+        String[] parts = coordinates.split(",");
+        return new GeoLocation(
+            Double.parseDouble(parts[0].trim()),
+            Double.parseDouble(parts[1].trim())
+        );
+    }
+
+    public static class Builder {
+        private GeoLocation location = new GeoLocation();
+
+        public Builder latitude(Double latitude) {
+            location.setLatitude(latitude);
+            return this;
+        }
+
+        public Builder longitude(Double longitude) {
+            location.setLongitude(longitude);
+            return this;
+        }
+
+        public Builder altitude(Double altitude) {
+            location.setAltitude(altitude);
+            return this;
+        }
+
+        public Builder accuracy(Double accuracy) {
+            location.setAccuracy(accuracy);
+            return this;
+        }
+
+        public GeoLocation build() {
+            return location;
+        }
+    }
+}

@@ -1,0 +1,122 @@
+package com.gogidix.rapidassist.common.domain.models.business;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+/**
+ * CustomerVehicle entity linking customers to their vehicles.
+ */
+@Entity
+@Table(name = "customer_vehicles", indexes = {
+    @Index(name = "idx_cust_vehicles_customer", columnList = "customer_id"),
+    @Index(name = "idx_cust_vehicles_vehicle", columnList = "vehicle_id")
+})
+public class CustomerVehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @Column(name = "vehicle_id")
+    private String vehicleId;
+
+    @Column(name = "is_primary")
+    private Boolean isPrimary = false;
+
+    @Column(name = "nickname")
+    private String nickname;
+
+    @Column(name = "ownership_type")
+    private String ownershipType; // OWNED, LEASED, RENTED, COMPANY
+
+    @Column(name = "purchase_date")
+    private LocalDateTime purchaseDate;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    public CustomerVehicle() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Boolean getIsPrimary() {
+        return isPrimary;
+    }
+
+    public void setIsPrimary(Boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getOwnershipType() {
+        return ownershipType;
+    }
+
+    public void setOwnershipType(String ownershipType) {
+        this.ownershipType = ownershipType;
+    }
+
+    public LocalDateTime getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDateTime purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CustomerVehicle)) return false;
+        CustomerVehicle that = (CustomerVehicle) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}
