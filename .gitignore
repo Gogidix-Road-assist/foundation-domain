@@ -1,0 +1,64 @@
+# Foundation-Domain specific
+.railway.env
+.railway.env.local
+.vercel/
+vercel.json.local
+
+# Build outputs
+**/target/
+**/build/
+# Note: **/out/ removed to allow port/out directories in hexagonal architecture
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.eclipse/
+.settings/
+.project
+.classpath
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Test coverage
+.jacoco/
+coverage/
+test-output/
+
+# Spring Boot local configs
+application-local.yml
+application-local.properties
+application-secret.yml
+
+# Node modules
+**/node_modules/
+**/.next/
+# Note: **/out/ removed to allow port/out directories in hexagonal architecture
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Kubernetes secrets
+secrets/
+*.key
+*.crt
+*.pem
+
+# Local test databases
+*.db
+*.db-shm
+*.db-wal
