@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@shared-frontend-libraries/design-system": ["./packages/design-system/src"],
+      "@shared-frontend-libraries/components": ["./packages/components/src"],
+      "@shared-frontend-libraries/layouts": ["./packages/layouts/src"],
+      "@shared-frontend-libraries/forms": ["./packages/forms/src"],
+      "@shared-frontend-libraries/data-display": ["./packages/data-display/src"],
+      "@shared-frontend-libraries/real-time": ["./packages/real-time/src"],
+      "@shared-frontend-libraries/dashboards": ["./packages/dashboards/src"],
+      "@shared-frontend-libraries/brand-assets": ["./packages/brand-assets/src"],
+      "@shared-frontend-libraries/utils": ["./packages/utils/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}

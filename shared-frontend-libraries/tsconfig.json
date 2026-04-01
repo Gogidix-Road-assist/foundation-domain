@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": ["packages/*/src/**/*", "apps/*/src/**/*"],
+  "references": [
+    { "path": "./packages/design-system" },
+    { "path": "./packages/components" },
+    { "path": "./packages/layouts" },
+    { "path": "./packages/forms" },
+    { "path": "./packages/data-display" },
+    { "path": "./packages/real-time" },
+    { "path": "./packages/dashboards" },
+    { "path": "./packages/brand-assets" },
+    { "path": "./packages/utils" }
+  ]
+}
