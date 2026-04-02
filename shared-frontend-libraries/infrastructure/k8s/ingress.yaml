@@ -1,0 +1,70 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shared-frontend-libraries
+  namespace: rapid-assist
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, X-Requested-With"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_input_headers "X-Forwarded-For" $http_x_forwarded_for always;
+spec:
+  tls:
+  - hosts:
+      - rapidassist.gogidix.com
+    secretName: shared-frontend-libraries-tls
+  rules:
+  - host: rapidassist.gogidix.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: shared-frontend-libraries
+              port:
+                number: 80
+  - host: www.rapidassist.gogidix.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: shared-frontend-libraries
+              port:
+                number: 80
+---
+# Canary ingress for blue-green deployments
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shared-frontend-libraries-canary
+  namespace: rapid-assist
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+spec:
+  tls:
+  - hosts:
+      - rapidassist.gogidix.com
+    secretName: shared-frontend-libraries-tls
+  rules:
+  - host: rapidassist.gogidix.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: shared-frontend-libraries-canary
+              port:
+                number: 80

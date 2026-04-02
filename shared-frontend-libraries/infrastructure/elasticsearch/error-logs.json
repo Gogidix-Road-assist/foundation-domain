@@ -1,0 +1,43 @@
+input: {
+    plugin: elasticsearch
+    timefield: "@timestamp"
+}
+}
+filter:
+- range:
+    from: now-15m
+    to: now
+  query:
+    bool:
+      must:
+        - term:
+            namespace: "rapid-assist"
+        - range:
+            "@timestamp":
+              gte: "now-15m"
+              lte: "now"
+        - exists:
+            field: "http.status"
+        - terms:
+          - terms:
+              - field: "http.status"
+                size: 10
+                sort:
+                  _score: "desc"
+                order: "desc"
+  aggs:
+    - terms:
+        size: 10
+        field: "http.status"
+        order:
+          desc:
+            "_count"
+            "_score"
+          aggs:
+            - max:
+                field: "http.duration"
+            - cardinality:
+                field: "http.request_id"
+        sort:
+          - _score: desc
+  size: 100

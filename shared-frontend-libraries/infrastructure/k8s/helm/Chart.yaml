@@ -1,0 +1,29 @@
+apiVersion: v2
+name: shared-frontend-libraries
+description: A Helm chart for RapidAssist Shared Frontend Libraries
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - rapidassist
+  - frontend
+  - shared-libraries
+  - components
+  - design-system
+maintainers:
+  - name: Gogidix Development Team
+    email: dev@gogidix.com
+    url: https://github.com/gogidix/rapid-assist
+sources:
+  - https://github.com/gogidix/rapid-assist
+icon: https://rapidassist.gogidix.com/icon.png
+deprecated: false
+annotations:
+  artifacthub.io/links: https://github.com/gogidix/rapid-assist/blob/main/README.md
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/category: infrastructure
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/description: |
+    RapidAssist Shared Frontend Libraries - Enterprise-grade component library
+    for all RapidAssist business domain frontends.

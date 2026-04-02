@@ -1,0 +1,67 @@
+{{/*
+A short description of the application
+*/}}
+{{ .Chart.Description | default "A Helm chart for RapidAssist Shared Frontend Libraries" }}
+
+{{/*
+A longer description of the application
+*/}}
+{{ .Values.description | default "" }}
+
+{{/*
+Installation instructions
+*/}}
+
+This Helm chart deploys the RapidAssist Shared Frontend Libraries to a Kubernetes cluster.
+
+## Quick Start
+
+```bash
+helm repo add rapidassist https://charts.gogidix.com
+helm install shared-frontend-libraries rapidassist/shared-frontend-libraries
+```
+
+## Uninstallation
+
+```bash
+helm uninstall shared-frontend-libraries
+```
+
+## Configuration
+
+The following table lists the configurable parameters of the chart and their default values.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `image.repository` | Container image repository | `gogidix/shared-frontend-libraries` |
+| `image.tag` | Container image tag | `1.0.0` |
+| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `replicaCount` | Number of replicas | `3` |
+| `resources.requests.cpu` | CPU request | `250m` |
+| `resources.requests.memory` | Memory request | `256Mi` |
+| `resources.limits.cpu` | CPU limit | `500m` |
+| `resources.limits.memory` | Memory limit | `512Mi` |
+| `env.NODE_ENV` | Node environment | `production` |
+| `env.PORT` | Application port | `3000` |
+| `env.LOG_LEVEL` | Log level | `info` |
+| `service.type` | Kubernetes service type | `ClusterIP` |
+| `ingress.enabled` | Enable ingress | `true` |
+| `ingress.className` | Ingress class | `nginx` |
+| `ingress.hosts` | Ingress hosts | `["rapidassist.gogidix.com"]` |
+| `autoscaling.enabled` | Enable autoscaling | `true` |
+| `autoscaling.minReplicas` | Minimum replicas | `2` |
+| `autoscaling.maxReplicas` | Maximum replicas | `10` |
+
+## Development
+
+For development deployment:
+
+```bash
+helm install shared-frontend-libraries rapidassist/shared-frontend-libraries \
+  --set replicaCount=1 \
+  --set env.NODE_ENV=development
+```
+
+## Monitoring
+
+The chart includes Prometheus ServiceMonitor and Grafana dashboards when monitoring is enabled.

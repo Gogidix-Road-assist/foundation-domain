@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-frontend-libraries-config
+  namespace: rapid-assist
+data:
+  NODE_ENV: production
+  PORT: "3000"
+  LOG_LEVEL: info
+  REACT_APP_API_URL: https://api.rapidassist.gogidix.com
+  REACT_APP_WS_URL: wss://ws.rapidassist.gogidix.com
+  REACT_APP_Sentry_DSN: https://sentry.gogidix.com/123
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-frontend-libraries-canary-config
+  namespace: rapid-assist
+data:
+  NODE_ENV: production
+  PORT: "3000"
+  LOG_LEVEL: info
+  REACT_APP_API_URL: https://api.rapidassist.gogidix.com
+  REACT_APP_WS_URL: wss://ws.rapidassist.gogidix.com
+  REACT_APP_Sentry_DSN: https://sentry.gogidix.com/123
+  VERSION: canary

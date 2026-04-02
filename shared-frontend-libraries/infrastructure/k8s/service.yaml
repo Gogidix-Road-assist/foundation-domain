@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shared-frontend-libraries
+  namespace: rapid-assist
+  labels:
+    app: shared-frontend-libraries
+spec:
+  type: ClusterIP
+  selector:
+    app: shared-frontend-libraries
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shared-frontend-libraries-headless
+  namespace: rapid-assist
+  labels:
+    app: shared-frontend-libraries
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: shared-frontend-libraries
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP

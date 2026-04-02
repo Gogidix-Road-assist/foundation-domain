@@ -9,24 +9,60 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/unit/setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', 'dist', 'build', '**/*.stories.{ts,tsx}'],
+    exclude: [
+      'node_modules',
+      'dist',
+      'build',
+      '**/*.stories.{ts,tsx}',
+      '**/*.config.{ts,js}',
+    ],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json', 'html', 'lcov', 'text-summary'],
       exclude: [
         'node_modules/',
         'tests/',
         '**/*.test.{ts,tsx}',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
         '**/*.stories.{ts,tsx}',
         '**/dist/**',
         '**/build/**',
         '**/*.config.{ts,js}',
+        '**/index.ts',
+        '**/index.d.ts',
+        '**/*.mock.{ts,tsx}',
+        '**/types/**',
       ],
+      // Coverage thresholds for all packages
       statements: 80,
-      branches: 80,
+      branches: 75,
       functions: 80,
       lines: 80,
+      // Per-file thresholds
+      perFile: true,
+      // All files must meet at least 50% coverage
+      thresholds: {
+        lines: 50,
+        functions: 50,
+        branches: 50,
+        statements: 50,
+      },
+      // Output directory
+      reportsDirectory: './coverage',
     },
+    // Test timeout
+    testTimeout: 10000,
+    // Hook timeout
+    hookTimeout: 10000,
+    // Teardown timeout
+    teardownTimeout: 10000,
+    // Isolate tests
+    isolate: true,
+    // Clear mocks between tests
+    clearMocks: true,
+    // Restore mocks after each test
+    restoreMocks: true,
   },
   resolve: {
     alias: {

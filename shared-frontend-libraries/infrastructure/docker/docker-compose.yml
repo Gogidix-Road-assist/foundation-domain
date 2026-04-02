@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # Development services
+  app:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile
+      target: builder
+    volumes:
+      - ..:/app
+      - /app/node_modules
+      - /app/packages/*/node_modules
+    ports:
+      - "3000:3000"
+      - "3001:3001"  # Storybook
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    command: pnpm dev
+
+  # Production service
+  app-prod:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile
+      target: production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Storybook
+  storybook:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile
+      target: builder
+    volumes:
+      - ..:/app
+      - /app/node_modules
+    ports:
+      - "6006:6006"
+    environment:
+      - NODE_ENV=development
+    command: pnpm storybook
+    working_dir: /app
+
+  # Monitoring stack
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # ELK Stack for logging
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch:8.12.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash:8.12.0
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./infrastructure/logstash/pipeline.conf:/usr/share/logstash/pipeline/pipeline.conf
+      - logstash-data:/usr/share/logstash/data
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana:8.12.0
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  elasticsearch-data:
+  logstash-data:
+
+networks:
+  default:
+    name: shared-frontend-libraries-network

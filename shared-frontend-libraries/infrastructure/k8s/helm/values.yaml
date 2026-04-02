@@ -1,0 +1,131 @@
+# Default values for shared-frontend-libraries Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+  hostname: rapidassist.gogidix.com
+
+image:
+  repository: gogidix/shared-frontend-libraries
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  tls:
+    enabled: true
+    secretName: shared-frontend-libraries-tls
+  hosts:
+    - host: rapidassist.gogidix.com
+      paths:
+        - /
+
+env:
+  NODE_ENV: production
+  PORT: "3000"
+  LOG_LEVEL: info
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+nodeSelector: {}
+tolerations: []
+
+affinity: {}
+
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClass: standard
+
+monitoring:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+  grafana:
+    enabled: true
+    adminPassword: admin
+    adminUser: admin
+    persistence:
+      enabled: true
+      size: 1Gi
+
+# Service dependencies
+postgresql:
+  enabled: false
+  host: postgres-service
+  port: 5432
+  database: rapidassist
+  username: rapidassist
+  password: rapidassist
+
+redis:
+  enabled: false
+  host: redis-service
+  port: 6379
+
+elasticsearch:
+  enabled: true
+  host: elasticsearch-service
+  port: 9200
+
+# Blue-green deployment
+blueGreen:
+  enabled: false
+  blueReplicas: 3
+  greenReplicas: 3
+  rollout:
+    strategy: canary
+    canaryReplicas: 1
+    canaryWeight: 10

@@ -1,0 +1,58 @@
+# Prometheus configuration for RapidAssist shared-frontend-libraries
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'rapid-assist'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # Application metrics
+  - job_name: 'shared-frontend-libraries'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['shared-frontend-libraries:3000', 'shared-frontend-libraries-canary:3000']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_label: 'pod'
+
+  # Node Exporter
+  - job_name: 'node-exporter'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_label: '__address__'
+      - pod_label: '__meta_kubernetes_pod_name'
+
+  # cAdvisor
+  - job_name: 'cadvisor'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_label: '__address__'
+
+  # Kube State Metrics
+  - job_name: 'kube-state-metrics'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_label: '__address__'
+
+# Rule files
+rule_files:
+  - 'alerting/*.yml'
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus
+    retention.time: 30d

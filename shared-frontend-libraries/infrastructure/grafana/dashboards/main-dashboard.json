@@ -1,0 +1,300 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"shared-frontend-libraries\"}[5m])",
+          "legendFormat": "none",
+          "refId": "Rate"
+        }
+      ],
+      "title": "Request Rate",
+      "type": "graph",
+      "yaxis": {
+        "format": "ops",
+        "label": "Requests / sec",
+        "min": 0
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "min": 0,
+          "show": true
+        }
+      ]
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, http_request_duration_seconds{job=\"shared-frontend-libraries\"})",
+          "legendFormat": "none",
+          "refId": "Latency"
+        }
+      ],
+      "title": "Response Time (p95)",
+      "type": "graph",
+      "yaxis": {
+        "format": "s",
+        "label": "Seconds",
+        "min": 0
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "min": 0,
+          "show": true
+        }
+      ]
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 12
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"shared-frontend-libraries\",status=~\"5..\"}[5m]))",
+          "legendFormat": "none",
+          "refId": "Errors"
+        }
+      ],
+      "title": "Error Rate",
+      "type": "graph",
+      "yaxis": {
+        "format": "ops",
+        "label": "Errors / sec",
+        "min": 0
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "min": 0,
+          "show": true
+        }
+      ]
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 20
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum(http_requests_total{job=\"shared-frontend-libraries\"})",
+          "legendFormat": "none",
+          "refId": "Total Requests"
+        }
+      ],
+      "title": "Total Requests",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 12,
+        "y": 20
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "sum(increase(http_requests_total{job=\"shared-frontend-libraries\",status=~\"5..\"}[5m]))",
+          "legendFormat": "none",
+          "refId": "Total Errors"
+        }
+      ],
+      "title": "Total Errors (5m)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, http_request_duration_seconds{job=\"shared-frontend-libraries\"})",
+          "legendFormat": "none",
+          "refId": "Median Latency"
+        }
+      ],
+      "title": "Median Response Time",
+      "type": "gauge",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "max": 5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 2},
+              {"color": "yellow", "value": 1},
+              {"color": "green", "value": 0.5}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 24,
+        "y": 0
+      },
+      "id": 7,
+      "targets": [
+        {
+          "expr": "sum(container_memory_usage_bytes{namespace=\"rapid-assist\",pod=~\"shared-frontend-libraries-.*\",container=\"app\"}) / sum(container_spec_memory_limit_bytes{namespace=\"rapid-assist\",pod=~\"shared-frontend-libraries-.*\",container=\"app\"}) * 100",
+          "legendFormat": "percent",
+          "refId": "Memory"
+        }
+      ],
+      "title": "Memory Usage",
+      "type": "gauge",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": 60},
+              {"color": "yellow", "value": 80},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 8,
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"rapid-assist\",pod=~\"shared-frontend-libraries-.*\",container=\"app\"}[5m])) * 100",
+          "legendFormat": "percent",
+          "refId": "CPU"
+        }
+      ],
+      "title": "CPU Usage",
+      "type": "gauge",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": 60},
+              {"color": "yellow", "value": 80},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 9,
+      "targets": [
+        {
+          "expr": "up{job=\"shared-frontend-libraries\"}",
+          "legendFormat": "none",
+          "refId": "Health"
+        }
+      ],
+      "title": "Application Health",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "id": 10,
+      "targets": [
+        {
+          "expr": "up{job=\"kube-state-metrics\"}",
+          "legendFormat": "none",
+          "refId": "K8s Pods"
+        }
+      ],
+      "title": "K8s Pods",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 16,
+  "version": 1,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["30s", "1m", "5m", "15m", "30m", "1h", "6h", "12h", "24h"]
+  },
+  "timezone": "",
+  "title": "RapidAssist - Frontend Libraries",
+  "uid": "frontend-libraries-dashboard",
+  "tags": ["frontend", "components", "rapidassist"]
+}

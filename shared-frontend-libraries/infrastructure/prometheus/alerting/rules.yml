@@ -1,0 +1,144 @@
+# Alerting rules for shared-frontend-libraries
+
+groups:
+  - name: application
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{job="shared-frontend-libraries",status=~"5.."}[5m])
+            /
+            rate(http_requests_total{job="shared-frontend-libraries"}[5m])
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          team: frontend
+
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            rate(http_requests_total{job="shared-frontend-libraries",status=~"5.."}[5m])
+            /
+            rate(http_requests_total{job="shared-frontend-libraries"}[5m])
+          ) > 0.15
+        for: 5m
+        labels:
+          severity: critical
+          team: frontend
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, http_request_duration_seconds{job="shared-frontend-libraries"})
+          > 1
+        for: 10m
+        labels:
+          severity: warning
+          team: frontend
+
+      - alert: CriticalLatency
+        expr: |
+          histogram_quantile(0.95, http_request_duration_seconds{job="shared-frontend-libraries"})
+          > 2
+        for: 5m
+        labels:
+          severity: critical
+          team: frontend
+
+      - alert: PodNotReady
+        expr: |
+          kube_pod_status_phase{namespace="rapid-assist",pod=~"shared-frontend-libraries-.*"} != Running
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+
+      - alert: PodCrashLooping
+        expr: |
+          rate(kube_pod_status_phase{namespace="rapid-assist",pod=~"shared-frontend-libraries-.*",phase="Failed"}[5m]) > 0
+        for: 10m
+        labels:
+          severity: critical
+          team: platform
+
+      - alert: HighMemoryUsage
+        expr: |
+          container_memory_usage_bytes{namespace="rapid-assist",container="app",pod=~"shared-frontend-libraries-.*"}
+          / container_spec_memory_limit_bytes{namespace="rapid-assist",container="app",pod=~"shared-frontend-libraries-.*"}
+          > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          container_memory_usage_bytes{namespace="rapid-assist",container="app",pod=~"shared-frontend-libraries-.*"}
+          / container_spec_memory_limit_bytes{namespace="rapid-assist",container="app",pod=~"shared-frontend-libraries-.*"}
+          > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+
+      - alert: HighCPUUsage
+        expr: |
+          rate(container_cpu_usage_seconds_total{namespace="rapid-assist",container="app",pod=~"shared-frontend-libraries-.*"}[5m])
+          > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+
+  - name: platform
+    rules:
+      - alert: NodeDown
+        expr: up{job="node-exporter"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+
+      - alert: HighNodeCPU
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode!="idle"}[5m]) * 100))
+          > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+
+      - alert: HighNodeMemory
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes{type!="cach","type!="buff"} / node_memory_MemTotal_bytes) * 100)
+          > 90
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100
+          < 20
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+
+  - name: business
+    rules:
+      - alert: CanaryDeploymentFailed
+        expr: |
+          (
+            rate(http_requests_total{job="shared-frontend-libraries-canary",status=~"5.."}[5m])
+            /
+            rate(http_requests_total{job="shared-frontend-libraries-canary"}[5m])
+          ) > 0.2
+          and
+          rate(http_requests_total{job="shared-frontend-libraries-canary",status=~"5.."}[5m])
+          > rate(http_requests_total{job="shared-frontend-libraries",status=~"5.."}[5m])
+        for: 10m
+        labels:
+          severity: critical
+          team: business

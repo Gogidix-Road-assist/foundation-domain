@@ -1,0 +1,9 @@
+// Favicon exports
+// In production, these would be actual PNG/ICO files
+// For now, we provide a data URI placeholder
+
+export const FAVICON_16 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSI0IiBmaWxsPSIjEwQjk4MSIvPgogIDxwYXRoIGQ9Ik00IDhMOCA0TDEyIDhMMTAgMTJMNiAxMkw0IDhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=';
+
+export const FAVICON_32 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI4IiBmaWxsPSIjMTBCOTgxIi8+CiAgPHBhdGggZD0iTTggMTZMMTYgOEwyNCAxNkwyMCAyNEwxMiAyNEw4IDE2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+
+// Favicon ICO would be generated in build process
