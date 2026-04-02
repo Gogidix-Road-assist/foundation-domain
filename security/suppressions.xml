@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions>
+    <!-- False positives and acceptable risks -->
+    <suppress>
+        <notes>
+            <![CDATA[
+            False positive - Spring Boot Actuator endpoints are intentionally exposed
+            ]]>
+        </notes>
+        <gav regex="^org.springframework.boot:spring-boot-starter-actuator.*"/>
+        <cve>CVE-2023-1234</cve>
+    </suppress>
+</suppressions>

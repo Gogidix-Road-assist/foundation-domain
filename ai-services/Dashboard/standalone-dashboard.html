@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Services Monitoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .status-healthy { background: #22c55e; }
+        .status-degraded { background: #eab308; }
+        .status-down { background: #ef4444; }
+        .card { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .sidebar { width: 250px; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="sidebar fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-50">
+        <div class="p-4 border-b border-gray-200">
+            <h1 class="text-lg font-bold text-gray-900 flex items-center">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-2">
+                    <span class="text-white text-sm font-bold">AI</span>
+                </div>
+                AI Services
+            </h1>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="#" class="flex items-center px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a>
+            <a href="#services" class="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10 5 10 5v10"/></svg>
+                Services
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">AI Services Dashboard</h1>
+                <p class="text-sm text-gray-500">Monitoring all 27 AI services</p>
+            </div>
+            <div class="flex items-center">
+                <span class="flex items-center text-sm text-gray-500" id="connectionStatus">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    Live
+                </span>
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="metricsGrid">
+            <div class="card bg-white rounded-xl p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Services</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">27</p>
+                    </div>
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white rounded-xl p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500">Healthy</p>
+                        <p class="text-2xl font-bold text-green-600 mt-1" id="healthyCount">25</p>
+                    </div>
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white rounded-xl p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500">Degraded</p>
+                        <p class="text-2xl font-bold text-yellow-600 mt-1" id="degradedCount">1</p>
+                    </div>
+                    <div class="p-2 bg-yellow-100 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-white rounded-xl p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500">Down</p>
+                        <p class="text-2xl font-bold text-red-600 mt-1" id="downCount">1</p>
+                    </div>
+                    <div class="p-2 bg-red-100 rounded-lg">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">All Services</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="servicesGrid">
+            <!-- Services will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Service Detail Modal -->
+    <div id="serviceModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900" id="modalTitle">Service Details</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // AI Services Data
+        const services = [
+            // Core AI Services (13)
+            { id: 'ai-leads-generator-service', name: 'AI Leads Generator', category: 'core', port: 8081, status: 'healthy', responseTime: 120, cpu: 45, memory: 512 },
+            { id: 'ai-content-generator-service', name: 'AI Content Generator', category: 'core', port: 8082, status: 'healthy', responseTime: 450, cpu: 62, memory: 768 },
+            { id: 'ai-document-analyzer-service', name: 'AI Document Analyzer', category: 'core', port: 8083, status: 'healthy', responseTime: 280, cpu: 55, memory: 640 },
+            { id: 'ai-recommendation-engine-service', name: 'AI Recommendation Engine', category: 'core', port: 8084, status: 'healthy', responseTime: 85, cpu: 72, memory: 1024 },
+            { id: 'ai-chatbot-service', name: 'AI Chatbot', category: 'core', port: 8085, status: 'healthy', responseTime: 180, cpu: 58, memory: 896 },
+            { id: 'ai-image-recognition-service', name: 'AI Image Recognition', category: 'core', port: 8086, status: 'healthy', responseTime: 520, cpu: 78, memory: 1536 },
+            { id: 'ai-speech-recognition-service', name: 'AI Speech Recognition', category: 'core', port: 8087, status: 'degraded', responseTime: 680, cpu: 85, memory: 1280 },
+            { id: 'ai-data-prediction-service', name: 'AI Data Prediction', category: 'core', port: 8088, status: 'healthy', responseTime: 340, cpu: 52, memory: 724 },
+            { id: 'ai-sentiment-analysis-service', name: 'AI Sentiment Analysis', category: 'core', port: 8089, status: 'healthy', responseTime: 95, cpu: 48, memory: 580 },
+            { id: 'ai-translation-service', name: 'AI Translation', category: 'core', port: 8090, status: 'healthy', responseTime: 155, cpu: 54, memory: 680 },
+            { id: 'ai-anomaly-detection-service', name: 'AI Anomaly Detection', category: 'core', port: 8091, status: 'healthy', responseTime: 220, cpu: 61, memory: 720 },
+            { id: 'ai-text-summarization-service', name: 'AI Text Summarization', category: 'core', port: 8092, status: 'healthy', responseTime: 380, cpu: 56, memory: 820 },
+            { id: 'ai-voice-assistant-service', name: 'AI Voice Assistant', category: 'core', port: 8093, status: 'healthy', responseTime: 420, cpu: 65, memory: 940 },
+            // Business Intelligence (7)
+            { id: 'ai-training-ml-service', name: 'AI Training ML', category: 'business-intelligence', port: 8094, status: 'healthy', responseTime: 2500, cpu: 88, memory: 2048 },
+            { id: 'analytics-service', name: 'Analytics Service', category: 'business-intelligence', port: 8095, status: 'healthy', responseTime: 110, cpu: 42, memory: 896 },
+            { id: 'customer-behaviour-analytics-service', name: 'Customer Behaviour Analytics', category: 'business-intelligence', port: 8096, status: 'healthy', responseTime: 195, cpu: 51, memory: 760 },
+            { id: 'data-analytics-service', name: 'Data Analytics', category: 'business-intelligence', port: 8097, status: 'healthy', responseTime: 280, cpu: 59, memory: 920 },
+            { id: 'predictive-maintenance-service', name: 'Predictive Maintenance', category: 'business-intelligence', port: 8098, status: 'healthy', responseTime: 320, cpu: 47, memory: 680 },
+            { id: 'sentiment-analysis-service', name: 'Sentiment Analysis (Legacy)', category: 'business-intelligence', port: 8099, status: 'down', responseTime: 0, cpu: 0, memory: 0 },
+            { id: 'vendors-product-listing-ai-service', name: 'Vendors Product Listing AI', category: 'business-intelligence', port: 8100, status: 'healthy', responseTime: 240, cpu: 53, memory: 720 },
+            // Business Operations (7)
+            { id: 'customer-support-chatbot-service', name: 'Customer Support Chatbot', category: 'business-operations', port: 8101, status: 'healthy', responseTime: 135, cpu: 55, memory: 820 },
+            { id: 'document-intelligence-service', name: 'Document Intelligence', category: 'business-operations', port: 8102, status: 'healthy', responseTime: 410, cpu: 67, memory: 1150 },
+            { id: 'dynamic-pricing-service', name: 'Dynamic Pricing', category: 'business-operations', port: 8103, status: 'healthy', responseTime: 95, cpu: 44, memory: 650 },
+            { id: 'fraud-detection-service', name: 'Fraud Detection', category: 'business-operations', port: 8104, status: 'healthy', responseTime: 45, cpu: 38, memory: 580 },
+            { id: 'intelligent-dispatch-service', name: 'Intelligent Dispatch', category: 'business-operations', port: 8105, status: 'healthy', responseTime: 185, cpu: 50, memory: 740 },
+            { id: 'recommendation-engine-service', name: 'Recommendation Engine', category: 'business-operations', port: 8106, status: 'healthy', responseTime: 78, cpu: 48, memory: 950 },
+            { id: 'route-optimization-service', name: 'Route Optimization', category: 'business-operations', port: 8107, status: 'healthy', responseTime: 265, cpu: 57, memory: 810 }
+        ];
+
+        // Render services
+        function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            let healthyCount = 0, degradedCount = 0, downCount = 0;
+
+            grid.innerHTML = services.map(service => {
+                const statusClass = service.status === 'healthy' ? 'bg-green-500' :
+                                    service.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500';
+                const statusText = service.status.charAt(0).toUpperCase() + service.status.slice(1);
+                const cpuColor = service.cpu > 80 ? 'bg-red-500' : service.cpu > 60 ? 'bg-yellow-500' : 'bg-green-500';
+                const memoryPercent = Math.min((service.memory / 2048) * 100, 100);
+
+                // Count statuses
+                if (service.status === 'healthy') healthyCount++;
+                else if (service.status === 'degraded') degradedCount++;
+                else downCount++;
+
+                return `
+                    <div class="card bg-white rounded-xl p-4 hover:shadow-lg transition-shadow cursor-pointer" onclick="showServiceDetails('${service.id}')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full ${statusClass} mr-2"></div>
+                                <span class="text-sm font-medium text-gray-900">${service.name}</span>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full ${
+                                service.status === 'healthy' ? 'bg-green-100 text-green-800' :
+                                service.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }">${statusText}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">${service.id}</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
+                            <div>⚡ ${service.responseTime}ms</div>
+                            <div>💻 ${service.cpu}% CPU</div>
+                            <div>📦 ${service.memory}MB</div>
+                            <div>🔌 Port ${service.port}</div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                <span>CPU</span>
+                                <span>${service.cpu}%</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full ${cpuColor}" style="width: ${service.cpu}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mb-1 mt-2">
+                                <span>Memory</span>
+                                <span>${service.memory}MB</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500" style="width: ${memoryPercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update counts
+            document.getElementById('healthyCount').textContent = healthyCount;
+            document.getElementById('degradedCount').textContent = degradedCount;
+            document.getElementById('downCount').textContent = downCount;
+        }
+
+        // Show service details in modal
+        function showServiceDetails(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (!service) return;
+
+            document.getElementById('modalTitle').textContent = service.name;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Status</p>
+                            <p class="font-semibold ${
+                                service.status === 'healthy' ? 'text-green-600' :
+                                service.status === 'degraded' ? 'text-yellow-600' :
+                                'text-red-600'
+                            }">${service.status.toUpperCase()}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Port</p>
+                            <p class="font-semibold">${service.port}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Category</p>
+                            <p class="font-semibold">${service.category.replace('-', ' ')}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Response Time</p>
+                            <p class="font-semibold">${service.responseTime}ms</p>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="font-semibold text-gray-900 mb-2">Metrics</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-500">CPU Usage</p>
+                                <p class="font-semibold">${service.cpu}%</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Memory Usage</p>
+                                <p class="font-semibold">${service.memory}MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4 mt-4">
+                        <a href="http://localhost:${service.port}/actuator/health" target="_blank"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                            View Health Endpoint
+                        </a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('serviceModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('serviceModal').classList.add('hidden');
+        }
+
+        // Close modal on background click
+        document.getElementById('serviceModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', renderServices);
+    </script>
+</body>
+</html>

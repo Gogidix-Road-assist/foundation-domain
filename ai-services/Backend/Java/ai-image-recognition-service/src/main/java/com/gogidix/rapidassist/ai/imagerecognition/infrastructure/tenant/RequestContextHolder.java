@@ -1,0 +1,72 @@
+package com.gogidix.rapidassist.ai.imagerecognition.infrastructure.tenant;
+
+import java.util.Optional;
+
+/**
+ * ThreadLocal holder for TenantContext.
+ * Context is set by TenantInterceptor and cleared after request completes.
+ */
+public final class RequestContextHolder {
+
+    private static final ThreadLocal<TenantContext> CONTEXT = new ThreadLocal<>();
+
+    private RequestContextHolder() {
+    }
+
+    /**
+     * Set the context for the current thread.
+     * Called by TenantInterceptor.
+     */
+    public static void set(TenantContext context) {
+        CONTEXT.set(context);
+    }
+
+    /**
+     * Get the context for the current thread.
+     * Returns Optional.empty() if not set (should NOT happen in normal flow).
+     */
+    public static Optional<TenantContext> get() {
+        return Optional.ofNullable(CONTEXT.get());
+    }
+
+    /**
+     * Get the context or throw if not set.
+     * Use this when context is required.
+     */
+    public static TenantContext require() {
+        return get().orElseThrow(() ->
+                new IllegalStateException("TenantContext not set. TenantInterceptor must run first."));
+    }
+
+    /**
+     * Clear the context for the current thread.
+     * Called after request completes.
+     */
+    public static void clear() {
+        CONTEXT.remove();
+    }
+
+    /**
+     * Get tenantId from current context.
+     * Convenience method.
+     */
+    public static String getTenantId() {
+        return require().getTenantId();
+    }
+
+    /**
+     * Get userId from current context.
+     * Convenience method.
+     */
+    public static Optional<String> getUserId() {
+        return get().flatMap(TenantContext::getUserId);
+    }
+
+    /**
+     * Get correlationId from current context.
+     * Convenience method.
+     */
+    public static String getCorrelationId() {
+        return require().getCorrelationId();
+    }
+}

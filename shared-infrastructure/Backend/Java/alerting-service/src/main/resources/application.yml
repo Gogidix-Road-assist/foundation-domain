@@ -1,0 +1,23 @@
+server:
+  port: 0
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+  alerting:
+    rules-retention: ${GOGIDIX_ALERTING_RULES_RETENTION:365d}
+    events-retention: ${GOGIDIX_ALERTING_EVENTS_RETENTION:90d}
+    mongo-enabled: ${GOGIDIX_ALERTING_MONGO_ENABLED:false}
+
+spring:
+  data:
+    mongodb:
+      uri: ${GOGIDIX_ALERTING_MONGO_URI:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

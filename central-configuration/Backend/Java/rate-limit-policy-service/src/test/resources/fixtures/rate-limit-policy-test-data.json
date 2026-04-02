@@ -1,0 +1,59 @@
+{
+  "tenantId": "test-tenant",
+  "environment": "development",
+  "namespace": "test-fixtures",
+  "rateLimitPolicies": [
+    {
+      "policyId": "rl-api-global-100",
+      "policyName": "Global API Rate Limit",
+      "resourceType": "API",
+      "resourceIdentifier": "/api/*",
+      "limit": 100,
+      "windowSeconds": 60,
+      "algorithm": "TOKEN_BUCKET",
+      "scope": "TENANT",
+      "priority": 1,
+      "enabled": true,
+      "description": "Global rate limit for all API endpoints"
+    },
+    {
+      "policyId": "rl-auth-strict-5",
+      "policyName": "Authentication Rate Limit",
+      "resourceType": "API",
+      "resourceIdentifier": "/api/auth/*",
+      "limit": 5,
+      "windowSeconds": 60,
+      "algorithm": "SLIDING_WINDOW",
+      "scope": "USER",
+      "priority": 10,
+      "enabled": true,
+      "description": "Strict rate limit for authentication endpoints"
+    },
+    {
+      "policyId": "rl-webhook-1000",
+      "policyName": "Webhook Rate Limit",
+      "resourceType": "WEBHOOK",
+      "resourceIdentifier": "webhook-receiver",
+      "limit": 1000,
+      "windowSeconds": 3600,
+      "algorithm": "FIXED_WINDOW",
+      "scope": "TENANT",
+      "priority": 5,
+      "enabled": true,
+      "description": "Hourly webhook processing limit"
+    },
+    {
+      "policyId": "rl-data-export-10",
+      "policyName": "Data Export Rate Limit",
+      "resourceType": "TASK",
+      "resourceIdentifier": "data-export-job",
+      "limit": 10,
+      "windowSeconds": 86400,
+      "algorithm": "TOKEN_BUCKET",
+      "scope": "USER",
+      "priority": 8,
+      "enabled": true,
+      "description": "Daily data export job limit per user"
+    }
+  ]
+}

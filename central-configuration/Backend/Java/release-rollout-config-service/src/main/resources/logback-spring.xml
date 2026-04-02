@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProfile name="!prod">
+        <!-- Development Configuration -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg [tenantId=%X{tenantId}][traceId=%X{traceId},spanId=%X{spanId}]%n</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="com.gogidix.rapidassist" level="DEBUG"/>
+        <logger name="org.springframework.data.mongodb" level="DEBUG"/>
+        <logger name="org.springframework.web" level="DEBUG"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <!-- Production Configuration -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg [tenantId=%X{tenantId}][traceId=%X{traceId},spanId=%X{spanId}]%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- JSON logging for production (optional) -->
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <level>level</level>
+                    <logger>logger</logger>
+                    <message>message</message>
+                    <stackTrace>stackTrace</stackTrace>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <logger name="com.gogidix.rapidassist" level="INFO"/>
+        <logger name="org.springframework.data.mongodb" level="WARN"/>
+        <logger name="org.springframework.web" level="WARN"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

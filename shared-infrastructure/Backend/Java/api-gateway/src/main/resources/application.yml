@@ -1,0 +1,93 @@
+server:
+  port: ${SERVER_PORT:8304}
+
+gogidix:
+  gateway:
+    correlation-id-header: ${GOGIDIX_CORRELATION_ID_HEADER:X-Correlation-Id}
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+
+spring:
+  application:
+    name: api-gateway
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      database: ${MONGODB_DATABASE:rapid_assist_gateway}
+
+  cloud:
+    gateway:
+      routes:
+        # Management Domain Routes
+        - id: management-domain
+          uri: ${GOGIDIX_MANAGEMENT_DOMAIN_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/management/**
+
+        # Business Domain - Marketplace Routes
+        - id: vendor-service
+          uri: ${GOGIDIX_VENDOR_SERVICE_URL:http://localhost:8095}
+          predicates:
+            - Path=/api/vendor/**
+          filters:
+            - StripPrefix=1
+
+        - id: marketplace-service
+          uri: ${GOGIDIX_MARKETPLACE_SERVICE_URL:http://localhost:8091}
+          predicates:
+            - Path=/api/marketplace/**
+          filters:
+            - StripPrefix=1
+
+        - id: cart-service
+          uri: ${GOGIDIX_CART_SERVICE_URL:http://localhost:8093}
+          predicates:
+            - Path=/api/cart/**
+          filters:
+            - StripPrefix=1
+
+        - id: delivery-service
+          uri: ${GOGIDIX_DELIVERY_SERVICE_URL:http://localhost:8094}
+          predicates:
+            - Path=/api/delivery/**
+          filters:
+            - StripPrefix=1
+
+        - id: search-service
+          uri: ${GOGIDIX_SEARCH_SERVICE_URL:http://localhost:8091}
+          predicates:
+            - Path=/api/search/**
+          filters:
+            - StripPrefix=1
+
+        - id: reporting-service
+          uri: ${GOGIDIX_REPORTING_SERVICE_URL:http://localhost:8099}
+          predicates:
+            - Path=/api/reporting/**
+          filters:
+            - StripPrefix=1
+
+        # Health check routes
+        - id: health-check
+          uri: ${GOGIDIX_HEALTH_URL:http://localhost:8080}
+          predicates:
+            - Path=/health,/actuator/health
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.gogidix.rapidassist.api.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.data.mongodb: DEBUG
+
+# CORS Configuration (environment variable: ALLOWED_ORIGINS)
+# Example: ALLOWED_ORIGINS=http://localhost:3000,https://app.rapidassist.com
+allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}

@@ -1,0 +1,388 @@
+openapi: 3.0.3
+info:
+  title: Policy Configuration Service API
+  description: |
+    Policy Configuration Service for the Rapid Assist platform.
+    This service manages policy configurations including security, privacy,
+    business rules, compliance, rate limiting, and access control policies.
+  version: 1.0.0
+  contact:
+    name: Gogidix
+    email: support@gogidix.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://policy-configuration.gogidix.com/api/v1
+    description: Production server
+
+tags:
+  - name: Policies
+    description: Policy configuration operations
+  - name: Health
+    description: Health check operations
+
+paths:
+  /policies:
+    get:
+      tags:
+        - Policies
+      summary: List all policies
+      operationId: listPolicies
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Tenant ID for multi-tenancy
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/PolicyType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PolicyStatus'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPolicyResponse'
+    post:
+      tags:
+        - Policies
+      summary: Create a new policy
+      operationId: createPolicy
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePolicyRequest'
+      responses:
+        '201':
+          description: Policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+
+  /policies/{id}:
+    get:
+      tags:
+        - Policies
+      summary: Get a policy by ID
+      operationId: getPolicy
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '404':
+          description: Policy not found
+    put:
+      tags:
+        - Policies
+      summary: Update a policy
+      operationId: updatePolicy
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePolicyRequest'
+      responses:
+        '200':
+          description: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+    delete:
+      tags:
+        - Policies
+      summary: Delete a policy
+      operationId: deletePolicy
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Policy deleted successfully
+        '404':
+          description: Policy not found
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+components:
+  schemas:
+    PolicyType:
+      type: string
+      enum:
+        - SECURITY
+        - PRIVACY
+        - BUSINESS_RULE
+        - COMPLIANCE
+        - RATE_LIMIT
+        - ACCESS_CONTROL
+
+    PolicyStatus:
+      type: string
+      enum:
+        - DRAFT
+        - ACTIVE
+        - INACTIVE
+        - ARCHIVED
+
+    PolicyScope:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [GLOBAL, ENTITY_TYPE, SPECIFIC_ENTITIES, ATTRIBUTE_BASED]
+        entityTypes:
+          type: array
+          items:
+            type: string
+        entityIds:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+
+    PolicyConstraints:
+      type: object
+      properties:
+        maxRetries:
+          type: integer
+        timeoutMs:
+          type: integer
+        requireApproval:
+          type: boolean
+        requiredRoles:
+          type: array
+          items:
+            type: string
+
+    CreatePolicyRequest:
+      type: object
+      required:
+        - policyKey
+        - name
+        - type
+        - rules
+        - environment
+      properties:
+        policyKey:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/PolicyType'
+        rules:
+          type: object
+        scope:
+          $ref: '#/components/schemas/PolicyScope'
+        constraints:
+          $ref: '#/components/schemas/PolicyConstraints'
+        enforced:
+          type: boolean
+          default: true
+        priority:
+          type: integer
+          default: 0
+        environment:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    UpdatePolicyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: object
+        scope:
+          $ref: '#/components/schemas/PolicyScope'
+        constraints:
+          $ref: '#/components/schemas/PolicyConstraints'
+        enforced:
+          type: boolean
+        priority:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    PolicyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        policyKey:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/PolicyType'
+        scope:
+          $ref: '#/components/schemas/PolicyScope'
+        rules:
+          type: object
+        constraints:
+          $ref: '#/components/schemas/PolicyConstraints'
+        enforced:
+          type: boolean
+        priority:
+          type: integer
+        environment:
+          type: string
+        status:
+          $ref: '#/components/schemas/PolicyStatus'
+        tags:
+          type: array
+          items:
+            type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+
+    PagedPolicyResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyResponse'
+        currentPage:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+        path:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

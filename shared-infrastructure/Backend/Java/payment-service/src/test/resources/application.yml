@@ -1,0 +1,25 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test
+      database: test_payment
+  kafka:
+    bootstrap-servers: localhost:9092
+  cloud:
+    discovery:
+      enabled: false
+
+gogidix:
+  payment:
+    persistence:
+      type: mongodb
+    stripe:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

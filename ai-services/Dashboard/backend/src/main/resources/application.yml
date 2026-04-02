@@ -1,0 +1,119 @@
+# AI Services Dashboard - Backend Aggregation Service
+
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: ai-services-dashboard
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.gogidix.ai.dashboard: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Connection timeouts for health checks
+app:
+  health-check:
+    timeout: 5000
+    interval: 30000
+  services:
+    # All 27 AI Services with their ports
+    core:
+      - id: ai-leads-generator-service
+        name: AI Leads Generator
+        port: 8081
+      - id: ai-content-generator-service
+        name: AI Content Generator
+        port: 8082
+      - id: ai-document-analyzer-service
+        name: AI Document Analyzer
+        port: 8083
+      - id: ai-recommendation-engine-service
+        name: AI Recommendation Engine
+        port: 8084
+      - id: ai-chatbot-service
+        name: AI Chatbot
+        port: 8085
+      - id: ai-image-recognition-service
+        name: AI Image Recognition
+        port: 8086
+      - id: ai-speech-recognition-service
+        name: AI Speech Recognition
+        port: 8087
+      - id: ai-data-prediction-service
+        name: AI Data Prediction
+        port: 8088
+      - id: ai-sentiment-analysis-service
+        name: AI Sentiment Analysis
+        port: 8089
+      - id: ai-translation-service
+        name: AI Translation
+        port: 8090
+      - id: ai-anomaly-detection-service
+        name: AI Anomaly Detection
+        port: 8091
+      - id: ai-text-summarization-service
+        name: AI Text Summarization
+        port: 8092
+      - id: ai-voice-assistant-service
+        name: AI Voice Assistant
+        port: 8093
+    business-intelligence:
+      - id: ai-training-ml-service
+        name: AI Training ML
+        port: 8094
+      - id: analytics-service
+        name: Analytics Service
+        port: 8095
+      - id: customer-behaviour-analytics-service
+        name: Customer Behaviour Analytics
+        port: 8096
+      - id: data-analytics-service
+        name: Data Analytics
+        port: 8097
+      - id: predictive-maintenance-service
+        name: Predictive Maintenance
+        port: 8098
+      - id: sentiment-analysis-service
+        name: Sentiment Analysis (Legacy)
+        port: 8099
+      - id: vendors-product-listing-ai-service
+        name: Vendors Product Listing AI
+        port: 8100
+    business-operations:
+      - id: customer-support-chatbot-service
+        name: Customer Support Chatbot
+        port: 8101
+      - id: document-intelligence-service
+        name: Document Intelligence
+        port: 8102
+      - id: dynamic-pricing-service
+        name: Dynamic Pricing
+        port: 8103
+      - id: fraud-detection-service
+        name: Fraud Detection
+        port: 8104
+      - id: intelligent-dispatch-service
+        name: Intelligent Dispatch
+        port: 8105
+      - id: recommendation-engine-service
+        name: Recommendation Engine
+        port: 8106
+      - id: route-optimization-service
+        name: Route Optimization
+        port: 8107

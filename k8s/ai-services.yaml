@@ -1,0 +1,391 @@
+# Foundation-Domain AI Services Deployment
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-config
+  namespace: foundation
+data:
+  SPRING_PROFILES_ACTIVE: "kubernetes"
+  MONGODB_URL: "mongodb://admin:foundation123@mongodb:27017"
+  REDIS_URL: "redis://:foundation123@redis:6379"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-gateway
+  namespace: foundation
+  labels:
+    app: ai-gateway
+    domain: ai-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-gateway
+  template:
+    metadata:
+      labels:
+        app: ai-gateway
+        domain: ai-services
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: ai-gateway
+        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-gateway-service:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: MONGODB_URL
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: REDIS_URL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-gateway
+  namespace: foundation
+spec:
+  selector:
+    app: ai-gateway
+  ports:
+  - port: 8200
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-inference
+  namespace: foundation
+  labels:
+    app: ai-inference
+    domain: ai-services
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-inference
+  template:
+    metadata:
+      labels:
+        app: ai-inference
+        domain: ai-services
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: ai-inference
+        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-inference-service:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: MONGODB_URL
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-inference
+  namespace: foundation
+spec:
+  selector:
+    app: ai-inference
+  ports:
+  - port: 8201
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-model-management
+  namespace: foundation
+  labels:
+    app: ai-model-management
+    domain: ai-services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-model-management
+  template:
+    metadata:
+      labels:
+        app: ai-model-management
+        domain: ai-services
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: ai-model-management
+        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-model-management-service:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: MONGODB_URL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-model-management
+  namespace: foundation
+spec:
+  selector:
+    app: ai-model-management
+  ports:
+  - port: 8202
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-chatbot
+  namespace: foundation
+  labels:
+    app: ai-chatbot
+    domain: ai-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-chatbot
+  template:
+    metadata:
+      labels:
+        app: ai-chatbot
+        domain: ai-services
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: ai-chatbot
+        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-chatbot-service:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: MONGODB_URL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-chatbot
+  namespace: foundation
+spec:
+  selector:
+    app: ai-chatbot
+  ports:
+  - port: 8214
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-nlp
+  namespace: foundation
+  labels:
+    app: ai-nlp
+    domain: ai-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-nlp
+  template:
+    metadata:
+      labels:
+        app: ai-nlp
+        domain: ai-services
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: ai-nlp
+        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-nlp-processing-service:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: SPRING_PROFILES_ACTIVE
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-nlp
+  namespace: foundation
+spec:
+  selector:
+    app: ai-nlp
+  ports:
+  - port: 8210
+    targetPort: 8080

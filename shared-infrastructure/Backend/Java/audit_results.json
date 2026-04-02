@@ -1,0 +1,453 @@
+{
+  "access-control-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "alerting-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "anti-fraud-rules-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "anti-fraud-signals-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "api-gateway": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "api-keys-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "audit-correlation-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "billing-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "courier-adapter-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "currency-converter-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "data-privacy-consent-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "database-indexing-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "database-management-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": false,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 83.3
+  },
+  "event-audit-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "geo-location-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "idempotency-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "identity-access-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "identity-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "insurer-adapter-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "integration-adapters-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "logging-aggregation-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "maps-geocoding-adapter-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "metrics-telemetry-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "mfa-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "notification-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "onboarding-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "payment-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "payments-adapter-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "policy-engine-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "pricing-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "rate-limiting-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "reporting-read-model-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "request-routing-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "service-health-monitor-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "service-registry-discovery": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "session-token-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "template-messaging-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "tenant-org-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "user-profile-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "waf-policy-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  },
+  "webhook-delivery-service": {
+    "checks": {
+      "has_pom": true,
+      "has_openapi": true,
+      "has_global_exception": true,
+      "has_cors": true,
+      "has_dockerfile": true,
+      "v1_0_0": true
+    },
+    "compliance": 100.0
+  }
+}

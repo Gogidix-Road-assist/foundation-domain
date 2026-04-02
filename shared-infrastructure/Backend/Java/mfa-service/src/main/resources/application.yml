@@ -1,0 +1,41 @@
+server:
+  port: 0
+
+gogidix:
+  security:
+    supabase:
+      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
+      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+  mfa:
+    provider:
+      type: ${GOGIDIX_MFA_PROVIDER:comprehensive} # comprehensive or noop
+    totp:
+      issuer: ${GOGIDIX_MFA_ISSUER:Gogidix RapidAssist}
+      time-step-seconds: ${GOGIDIX_MFA_TOTP_TIMESTEP:30}
+      code-digits: ${GOGIDIX_MFA_CODE_DIGITS:6}
+      algorithm: ${GOGIDIX_MFA_ALGORITHM:HmacSHA1}
+    otp:
+      length: ${GOGIDIX_MFA_OTP_LENGTH:6}
+      expiration-seconds: ${GOGIDIX_MFA_OTP_EXPIRY:300}
+      max-attempts: ${GOGIDIX_MFA_MAX_ATTEMPTS:3}
+      sms-template: ${GOGIDIX_MFA_SMS_TEMPLATE:Your verification code is: {code}}
+      email-template: ${GOGIDIX_MFA_EMAIL_TEMPLATE:Your verification code is: {code}}
+    backup-codes:
+      count: ${GOGIDIX_MFA_BACKUP_COUNT:10}
+      code-length: ${GOGIDIX_MFA_BACKUP_LENGTH:8}
+      alphanumeric: ${GOGIDIX_MFA_BACKUP_ALPHANUMERIC:true}
+
+spring:
+  data:
+    mongodb:
+      uri: ${GOGIDIX_MONGODB_URI:mongodb://localhost:27017/rapidassist}
+      database: ${GOGIDIX_MFA_DB:mfa}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

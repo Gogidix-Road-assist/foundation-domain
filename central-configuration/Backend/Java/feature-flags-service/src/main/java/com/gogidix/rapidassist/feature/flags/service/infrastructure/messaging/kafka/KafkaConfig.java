@@ -1,0 +1,61 @@
+package com.gogidix.rapidassist.feature.flags.service.infrastructure.messaging.kafka;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Kafka configuration for event messaging.
+ *
+ * <p>Sets up Kafka producers for publishing domain events.
+ * Connection settings are auto-configured by Spring Boot.
+ */
+@EnableKafka
+@Configuration
+@Profile("!kafka-disabled")
+public class KafkaConfig {
+
+    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+    private String bootstrapServers;
+
+    // ========================================================================
+    // Producer Configuration
+    // ========================================================================
+
+    @Bean
+    public ProducerFactory<String, Object> producerFactory() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        config.put(ProducerConfig.ACKS_CONFIG, "all");
+        config.put(ProducerConfig.RETRIES_CONFIG, 3);
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, Object> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
+    // ========================================================================
+    // Topics Configuration
+    // ========================================================================
+
+    public static final String FEATURE_FLAG_EVENTS_TOPIC = "feature-flag.events";
+    public static final String FEATURE_FLAG_CHANGES_TOPIC = "feature-flag.changes";
+    public static final String FEATURE_FLAG_EVALUATIONS_TOPIC = "feature-flag.evaluations";
+}

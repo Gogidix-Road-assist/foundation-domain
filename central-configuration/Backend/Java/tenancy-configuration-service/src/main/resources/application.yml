@@ -1,0 +1,32 @@
+server:
+  port: 8106
+
+spring:
+  application:
+    name: tenancy-configuration-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: tenancy_configuration_db
+      auto-index-creation: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.gogidix.rapidassist.tenancy.configuration.service: INFO
+
+tenancy:
+  cache:
+    ttl-minutes: 30
+  default:
+    max-users-per-tenant: 1000

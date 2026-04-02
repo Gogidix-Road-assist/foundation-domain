@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: dynamic-routing-config-service
+
+  # MongoDB Test Configuration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: dynamic_routing_test
+      auto-index-creation: true
+
+  # Redis Test Configuration (disabled for tests)
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+# Logging
+logging:
+  level:
+    com.gogidix.rapidassist.dynamic.routing.config.service: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.data.redis: DEBUG
+
+# Server configuration (not used for tests)
+server:
+  port: 8081
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  # Disable Redis health check for tests (Redis is optional)
+  health:
+    redis:
+      enabled: false
+  # Don't fail the overall health check if individual indicators are down
+  status:
+    order: DOWN, DEGRADED, UP, UNKNOWN

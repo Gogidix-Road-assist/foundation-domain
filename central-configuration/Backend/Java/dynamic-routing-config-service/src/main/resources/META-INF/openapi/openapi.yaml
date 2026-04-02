@@ -1,0 +1,398 @@
+openapi: 3.0.1
+info:
+  title: Dynamic Routing Config Service API
+  description: Dynamic routing configuration management service for Rapid Assist SaaS platform
+  version: 1.0.0
+  contact:
+    name: Gogidix Platform Team
+    email: platform@gogidix.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://dynamic-routing-config-service.gogidix.com/api/v1
+    description: Production server
+
+security:
+  - bearer-jwt: []
+  - basic-auth: []
+
+tags:
+  - name: Routing Rules
+    description: Routing rule management operations
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /routing-rules:
+    post:
+      tags:
+        - Routing Rules
+      summary: Create a new routing rule
+      description: Creates a new routing rule for the specified tenant
+      operationId: createRoutingRule
+      security:
+        - bearer-jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoutingRuleRequest'
+      responses:
+        '201':
+          description: Routing rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingRule'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Routing rule already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Routing Rules
+      summary: List routing rules for tenant
+      description: Returns paginated list of routing rules for current tenant
+      operationId: listRoutingRules
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: environment
+          in: query
+          schema:
+            type: string
+        - name: active
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of routing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResponse'
+
+  /routing-rules/{ruleId}:
+    get:
+      tags:
+        - Routing Rules
+      summary: Get routing rule by ID
+      operationId: getRoutingRule
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Routing rule found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingRule'
+        '404':
+          description: Routing rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Routing Rules
+      summary: Update routing rule
+      operationId: updateRoutingRule
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoutingRuleRequest'
+      responses:
+        '200':
+          description: Routing rule updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingRule'
+        '404':
+          description: Routing rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Routing Rules
+      summary: Delete routing rule
+      operationId: deleteRoutingRule
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Routing rule deleted
+        '404':
+          description: Routing rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /actuator/health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Returns the health status of the service
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+components:
+  securitySchemes:
+    bearer-jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basic-auth:
+      type: http
+      scheme: basic
+
+  schemas:
+    RoutingRule:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        ruleName:
+          type: string
+        pattern:
+          $ref: '#/components/schemas/RoutePattern'
+        target:
+          $ref: '#/components/schemas/RouteTarget'
+        strategy:
+          type: string
+          enum: [ROUND_ROBIN, LEAST_CONNECTIONS, IP_HASH, HEADER_BASED, RANDOM]
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        config:
+          $ref: '#/components/schemas/RouteConfig'
+        priority:
+          type: integer
+        active:
+          type: boolean
+        environment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RoutePattern:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [PATH_PREFIX, PATH_REGEX, EXACT_PATH, WILDCARD]
+        value:
+          type: string
+        methods:
+          type: array
+          items:
+            type: string
+            enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+
+    RouteTarget:
+      type: object
+      properties:
+        type:
+          type: string
+        endpoint:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+
+    Condition:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [HEADER, QUERY_PARAM, PATH_VARIABLE, CUSTOM]
+        key:
+          type: string
+        operator:
+          type: string
+          enum: [equals, contains, matches, starts_with, ends_with]
+        value:
+          type: string
+
+    RouteConfig:
+      type: object
+      properties:
+        timeoutMs:
+          type: integer
+        retryAttempts:
+          type: integer
+        circuitBreakerEnabled:
+          type: boolean
+        circuitBreakerThreshold:
+          type: number
+        rateLimitEnabled:
+          type: boolean
+        rateLimitPerSecond:
+          type: integer
+
+    CreateRoutingRuleRequest:
+      type: object
+      required:
+        - tenantId
+        - ruleName
+        - pattern
+        - target
+        - environment
+      properties:
+        tenantId:
+          type: string
+        ruleName:
+          type: string
+        pattern:
+          $ref: '#/components/schemas/RoutePattern'
+        target:
+          $ref: '#/components/schemas/RouteTarget'
+        strategy:
+          type: string
+          enum: [ROUND_ROBIN, LEAST_CONNECTIONS, IP_HASH, HEADER_BASED, RANDOM]
+        priority:
+          type: integer
+        active:
+          type: boolean
+        environment:
+          type: string
+
+    UpdateRoutingRuleRequest:
+      type: object
+      properties:
+        target:
+          $ref: '#/components/schemas/RouteTarget'
+        priority:
+          type: integer
+        active:
+          type: boolean
+        reason:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        tenantId:
+          type: string
+        correlationId:
+          type: string
+
+    PagedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingRule'
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+        components:
+          type: object

@@ -1,0 +1,66 @@
+server:
+  port: 8103
+
+spring:
+  application:
+    name: policy-configuration-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: policy_configuration_db
+      auto-index-creation: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 5
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/rapidassist}
+
+# CORS Configuration
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080,http://localhost:4200}
+  allowed-methods: ${ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS,PATCH}
+  allowed-headers: ${ALLOWED_HEADERS:*}
+  allow-credentials: ${ALLOW_CREDENTIALS:true}
+  max-age: ${CORS_MAX_AGE:3600}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.gogidix.rapidassist.policy.configuration.service: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application-specific configuration
+policy:
+  cache:
+    ttl-minutes: ${POLICY_CACHE_TTL:15}
+
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  show-actuator: true
+
+# Info endpoint information
+info:
+  app:
+    name: ${spring.application.name}
+    description: Policy Configuration Service for Rapid Assist
+    version: 1.0.0

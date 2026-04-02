@@ -1,0 +1,431 @@
+openapi: 3.0.3
+info:
+  title: Country Localization Config Service API
+  description: |
+    Country Localization Configuration Service for managing country-specific settings including
+    locale, currency, date/time formats, address formats, phone formats, emergency services,
+    and legal requirements.
+  version: 1.0.0
+  contact:
+    name: Gogidix Rapid Assist
+    email: support@gogidix.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://country-localization.prod.gogidix.com/api/v1
+    description: Production server
+
+tags:
+  - name: Country Localizations
+    description: Operations for managing country localizations
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /country-localizations:
+    get:
+      tags: [Country Localizations]
+      summary: List all country localizations
+      operationId: listCountryLocalizations
+      parameters:
+        - name: activeOnly
+          in: query
+          schema:
+            type: boolean
+          description: Filter to active localizations only
+        - name: measurementSystem
+          in: query
+          schema:
+            type: string
+            enum: [METRIC, IMPERIAL, MIXED]
+          description: Filter by measurement system
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedCountryLocalizationResponse'
+    post:
+      tags: [Country Localizations]
+      summary: Create a new country localization
+      operationId: createCountryLocalization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCountryLocalizationRequest'
+      responses:
+        '201':
+          description: Localization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryLocalizationResponse'
+
+  /country-localizations/{countryCode}:
+    get:
+      tags: [Country Localizations]
+      summary: Get a country localization by country code
+      operationId: getCountryLocalization
+      parameters:
+        - name: countryCode
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ISO 3166-1 alpha-2 country code
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryLocalizationResponse'
+        '404':
+          description: Localization not found
+    put:
+      tags: [Country Localizations]
+      summary: Update a country localization
+      operationId: updateCountryLocalization
+      parameters:
+        - name: countryCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCountryLocalizationRequest'
+      responses:
+        '200':
+          description: Localization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryLocalizationResponse'
+    delete:
+      tags: [Country Localizations]
+      summary: Delete a country localization
+      operationId: deleteCountryLocalization
+      parameters:
+        - name: countryCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Localization deleted successfully
+        '400':
+          description: Cannot delete active localization
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+components:
+  schemas:
+    CountryLocalizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        countryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        countryName:
+          type: string
+        locale:
+          $ref: '#/components/schemas/LocaleConfig'
+        currency:
+          $ref: '#/components/schemas/CurrencyConfig'
+        dateTime:
+          $ref: '#/components/schemas/DateTimeConfig'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
+        phoneFormat:
+          $ref: '#/components/schemas/PhoneFormat'
+        emergencyServices:
+          $ref: '#/components/schemas/EmergencyServices'
+        legalRequirements:
+          $ref: '#/components/schemas/LegalRequirements'
+        measurementSystem:
+          type: string
+          enum: [METRIC, IMPERIAL, MIXED]
+        active:
+          type: boolean
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+
+    LocaleConfig:
+      type: object
+      properties:
+        languageCode:
+          type: string
+        regionCode:
+          type: string
+        variant:
+          type: string
+        numberFormat:
+          type: string
+        dateFormat:
+          type: string
+        timeFormat:
+          type: string
+        dateTimeFormat:
+          type: string
+
+    CurrencyConfig:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        symbol:
+          type: string
+        symbolPosition:
+          type: string
+          enum: [BEFORE, AFTER]
+        decimalPlaces:
+          type: integer
+        thousandsSeparator:
+          type: string
+        decimalSeparator:
+          type: string
+
+    DateTimeConfig:
+      type: object
+      properties:
+        timezone:
+          type: string
+        dateFormat:
+          type: string
+        timeFormat:
+          type: string
+        dateTimeFormat:
+          type: string
+        use24HourFormat:
+          type: boolean
+        firstDayOfWeek:
+          type: string
+        holidays:
+          type: array
+          items:
+            type: string
+        observeDST:
+          type: boolean
+
+    AddressFormat:
+      type: object
+      properties:
+        formatTemplate:
+          type: string
+        fieldOrder:
+          type: array
+          items:
+            type: string
+        postcodeBeforeCity:
+          type: boolean
+        stateLabel:
+          type: string
+        requireState:
+          type: boolean
+
+    PhoneFormat:
+      type: object
+      properties:
+        countryCode:
+          type: string
+        dialingCodeLength:
+          type: integer
+        numberLength:
+          type: integer
+        formatTemplate:
+          type: string
+        requireTrunkPrefix:
+          type: boolean
+        trunkPrefix:
+          type: string
+
+    EmergencyServices:
+      type: object
+      properties:
+        police:
+          type: string
+        ambulance:
+          type: string
+        fire:
+          type: string
+        nonEmergency:
+          type: string
+
+    LegalRequirements:
+      type: object
+      properties:
+        requireVAT:
+          type: boolean
+        vatRate:
+          type: string
+        requireDataConsent:
+          type: boolean
+        privacyPolicyVersion:
+          type: string
+        requireCookieConsent:
+          type: boolean
+        minimumAge:
+          type: string
+        gdprCountryCodes:
+          type: array
+          items:
+            type: string
+
+    CreateCountryLocalizationRequest:
+      type: object
+      required:
+        - countryCode
+        - countryName
+        - locale
+        - currency
+        - createdBy
+      properties:
+        countryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        countryName:
+          type: string
+        locale:
+          $ref: '#/components/schemas/LocaleConfig'
+        currency:
+          $ref: '#/components/schemas/CurrencyConfig'
+        dateTime:
+          $ref: '#/components/schemas/DateTimeConfig'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
+        phoneFormat:
+          $ref: '#/components/schemas/PhoneFormat'
+        emergencyServices:
+          $ref: '#/components/schemas/EmergencyServices'
+        legalRequirements:
+          $ref: '#/components/schemas/LegalRequirements'
+        measurementSystem:
+          type: string
+          enum: [METRIC, IMPERIAL, MIXED]
+        active:
+          type: boolean
+          default: true
+        createdBy:
+          type: string
+        reason:
+          type: string
+
+    UpdateCountryLocalizationRequest:
+      type: object
+      required:
+        - countryName
+        - locale
+        - currency
+        - updatedBy
+      properties:
+        countryName:
+          type: string
+        locale:
+          $ref: '#/components/schemas/LocaleConfig'
+        currency:
+          $ref: '#/components/schemas/CurrencyConfig'
+        dateTime:
+          $ref: '#/components/schemas/DateTimeConfig'
+        addressFormat:
+          $ref: '#/components/schemas/AddressFormat'
+        phoneFormat:
+          $ref: '#/components/schemas/PhoneFormat'
+        emergencyServices:
+          $ref: '#/components/schemas/EmergencyServices'
+        legalRequirements:
+          $ref: '#/components/schemas/LegalRequirements'
+        measurementSystem:
+          type: string
+          enum: [METRIC, IMPERIAL, MIXED]
+        active:
+          type: boolean
+        updatedBy:
+          type: string
+        reason:
+          type: string
+
+    PagedCountryLocalizationResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryLocalizationResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+        path:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
