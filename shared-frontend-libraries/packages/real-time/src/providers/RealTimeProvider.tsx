@@ -1,12 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   QueryClient,
   QueryClientProvider,
   useQuery,
-  useMutation,
 } from '@tanstack/react-query';
-import { WebSocketProvider } from './WebSocketProvider';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { WebSocketProvider, useWebSocketContext } from './WebSocketProvider';
 
 export interface RealTimeState {
   isConnected: boolean;
@@ -29,26 +27,24 @@ export const RealTimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     onlineUsers: new Map(),
   });
 
-  const { ws } = useWebSocket({
-    onMessage: useCallback((message) => {
-      if (message.type === 'users:update') {
-        const users = message.payload as any;
-        setState((prev) => ({
-          ...prev,
-          onlineUsers: new Map(
-            Object.entries(users).map(([id, data]: [string, any]) => [
-              id,
-              {
-                ...data,
-                status: data.status || prev.onlineUsers.get(id)?.status || 'offline',
-                lastSeen: Date.now(),
-              } as any,
-            ],
-          ])
-        ));
-      }
-    },
-  });
+  const onMessage = useCallback((message: any) => {
+    if (message.type === 'users:update') {
+      const users = message.payload;
+      setState((prev) => ({
+        ...prev,
+        onlineUsers: new Map(
+          Object.entries(users).map(([id, data]: [string, any]) => [
+            id,
+            {
+              ...data,
+              status: data.status || prev.onlineUsers.get(id)?.status || 'offline',
+              lastSeen: Date.now(),
+            },
+          ]),
+        ),
+      }));
+    }
+  }, []);
 
   const { data: notifications } = useQuery({
     queryKey: ['notifications'],
@@ -62,7 +58,14 @@ export const RealTimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <WebSocketProvider onMessage={onMessage}>
+        {children}
+      </WebSocketProvider>
     </QueryClientProvider>
   );
+};
+
+export const useRealTime = () => {
+  const { isConnected } = useWebSocketContext();
+  return { isConnected };
 };

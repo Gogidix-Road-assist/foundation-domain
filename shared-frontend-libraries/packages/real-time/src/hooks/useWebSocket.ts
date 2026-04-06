@@ -35,6 +35,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, setState] = useState<WebSocketState>({
     status: 'disconnected',
@@ -52,7 +53,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       error,
       connectionCount: state.connectionCount + 1,
     });
-  };
+  }, [state.connectionCount, options]);
 
   const connect = useCallback(() => {
     try {
@@ -90,7 +91,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       updateStatus('error', error instanceof Error ? error.message : 'Failed to connect');
       scheduleReconnect();
     }
-  }, [config.url, options.onMessage, options.onStatusChange, options.onConnect, options.onDisconnect]);
+  }, [config.url, updateStatus, scheduleReconnect, startHeartbeat, options]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
@@ -98,13 +99,13 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       wsRef.current = null;
       updateStatus('disconnected');
     }
-  }, [wsRef, options.onDisconnect]);
+  }, [updateStatus]);
 
   const send = useCallback((message: any) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     }
-  }, [wsRef]);
+  }, []);
 
   const scheduleReconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -124,9 +125,9 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
     };
 
     reconnectTimeoutRef.current = setTimeout(reconnect, 1000);
-  }, [config, config.reconnectInterval, config.maxReconnectAttempts, state.connectionCount, state.status, updateStatus]);
+  }, [config, state.connectionCount, updateStatus, connect]);
 
-  const startHeartbeat = (ws: WebSocket) => {
+  const startHeartbeat = useCallback((ws: WebSocket) => {
     if (config.heartbeatInterval) {
       const heartbeat = () => {
         if (ws.readyState === WebSocket.OPEN) {
@@ -135,20 +136,21 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
           } catch (e) {
             // Ignore heartbeat errors
           }
-        };
+        }
+      };
 
       heartbeatIntervalRef.current = setInterval(heartbeat, config.heartbeatInterval);
     }
-  };
+  }, [config.heartbeatInterval]);
 
-  const stopHeartbeat = () => {
+  const stopHeartbeat = useCallback(() => {
     if (heartbeatTimeoutRef.current) {
       clearInterval(heartbeatTimeoutRef.current);
     }
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
     }
-  };
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -159,7 +161,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [disconnect, stopHeartbeat, reconnectTimeoutRef]);
+  }, [disconnect, stopHeartbeat]);
 
   return {
     connect,

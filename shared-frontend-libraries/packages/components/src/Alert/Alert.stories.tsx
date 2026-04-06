@@ -102,7 +102,7 @@ export const AllSeverities: Story = {
 
 export const InlineAlert: Story = {
   args: {
-    severity: 'info",
+    severity: 'info',
     variant: 'outlined',
     children: 'Tip: Use keyboard shortcuts to navigate faster.',
   },

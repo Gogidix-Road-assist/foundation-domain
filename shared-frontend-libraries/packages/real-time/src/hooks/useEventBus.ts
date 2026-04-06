@@ -13,11 +13,11 @@ export const useEventBus = (options: UseEventBusOptions = {}) => {
     context.publish?.({ type: eventType || 'custom', data });
   }, [context.publish, eventType]);
 
-  const subscribe = useCallback((handler: (data: any) => {
+  const subscribe = useCallback((handler: (data: any) => void) => {
     return context.subscribe?.({ type: eventType || 'custom', handler });
   }, [context.subscribe, eventType]);
 
-  const unsubscribe = useCallback((handler: (data: any) => {
+  const unsubscribe = useCallback((handler: (data: any) => void) => {
     return context.unsubscribe?.({ type: eventType || 'custom', handler });
   }, [context.unsubscribe, eventType]);
 

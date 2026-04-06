@@ -25,18 +25,16 @@ import CarCrashIcon from '@mui/icons-material/CarCrash';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import AmbulanceIcon from '@mui/icons-material/Ambulance';
 import PoliceCarIcon from '@mui/icons-material/PoliceCar';
-import FireTruckIcon from '@mui/icons-material/LocalFireDepartment';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import PickupTruckIcon from '@mui/icons-material/PickupTruck';
 import TruckIcon from '@mui/icons-material/Truck';
 import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
-import AirportShuttleOutlined from AirportShuttleOutlinedIcon;
 import ElectricCarIcon from '@mui/icons-material/ElectricCar';
 import ElectricScooterIcon from '@mui/icons-material/ElectricScooter';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import SnowmobileIcon from '@mui/icons-material/AcUnit';
 import TwoWheelerOutlinedIcon from '@mui/icons-material/TwoWheelerOutlined';
-import TwoWheelerOutlined from TwoWheelerOutlinedIcon;
 
 export const VehicleIcons = {
   Car: DirectionsCarIcon,
@@ -65,11 +63,11 @@ export const VehicleIcons = {
   Ambulance: AmbulanceIcon,
   Medical: MedicalServicesIcon,
   Police: PoliceCarIcon,
-  FireTruck: FireTruckIcon,
+  FireTruck: LocalFireDepartmentIcon,
   Tow: LocalShippingOutlinedIcon,
   Pickup: PickupTruckIcon,
   HeavyTruck: TruckIcon,
-  Shuttle: AirportShuttleOutlined,
+  Shuttle: AirportShuttleOutlinedIcon,
   ElectricCar: ElectricCarIcon,
   ElectricScooter: ElectricScooterIcon,
   Bike: PedalBikeIcon,

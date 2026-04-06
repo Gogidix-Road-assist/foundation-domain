@@ -1,6 +1,7 @@
 {
   "name": "@shared-frontend-libraries/design-system",
   "version": "1.0.0",
+  "description": "Enterprise-grade design system for RapidAssist",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -25,20 +26,23 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mui/material": "^6.2.0",
-    "@mui/system": "^6.2.0",
     "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0"
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^6.2.0",
+    "@mui/system": "^6.2.0"
   },
   "devDependencies": {
+    "@mui/icons-material": "^6.0.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3",
     "vite": "^5.0.11",
-    "vite-plugin-dts": "^3.7.0",
-    "typescript": "^5.3.3"
+    "vite-plugin-dts": "^3.7.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "@emotion/react": "^11.11.4",
+    "@mui/material": "^6.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Grid, CardProps } from '@mui/material';
+import { Card, CardContent, Typography, Box, Grid, CardProps, LinearProgress } from '@mui/material';
 import { MANAGEMENT_COLORS } from '@shared-frontend-libraries/design-system';
 
 export interface KPIMetric {
@@ -62,7 +62,6 @@ export const KPICard: React.FC<KPICardProps> = ({ title, metrics, ...props }) =>
                     backgroundColor: getTrendColor(metric.change),
                   }}
                 />
-              </Box>
               </Box>
             </Grid>
           ))}

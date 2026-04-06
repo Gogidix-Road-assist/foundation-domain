@@ -4,7 +4,7 @@ import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import LocationOffIcon from '@mui/icons-material/LocationOff';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import DirectionsIcon from '@mui/icons-material/Directions';
+import DirectionIcon from '@mui/icons-material/Directions';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
@@ -18,7 +18,6 @@ import LayersIcon from '@mui/icons-material/Layers';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import ExitFullscreenIcon from '@mui/icons-material/ExitFullscreen';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import PlaceIcon from '@mui/icons-material/Place';
 import PinDropIcon from '@mui/icons-material/PinDrop';
@@ -29,7 +28,7 @@ import RouteIcon from '@mui/icons-material/Route';
 import TrafficIcon from '@mui/icons-material/Traffic';
 import TollIcon from '@mui/icons-material/Toll';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import GasStationIcon from '@mui/icons-material/LocalGasStation';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import HotelIcon from '@mui/icons-material/Hotel';
 import AtmIcon from '@mui/icons-material/Atm';
@@ -44,7 +43,7 @@ export const MapIcons = {
   LocationOff: LocationOffIcon,
   Navigation: NavigationIcon,
   MyLocation: MyLocationIcon,
-  Directions: DirectionsIcon,
+  Directions: DirectionIcon,
   DirectionsWalk: DirectionsWalkIcon,
   DirectionsCar: DirectionsCarIcon,
   DirectionsBike: DirectionsBikeIcon,
@@ -58,7 +57,7 @@ export const MapIcons = {
   ZoomIn: ZoomInIcon,
   ZoomOut: ZoomOutIcon,
   Fullscreen: FullscreenIcon,
-  ExitFullscreen: ExitFullscreenIcon,
+  ExitFullscreen: FullscreenIcon,
   CenterFocusStrong: CenterFocusStrongIcon,
   Place: PlaceIcon,
   PinDrop: PinDropIcon,
@@ -69,7 +68,7 @@ export const MapIcons = {
   Traffic: TrafficIcon,
   Toll: TollIcon,
   LocalParking: LocalParkingIcon,
-  GasStation: GasStationIcon,
+  GasStation: LocalGasStationIcon,
   Restaurant: RestaurantIcon,
   Hotel: HotelIcon,
   Atm: AtmIcon,

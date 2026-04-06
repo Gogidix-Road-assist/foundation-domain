@@ -1,11 +1,18 @@
+import { WebSocketStatus } from '../types/websocket.types';
+
 export interface ConnectionState {
   isConnected: boolean;
   isReconnecting: boolean;
+  connectionId?: string;
   lastConnectedAt?: Date;
 }
 
+export type ConnectionStateListener = (state: ConnectionState) => void;
+
 export class ConnectionManager {
-  private instance: ConnectionManager | null = null;
+  private static instance: ConnectionManager | null = null;
+  private connections: Map<string, WebSocket> = new Map();
+  private listeners: Set<ConnectionStateListener> = new Set();
 
   static getInstance(): ConnectionManager {
     if (!ConnectionManager.instance) {
@@ -14,12 +21,9 @@ export class ConnectionManager {
     return ConnectionManager.instance;
   }
 
-  private constructor() {
-    this.connections = new Map<string, any>();
-    this.listeners = new Set<(state: ConnectionState) => void>();
-  }
+  private constructor() {}
 
-  public connect(id: string, connection: any): void {
+  public connect(id: string, connection: WebSocket): void {
     this.connections.set(id, connection);
     this.notifyListeners({ id, isConnected: true, lastConnectedAt: new Date() });
   }
@@ -27,22 +31,19 @@ export class ConnectionManager {
   public disconnect(id: string): void {
     const connection = this.connections.get(id);
     if (connection) {
-      connection.close?.();
+      connection.close();
       this.connections.delete(id);
       this.notifyListeners({ id, isConnected: false });
     }
   }
 
-  public subscribe(listener: (state: ConnectionState) => void): () => void {
+  public subscribe(listener: ConnectionStateListener): () => void {
     this.listeners.add(listener);
-    // Send current state immediately
-    const currentState = this.getCurrentState();
-    Object.values(this.connections).forEach((_, conn) => {
-      listener(currentState);
-    });
+    this.notifyListeners(this.getCurrentState());
+    return () => this.unsubscribe(listener);
   }
 
-  public unsubscribe(listener: (state: ConnectionState) => void): () => void {
+  public unsubscribe(listener: ConnectionStateListener): void {
     this.listeners.delete(listener);
   }
 
@@ -51,22 +52,61 @@ export class ConnectionManager {
     if (connections.length === 0) {
       return { isConnected: false, isReconnecting: false };
     }
+
     const hasConnectedConnection = connections.some((conn) => {
       try {
-        return conn.readyState === 1 || conn.readyState === 'open';
+        return conn.readyState === WebSocket.OPEN || conn.readyState === 'open';
       } catch {
         return false;
       }
     });
+
+    const isConnecting = connections.some((conn) => {
+      try {
+        return conn.readyState === WebSocket.CONNECTING || conn.readyState === 'connecting';
+      } catch {
+        return false;
+      }
+    });
+
+    const latestConnection = connections.find((conn) => {
+      try {
+        return conn.readyState === WebSocket.OPEN || conn.readyState === 'open';
+      } catch {
+        return false;
+      }
+    });
+
     return {
       isConnected: hasConnectedConnection,
-      isReconnecting: false,
-      lastConnectedAt: undefined,
+      isReconnecting: isConnecting,
+      lastConnectedAt: (latestConnection as any)?.lastConnectedAt,
+      connectionId: (latestConnection as any)?.url,
     };
   }
 
+  public getConnectedCount(): number {
+    return Array.from(this.connections.values()).filter((conn) => {
+      const status = conn.readyState as WebSocketStatus;
+      return status === WebSocket.OPEN || status === 'open';
+    }).length;
+  }
+
   private notifyListeners(state: ConnectionState): void {
-    this.listeners.forEach((listener) => listener(state));
+    this.listeners.forEach((listener) => {
+      try {
+        listener(state);
+      } catch (error) {
+        console.error('Error notifying listener:', error);
+      }
+    });
+  }
+
+  public getConnectedIds(): string[] {
+    return Array.from(this.connections.keys()).filter((id) => {
+      const connection = this.connections.get(id);
+      return connection && (connection.readyState === WebSocket.OPEN || connection.readyState === 'open');
+    });
   }
 }
 

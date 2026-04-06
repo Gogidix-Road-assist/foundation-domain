@@ -2,15 +2,15 @@
   "name": "@shared-frontend-libraries/utils",
   "version": "1.0.0",
   "description": "Enterprise-grade utility functions for RapidAssist",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
     }
   },
@@ -27,38 +27,32 @@
     "build-storybook": "storybook build -p 6012"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@emotion/react": "^11.11.4",
     "@mui/material": "^6.2.0",
-    "@emotion/react": "^11.11.4"
-  },
-  "dependencies": {
-    "@shared-frontend-libraries/design-system": "workspace:*",
-    "@shared-frontend-libraries/components": "workspace:*",
-    "@shared-frontend-libraries/forms": "workspace:*",
-    "@shared-frontend-libraries/layouts": "workspace:*",
-    "@shared-frontend-libraries/data-display": "workspace:*",
-    "@shared-frontend-libraries/dashboards": "workspace:*",
-    "@shared-frontend-libraries/brand-assets": "workspace:*",
-    "@shared-frontend-libraries/real-time": "workspace:*"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@testing-library/react": "^14.2.0",
-    "@testing-library/user-event": "^14.5.1",
-    "@testing-library/jest-dom": "^6.1.4",
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite-plugin-dts": "^3.7.0",
-    "vitest": "^1.1.0",
-    "@vitest/ui": "^1.1.0",
-    "@vitest/coverage-v8": "^1.1.0",
+    "@mui/icons-material": "^6.5.0",
+    "@storybook/addon-essentials": "^8.0.0",
     "@storybook/react": "^8.0.0",
     "@storybook/react-vite": "^8.0.0",
-    "@storybook/addon-essentials": "^8.0.0",
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.2.0",
+    "@testing-library/user-event": "^14.5.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^1.1.0",
+    "@vitest/ui": "^1.1.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "typescript": "^5.3.3",
     "prettier": "^3.1.0",
-    "@mui/icons-material": "^5.14.19"
+    "typescript": "^5.3.3",
+    "vite-plugin-dts": "^3.7.0",
+    "vitest": "^1.1.0"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1"
   }
 }

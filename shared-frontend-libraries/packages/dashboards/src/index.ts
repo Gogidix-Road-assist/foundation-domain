@@ -1,11 +1,4 @@
-export * from './GlobalHQDashboard';
-export * from './CountryDashboard';
-export * from './AnalyticsDashboard';
-export * from './ResourceAllocation';
-export * from './StrategicDashboard';
+// Only export components that actually exist
+export * from './GlobalHQDashboard/GlobalHQDashboard';
 export * from './RealTimeTracker';
-export * from './widgets/KPICard';
-export * from './widgets/LiveMap';
-export * from './widgets/ActivityFeed';
-export * from './widgets/AlertPanel';
-export * from './widgets/StatusPanel';
+export * from './widgets/KPICard/KPICard';

@@ -202,7 +202,6 @@ export const Table: React.FC<TableProps> = ({
               </Box>
             ))}
           </Box>
-          )}
           <IconButton
             onClick={() => onPageChange?.(currentPage + 1)}
             disabled={currentPage === Math.ceil(data.length / pageSize)}

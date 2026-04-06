@@ -1,11 +1,11 @@
-export const get = async <T = (url: string, options?: RequestInit = {}): Promise => {
+export const get = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
-    method: options.method || 'GET',
+    method: options?.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...(options?.headers || {}),
     },
-    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+    ...(options?.body ? { body: JSON.stringify(options.body) } : {}),
   });
 
   if (!response.ok) {
@@ -15,15 +15,15 @@ export const get = async <T = (url: string, options?: RequestInit = {}): Promise
   return response.json();
 };
 
-export const post = async <T = (url: string, data: any, options?: RequestInit = {}): Promise<T> => {
+export const post = async <T>(url: string, data: any, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...(options?.headers || {}),
     },
     body: JSON.stringify(data),
-    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+    ...(options?.body ? { body: JSON.stringify(options.body) } : {}),
   });
 
   if (!response.ok) {
@@ -33,12 +33,12 @@ export const post = async <T = (url: string, data: any, options?: RequestInit = 
   return response.json();
 };
 
-export const put = async <T = (url: string, data: any, options?: RequestInit = {}): Promise<T> => {
+export const put = async <T>(url: string, data: any, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...(options?.headers || {}),
     },
     body: JSON.stringify(data),
   });
@@ -50,11 +50,11 @@ export const put = async <T = (url: string, data: any, options?: RequestInit = {
   return response.json();
 };
 
-export const del = async <T = (url: string, options?: RequestInit = {}): Promise => {
+export const del = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
     method: 'DELETE',
     headers: {
-      ...(options.headers || {}),
+      ...(options?.headers || {}),
     },
   });
 

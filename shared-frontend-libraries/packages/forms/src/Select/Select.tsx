@@ -58,6 +58,6 @@ export const FormSelect = React.forwardRef<HTMLDivElement, SelectProps>(
       )}
     </FormControl>
   );
-};
+});
 
 FormSelect.displayName = 'FormSelect';

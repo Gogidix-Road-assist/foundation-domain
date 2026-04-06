@@ -1,5 +1,3 @@
-export * from './Logo';
-export * from './Icon';
+// Only export components that actually exist
+export * from './Logo/BrandLogo';
 export * from './icons';
-export * from './Logo/variants';
-export * from './Logo/variants/favicon';
