@@ -1,5 +1,11 @@
 # Shared Frontend Libraries
 
+> **🟡 Status:** NOT PRODUCTION READY (40% Complete)
+>
+> **📋 Important:** Read [DOMAIN_STATUS.md](DOMAIN_STATUS.md) before starting work.
+> **🤖 For AI Agents:** See [AGENT_GUIDE.md](AGENT_GUIDE.md) for workflow guidance.
+> **✅ Quick Check:** Use [QUICK_CHECKLIST.md](QUICK_CHECKLIST.md) for tasks.
+
 Enterprise-grade shared component library for Rapid Assist applications.
 
 ## Overview
@@ -29,6 +35,15 @@ This library provides a comprehensive set of reusable UI components, layouts, an
 - TanStack Query 5.62.11
 - Framer Motion 12.2.0
 - Vite 5.2.0
+
+## Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|-----------|
+| [DOMAIN_STATUS.md](DOMAIN_STATUS.md) | Complete domain status, blockers, and roadmap | All developers & agents |
+| [AGENT_GUIDE.md](AGENT_GUIDE.md) | Workflow guide for AI agents working on this domain | AI Agents |
+| [QUICK_CHECKLIST.md](QUICK_CHECKLIST.md) | Quick reference checklist for production readiness | All developers & agents |
+| [Getting Started Guide](docs/getting-started.md) | How to use the library in your project | Application developers |
 
 ## Getting Started
 
