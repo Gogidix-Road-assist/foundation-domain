@@ -1,48 +1,27 @@
+# Node modules
+node_modules/
+*/node_modules/
+
 # Build outputs
-**/target/
-**/build/
+target/
+*/target/
+build/
+*/build/
+dist/
+*/dist/
+.classpath
+.project
+.settings/
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.iml
-.eclipse/
-.settings/
-.project
-.classpath
-
-# Logs
-*.log
-logs/
 
 # OS
 .DS_Store
+.DS_Store?
 Thumbs.db
-*~
 
-# Environment
-.env
-.env.local
-.env.*.local
-.railway.env
-.railway.env.local
-
-# Secrets
-*.key
-*.crt
-*.pem
-secrets/
-
-# Test coverage
-.jacoco/
-coverage/
-test-output/
-
-# Node modules
-**/node_modules/
-**/.next/
-
-# Local configs
-application-local.yml
-application-local.properties
-application-secret.yml
+# Logs
+*.log
