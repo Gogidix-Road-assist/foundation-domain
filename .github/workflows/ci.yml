@@ -1,50 +1,50 @@
 name: Foundation-Domain CI/CD
 on:
   push:
-  branches: [dev, staging/uat, production, hotfix]
-  paths:
-  - '**'
+    branches: [dev, staging/uat, production, hotfix]
+    paths:
+      - '**'
 jobs:
   build-and-test:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.head_ref }}
-      
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ runner.os }}-build"
-          
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
       - name: Build with Maven
-        run: mvn -B -DskipTests 2>&1
-      
+        run: mvn -B -DskipTests
+
       - name: Run tests
-        run: mvn test 2>&1
-      
+        run: mvn test
+
   deploy-staging:
     needs: build-and-test
     if: github.ref == 'refs/heads/dev'
-      runs-on: ubuntu-latest
-      steps:
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Staging
         run: |
           echo "Deploy to staging - placeholder"
-      
-      deploy-production:
+
+  deploy-production:
     needs: build-and-test
     if: github.ref == 'refs/heads/production'
-      runs-on: ubuntu-latest
-      steps:
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Production
         run: |
           echo "Deploy to production - placeholder"
