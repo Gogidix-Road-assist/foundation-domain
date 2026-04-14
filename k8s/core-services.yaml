@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/api-gateway:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/api-gateway:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8304
@@ -123,7 +123,7 @@ spec:
     spec:
       containers:
       - name: identity-service
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/identity-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/identity-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8316
@@ -199,7 +199,7 @@ spec:
     spec:
       containers:
       - name: notification-service
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/notification-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/notification-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8323
@@ -275,7 +275,7 @@ spec:
     spec:
       containers:
       - name: service-registry
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/service-registry-discovery:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/service-registry-discovery:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8761
@@ -347,7 +347,7 @@ spec:
     spec:
       containers:
       - name: rate-limiting-service
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/rate-limiting-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/rate-limiting-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

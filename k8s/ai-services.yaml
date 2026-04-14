@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: ai-gateway
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-gateway-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-gateway-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -117,7 +117,7 @@ spec:
     spec:
       containers:
       - name: ai-inference
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-inference-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-inference-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -193,7 +193,7 @@ spec:
     spec:
       containers:
       - name: ai-model-management
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-model-management-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-model-management-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -269,7 +269,7 @@ spec:
     spec:
       containers:
       - name: ai-chatbot
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-chatbot-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-chatbot-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -345,7 +345,7 @@ spec:
     spec:
       containers:
       - name: ai-nlp
-        image: ghcr.io/ggx-insurance-saas/Insurance-company-Saas/ai-nlp-processing-service:dev
+        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-nlp-processing-service:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
