@@ -1,0 +1,26 @@
+# =============================================================================
+# Access Control Service - Test Configuration
+# =============================================================================
+
+spring:
+  application:
+    name: access-control-service
+
+  # MongoDB Test Configuration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: rapidassist_test
+      auto-index-creation: true
+
+  # Redis Test Configuration
+  redis:
+    host: localhost
+    port: 6379
+    database: 1
+
+# Logging
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG

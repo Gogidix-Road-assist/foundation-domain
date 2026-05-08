@@ -1,0 +1,51 @@
+server:
+  port: 8097
+
+spring:
+  application:
+    name: mechanics-vendors-bridge-service
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# Cross-Domain Service URLs
+services:
+  mechanics:
+    inventory-service: http://localhost:8087
+    ordering-service: http://localhost:8086
+
+  vendors:
+    base-url: http://localhost:9010
+    catalog-service: http://localhost:9010/api/vendors
+    order-service: http://localhost:9010/api/orders
+
+# Auto-Reorder Configuration
+auto-reorder:
+  enabled: true
+  check-interval: 300000 # 5 minutes in milliseconds
+  low-stock-threshold: 10
+  default-reorder-quantity: 20
+  max-order-amount: 5000.00
+
+# Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      vendorsService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15000
+      mechanicsService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15000
+
+# Logging
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG

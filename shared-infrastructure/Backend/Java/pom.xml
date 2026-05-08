@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.gogidix.rapidassist.infrastructure</groupId>
+    <artifactId>shared-infrastructure</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Gogidix Shared Infrastructure Services</name>
+    <description>Parent POM for all shared infrastructure services</description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain</url>
+        </repository>
+    </distributionManagement>
+
+    <modules>
+        <module>access-control-service</module>
+        <module>alerting-service</module>
+        <module>api-gateway</module>
+        <module>api-keys-service</module>
+        <module>audit-correlation-service</module>
+        <module>database-indexing-service</module>
+        <module>database-management-service</module>
+        <module>event-audit-service</module>
+        <module>idempotency-service</module>
+        <module>identity-access-service</module>
+        <module>identity-service</module>
+        <module>integration-adapters-service</module>
+        <module>logging-aggregation-service</module>
+        <module>mechanics-gps-tracker-service</module>
+        <module>mechanics-insurance-bridge-service</module>
+        <module>mechanics-vendors-bridge-service</module>
+        <module>metrics-telemetry-service</module>
+        <module>mfa-service</module>
+        <module>rate-limiting-service</module>
+        <module>request-routing-service</module>
+        <module>service-health-monitor-service</module>
+        <module>service-registry-discovery</module>
+        <module>session-token-service</module>
+        <module>tenant-org-service</module>
+        <module>waf-policy-service</module>
+    </modules>
+</project>
