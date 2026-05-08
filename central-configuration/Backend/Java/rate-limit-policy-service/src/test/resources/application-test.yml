@@ -1,0 +1,63 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rate-limit-policy-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test_rate_limit_policy_service
+      auto-index-creation: true
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000ms
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:
+
+app:
+  security:
+    cors:
+      allowed-origins: http://localhost:3000,http://localhost:8080
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
+    users:
+      admin:
+        username: admin
+        password: admin123
+      reader:
+        username: reader
+        password: reader123
+      approver:
+        username: approver
+        password: approver123
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  # Disable Redis health check for tests (Redis is optional)
+  health:
+    redis:
+      enabled: false
+
+logging:
+  level:
+    com.gogidix.rapidassist.rate.limit.policy: DEBUG
+    org.springframework.security: DEBUG

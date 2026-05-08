@@ -1,0 +1,31 @@
+server:
+  port: 8105
+
+spring:
+  application:
+    name: release-rollout-config-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: release_rollout_db
+      auto-index-creation: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 7
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.gogidix.rapidassist.release.rollout.config.service: INFO
+
+rollout:
+  default:
+    batch-size: 10
+    batch-interval-minutes: 30

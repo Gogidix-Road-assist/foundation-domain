@@ -1,0 +1,32 @@
+server:
+  port: 8104
+
+spring:
+  application:
+    name: rate-limit-policy-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: rate_limit_policy_db
+      auto-index-creation: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 6
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.gogidix.rapidassist.rate.limit.policy.service: INFO
+
+rate-limit:
+  default:
+    requests-per-minute: 60
+  cache:
+    ttl-seconds: 60

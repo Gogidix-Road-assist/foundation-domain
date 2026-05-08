@@ -1,0 +1,342 @@
+openapi: 3.0.1
+info:
+  title: Config Service API
+  description: Centralized configuration management service for Rapid Assist SaaS platform
+  version: 1.0.0
+  contact:
+    name: Gogidix Platform Team
+    email: platform@gogidix.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://config-service.gogidix.com/api/v1
+    description: Production server
+
+security:
+  - bearer-jwt: []
+  - basic-auth: []
+
+tags:
+  - name: Configuration
+    description: Configuration management operations
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /configurations:
+    post:
+      tags:
+        - Configuration
+      summary: Create a new configuration
+      description: Creates a new configuration for the specified tenant
+      operationId: createConfiguration
+      security:
+        - bearer-jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConfigurationRequest'
+      responses:
+        '201':
+          description: Configuration created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Configuration already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Configuration
+      summary: List configurations for tenant
+      description: Returns paginated list of configurations for current tenant
+      operationId: listConfigurations
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: environment
+          in: query
+          schema:
+            type: string
+        - name: namespace
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of configurations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResponse'
+
+  /configurations/{tenantId}/{configKey}/{environment}/{namespace}:
+    get:
+      tags:
+        - Configuration
+      summary: Get configuration by natural key
+      operationId: getConfiguration
+      security:
+        - bearer-jwt: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: configKey
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: environment
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        '404':
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Configuration
+      summary: Update configuration
+      operationId: updateConfiguration
+      security:
+        - bearer-jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConfigurationRequest'
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        '404':
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Configuration
+      summary: Delete configuration
+      operationId: deleteConfiguration
+      security:
+        - bearer-jwt: []
+      responses:
+        '204':
+          description: Configuration deleted
+        '404':
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /actuator/health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Returns the health status of the service
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+components:
+  securitySchemes:
+    bearer-jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basic-auth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Configuration:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        configKey:
+          type: string
+        environment:
+          type: string
+        namespace:
+          type: string
+        version:
+          type: integer
+        value:
+          type: object
+        dataType:
+          type: string
+          enum: [STRING, NUMBER, BOOLEAN, JSON, YAML, ARRAY, OBJECT, BINARY]
+        encrypted:
+          type: boolean
+        required:
+          type: boolean
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, DEPRECATED, VALIDATION_FAILED, PENDING_APPROVAL]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateConfigurationRequest:
+      type: object
+      required:
+        - tenantId
+        - configKey
+        - environment
+        - namespace
+        - dataType
+      properties:
+        tenantId:
+          type: string
+        configKey:
+          type: string
+        environment:
+          type: string
+        namespace:
+          type: string
+        value:
+          type: object
+        dataType:
+          type: string
+          enum: [STRING, NUMBER, BOOLEAN, JSON, YAML, ARRAY, OBJECT, BINARY]
+        encrypted:
+          type: boolean
+        required:
+          type: boolean
+        description:
+          type: string
+
+    UpdateConfigurationRequest:
+      type: object
+      properties:
+        value:
+          type: object
+        reason:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        tenantId:
+          type: string
+        correlationId:
+          type: string
+
+    PagedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Configuration'
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+        components:
+          type: object
