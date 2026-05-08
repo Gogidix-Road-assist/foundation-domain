@@ -1,0 +1,48 @@
+# Build outputs
+**/target/
+**/build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.eclipse/
+.settings/
+.project
+.classpath
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+.railway.env
+.railway.env.local
+
+# Secrets
+*.key
+*.crt
+*.pem
+secrets/
+
+# Test coverage
+.jacoco/
+coverage/
+test-output/
+
+# Node modules
+**/node_modules/
+**/.next/
+
+# Local configs
+application-local.yml
+application-local.properties
+application-secret.yml
