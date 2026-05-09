@@ -24,8 +24,11 @@
             <property name="ignoreConstructorParameter" value="true"/>
             <property name="ignoreSetter" value="true"/>
             <property name="setterCanReturnItsClass" value="true"/>
+            <property name="ignoreAbstractMethods" value="true"/>
         </module>
-        <module name="IllegalCatch"/>
+        <module name="IllegalCatch">
+            <property name="illegalClassNames" value="Error,RuntimeException"/>
+        </module>
         <module name="IllegalImport"/>
         <module name="IllegalThrows"/>
         <module name="InnerAssignment"/>
