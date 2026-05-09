@@ -13,7 +13,7 @@
 
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>dashboard-reporting-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Dashboard Reporting Service</name>
     <description>Dashboard Report Generation and Export Service with Hexagonal Architecture</description>
 

@@ -13,7 +13,7 @@
 
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>dashboard-configuration-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Dashboard Configuration Service</name>
     <description>Dashboard Configuration Management Service with Hexagonal Architecture</description>
 
