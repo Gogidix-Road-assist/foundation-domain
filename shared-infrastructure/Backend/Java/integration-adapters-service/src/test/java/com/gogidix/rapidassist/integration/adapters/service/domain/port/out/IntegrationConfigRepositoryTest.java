@@ -178,15 +178,12 @@ class IntegrationConfigRepositoryTest {
         repository.save(config2);
         repository.save(config3);
 
-        IntegrationConfig config = repository.findByTenantIdAndProvider("tenant-1", "stripe");
-        assertThat(config).isPresent();
+        assertThat(repository.findByTenantIdAndProvider("tenant-1", "stripe")).isPresent();
 
-        config = repository.findByTenantIdAndProvider("tenant-2", "stripe");
-        assertThat(config).isEmpty();
+        assertThat(repository.findByTenantIdAndProvider("tenant-2", "stripe")).isEmpty();
 
         repository.save(config3);
-        config = repository.findByTenantIdAndProvider("tenant-2", "stripe");
-        assertThat(config).isPresent();
+        assertThat(repository.findByTenantIdAndProvider("tenant-2", "stripe")).isPresent();
     }
 
     @Test
