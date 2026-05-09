@@ -55,9 +55,12 @@ class TelemetryEventsControllerTest {
     void ingestTelemetryEvent_Success() throws Exception {
         doNothing().when(ingestCommand).ingest(any(TelemetryEvent.class));
 
-        IngestTelemetryEventRequest request = new IngestTelemetryEventRequest(
-                "corr-456", Instant.now(), "counter", "api_calls", 100.0, null
-        );
+        IngestTelemetryEventRequest request = new IngestTelemetryEventRequest();
+        request.setCorrelationId("corr-456");
+        request.setType("counter");
+        request.setName("api_calls");
+        request.setValue(100.0);
+        request.setAttributes(null);
 
         mockMvc.perform(post("/api/v1/telemetry")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,9 +72,12 @@ class TelemetryEventsControllerTest {
     void ingestTelemetryEvent_MissingCorrelationId() throws Exception {
         doNothing().when(ingestCommand).ingest(any(TelemetryEvent.class));
 
-        IngestTelemetryEventRequest request = new IngestTelemetryEventRequest(
-                null, Instant.now(), "counter", "api_calls", 100.0, null
-        );
+        IngestTelemetryEventRequest request = new IngestTelemetryEventRequest();
+        request.setCorrelationId(null);
+        request.setType("counter");
+        request.setName("api_calls");
+        request.setValue(100.0);
+        request.setAttributes(null);
 
         mockMvc.perform(post("/api/v1/telemetry")
                         .contentType(MediaType.APPLICATION_JSON)
