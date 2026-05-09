@@ -4,27 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.gogidix.rapidassist.config</groupId>
+    <parent>
+        <groupId>com.gogidix.rapidassist</groupId>
+        <artifactId>foundation-domain</artifactId>
+        <version>1.0.2</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>central-configuration</artifactId>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>Gogidix Central Configuration Services</name>
-    <description>Parent POM for all central configuration services</description>
-
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain</url>
-        </repository>
-    </distributionManagement>
 
     <modules>
         <module>config-service</module>
@@ -34,30 +23,4 @@
         <module>release-rollout-config-service</module>
         <module>tenancy-configuration-service</module>
     </modules>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.4.0</version>
-                    <configuration>
-                        <configLocation>checkstyle.xml</configLocation>
-                        <consoleOutput>true</consoleOutput>
-                        <failsOnError>true</failsOnError>
-                        <failOnViolation>true</failOnViolation>
-                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>10.18.1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

@@ -1,4 +1,4 @@
-name: Foundation-Domain CI/CD (Automated Workflow Dispatch)
+name: Foundation-Domain CI/CD (Reactor Build)
 
 on:
   push:
@@ -11,6 +11,8 @@ on:
       - 'ai-services/**'
       - 'centralized-dashboard/**'
       - 'shared-frontend-libraries/**'
+      - 'pom.xml'
+      - 'checkstyle.xml'
       - '.github/workflows/foundation-domain-ci-automated.yml'
   pull_request:
     branches: [main, dev]
@@ -22,22 +24,10 @@ on:
       - 'ai-services/**'
       - 'centralized-dashboard/**'
       - 'shared-frontend-libraries/**'
+      - 'pom.xml'
+      - 'checkstyle.xml'
   workflow_dispatch:
     inputs:
-      working_dir:
-        description: 'Working directory (relative to repo root)'
-        required: true
-        default: 'shared-libraries/Backend/Java'
-        type: choice
-        options:
-          - shared-libraries/Backend/Java
-          - central-configuration/Backend/Java
-          - shared-infrastructure/Backend/Java
-          - orchestration-services/Backend/Java
-          - ai-services/Backend/Java
-          - centralized-dashboard/Backend/Java
-          - centralized-dashboard/Frontend/Web/centralized-dashboard-web
-          - shared-frontend-libraries
       run_tests:
         description: 'Run unit tests'
         required: true
@@ -54,7 +44,7 @@ on:
         default: true
         type: boolean
       build_docker:
-        description: 'Build and scan Docker image'
+        description: 'Build and scan Docker images'
         required: true
         default: false
         type: boolean
@@ -68,7 +58,7 @@ on:
           - staging
           - production
       maven_profile:
-        description: 'Maven profile to use (Java only)'
+        description: 'Maven profile to use'
         required: true
         default: 'default'
         type: choice
@@ -82,86 +72,18 @@ env:
   JAVA_DISTRIBUTION: 'temurin'
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
-  WORKING_DIR: ${{ inputs.working_dir || 'shared-libraries/Backend/Java' }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   # ===========================
-  # DETECT PROJECT TYPE
+  # GATE 1: REACTOR BUILD
   # ===========================
-  detect:
-    name: 🔍 Detect Project Type
-    runs-on: ubuntu-latest
-    outputs:
-      project_type: ${{ steps.detect.outputs.project_type }}
-      working_dir: ${{ steps.detect.outputs.working_dir }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect project type and working directory
-        id: detect
-        run: |
-          if [ -n "${{ inputs.working_dir }}" ]; then
-            WD="${{ inputs.working_dir }}"
-          else
-            CHANGED=$(git log --name-only --pretty=format: -5 | cut -d'/' -f1 | sort -u | grep -v '^$')
-            echo "Changed top-level directories: $CHANGED"
-            WD=""
-            for subdir in $CHANGED; do
-              case "$subdir" in
-                shared-libraries|ai-services|shared-infrastructure|central-configuration|orchestration-services)
-                  if [ -f "${subdir}/Backend/Java/pom.xml" ]; then
-                    WD="${subdir}/Backend/Java"
-                    break
-                  fi
-                  ;;
-                centralized-dashboard)
-                  if [ -f "${subdir}/Backend/Java/pom.xml" ]; then
-                    WD="${subdir}/Backend/Java"
-                  elif [ -d "${subdir}/Frontend/Web/centralized-dashboard-web" ]; then
-                    WD="${subdir}/Frontend/Web/centralized-dashboard-web"
-                  fi
-                  break
-                  ;;
-                shared-frontend-libraries)
-                  WD="shared-frontend-libraries"
-                  break
-                  ;;
-              esac
-            done
-            if [ -z "$WD" ]; then
-              WD="shared-libraries/Backend/Java"
-            fi
-          fi
-          echo "working_dir=$WD" >> $GITHUB_OUTPUT
-          echo "Detected working directory: $WD"
-          if [ -f "$WD/pom.xml" ]; then
-            echo "project_type=java" >> $GITHUB_OUTPUT
-            echo "Detected: Java/Maven project"
-          elif [ -f "$WD/package.json" ]; then
-            echo "project_type=node" >> $GITHUB_OUTPUT
-            echo "Detected: Node.js project"
-          else
-            echo "project_type=unknown" >> $GITHUB_OUTPUT
-            echo "::warning::No pom.xml or package.json found in $WD"
-          fi
-
-  # ===========================
-  # JAVA GATE 1: BUILD
-  # ===========================
-  build-java:
-    name: 🔨 Build Gate (Java)
-    needs: detect
-    if: needs.detect.outputs.project_type == 'java'
+  build:
+    name: 🔨 Reactor Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     outputs:
       build_success: ${{ steps.build_result.outputs.success }}
     steps:
@@ -204,12 +126,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Display workflow inputs
+      - name: Display build config
         run: |
           echo "=========================================="
-          echo "Workflow Dispatch Inputs:"
-          echo "  Working Directory: ${{ env.WORKING_DIR }}"
-          echo "  Project Type: java"
+          echo "Foundation-Domain Reactor Build"
           echo "  Run Tests: ${{ inputs.run_tests }}"
           echo "  Run Security Scan: ${{ inputs.run_security_scan }}"
           echo "  Run Code Quality: ${{ inputs.run_code_quality }}"
@@ -218,17 +138,8 @@ jobs:
           echo "  Maven Profile: ${{ inputs.maven_profile }}"
           echo "=========================================="
 
-      - name: Install shared-libraries (local deps)
-        if: env.WORKING_DIR != 'shared-libraries/Backend/Java'
-        working-directory: shared-libraries/Backend/Java
-        run: |
-          echo "Installing shared-libraries to local Maven repo..."
-          mvn clean install -DskipTests -q
-          echo "Shared libraries installed successfully."
-
-      - name: Build with Maven
+      - name: Build reactor (all modules)
         id: build_result
-        working-directory: ${{ env.WORKING_DIR }}
         run: |
           PROFILE="${{ inputs.maven_profile }}"
           if [ -n "$PROFILE" ] && [ "$PROFILE" != "default" ]; then
@@ -238,218 +149,51 @@ jobs:
           fi
           echo "success=true" >> $GITHUB_OUTPUT
 
-      - name: Checkstyle
+      - name: Checkstyle (all modules)
         if: success()
-        working-directory: ${{ env.WORKING_DIR }}
         run: |
-          mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/${{ env.WORKING_DIR }}/checkstyle.xml"
+          mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
 
-      - name: SpotBugs
+      - name: SpotBugs (all modules)
         if: success()
-        working-directory: ${{ env.WORKING_DIR }}
         run: |
           mvn spotbugs:check -DskipTests
 
   # ===========================
-  # NODE GATE 1: BUILD
+  # GATE 2: CODE QUALITY
   # ===========================
-  build-node:
-    name: 🔨 Build Gate (Node.js)
-    needs: detect
-    if: needs.detect.outputs.project_type == 'node'
-    runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
-    outputs:
-      build_success: ${{ steps.build_result.outputs.success }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
-
-      - name: Install pnpm
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if grep -q '"packageManager".*pnpm' package.json 2>/dev/null; then
-            npm install -g pnpm@8
-          fi
-
-      - name: Display workflow inputs
-        run: |
-          echo "=========================================="
-          echo "Workflow Dispatch Inputs:"
-          echo "  Working Directory: ${{ env.WORKING_DIR }}"
-          echo "  Project Type: node"
-          echo "  Run Tests: ${{ inputs.run_tests }}"
-          echo "  Run Security Scan: ${{ inputs.run_security_scan }}"
-          echo "  Run Code Quality: ${{ inputs.run_code_quality }}"
-          echo "=========================================="
-
-      - name: Install dependencies
-        id: build_result
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            pnpm install --frozen-lockfile || pnpm install
-          elif [ -f "package-lock.json" ]; then
-            npm ci || npm install
-          elif [ -f "yarn.lock" ]; then
-            yarn install --frozen-lockfile || yarn install
-          else
-            npm install
-          fi
-          echo "success=true" >> $GITHUB_OUTPUT
-
-      - name: Lint
-        if: success()
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          npm run lint --if-present
-
-      - name: Type Check
-        if: success()
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          npm run typecheck --if-present
-
-      - name: Build
-        if: success()
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          npm run build --if-present
-
-  # ===========================
-  # JAVA GATE 2: CODE QUALITY
-  # ===========================
-  code-quality-java:
-    name: 📊 Code Quality Gate (Java)
-    needs: [detect, build-java]
+  code-quality:
+    name: 📊 Code Quality Gate (Semgrep)
+    needs: build
     if: |
-      needs.detect.outputs.project_type == 'java' &&
       (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
-      needs.build-java.result == 'success'
+      needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
-
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << SETTINGS
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          SETTINGS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-
       - name: Semgrep Scan
         uses: semgrep/semgrep@main
         with:
           config: auto
-          working-directory: ${{ env.WORKING_DIR }}
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-  # ===========================
-  code-quality-node:
-    name: 📊 Code Quality Gate (Node.js)
-    needs: [detect, build-node]
-    if: |
-      needs.detect.outputs.project_type == 'node' &&
-      (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
-      needs.build-node.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if grep -q '"packageManager".*pnpm' package.json 2>/dev/null; then
-            npm install -g pnpm@8
-          fi
-
-      - name: Install dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            pnpm install --frozen-lockfile || pnpm install
-          elif [ -f "package-lock.json" ]; then
-            npm ci || npm install
-          else
-            npm install
-          fi
-
-      - name: Semgrep Scan
-        uses: semgrep/semgrep@main
-        with:
-          config: auto
-          working-directory: ${{ env.WORKING_DIR }}
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   # ===========================
-  # JAVA GATE 3: SECURITY
+  # GATE 3: SECURITY
   # ===========================
-  security-scan-java:
-    name: 🔒 Security Gate (Java)
-    needs: [detect, build-java]
+  security-scan:
+    name: 🔒 Security Gate
+    needs: build
     if: |
-      needs.detect.outputs.project_type == 'java' &&
       (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
-      needs.build-java.result == 'success'
+      needs.build.result == 'success'
     runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -467,86 +211,26 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=all --working-directory=${{ env.WORKING_DIR }}
-
-      - name: Secret Scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          extra_args: --only-verified
-
-  # ===========================
-  # NODE GATE 3: SECURITY
-  # ===========================
-  security-scan-node:
-    name: 🔒 Security Gate (Node.js)
-    needs: [detect, build-node]
-    if: |
-      needs.detect.outputs.project_type == 'node' &&
-      (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
-      needs.build-node.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if grep -q '"packageManager".*pnpm' package.json 2>/dev/null; then
-            npm install -g pnpm@8
-          fi
-
-      - name: Install dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            pnpm install --frozen-lockfile || pnpm install
-          elif [ -f "package-lock.json" ]; then
-            npm ci || npm install
-          else
-            npm install
-          fi
-
-      - name: Run Snyk to check for vulnerabilities
-        if: vars.SNYK_ENABLED != 'false'
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
           args: --severity-threshold=high --fail-on=all
 
-      - name: npm audit
-        working-directory: ${{ env.WORKING_DIR }}
-        run: npm audit --audit-level=high
-
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --only-verified
 
   # ===========================
-  # JAVA GATE 4: TEST
+  # GATE 4: TEST
   # ===========================
-  test-java:
-    name: 🧪 Test Gate (Java)
-    needs: [detect, build-java]
+  test:
+    name: 🧪 Test Gate (All Modules)
+    needs: build
     if: |
-      needs.detect.outputs.project_type == 'java' &&
       (inputs.run_tests == true || inputs.run_tests == 'true' || inputs.run_tests == '') &&
-      needs.build-java.result == 'success'
+      needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -557,6 +241,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: 'maven'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Configure Maven settings
         run: |
@@ -578,8 +269,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Run Tests with Coverage
-        working-directory: ${{ env.WORKING_DIR }}
+      - name: Run Tests with Coverage (reactor)
         run: |
           mvn test -Dpitest.skip=true org.jacoco:jacoco-maven-plugin:report
 
@@ -587,7 +277,6 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ env.WORKING_DIR }}/target/site/jacoco/jacoco.xml
           flags: unittests
           fail_ci_if_error: true
 
@@ -596,81 +285,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ${{ env.WORKING_DIR }}/**/target/surefire-reports/*.xml
+          path: '**/target/surefire-reports/*.xml'
 
   # ===========================
-  # NODE GATE 4: TEST
-  # ===========================
-  test-node:
-    name: 🧪 Test Gate (Node.js)
-    needs: [detect, build-node]
-    if: |
-      needs.detect.outputs.project_type == 'node' &&
-      (inputs.run_tests == true || inputs.run_tests == 'true' || inputs.run_tests == '') &&
-      needs.build-node.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if grep -q '"packageManager".*pnpm' package.json 2>/dev/null; then
-            npm install -g pnpm@8
-          fi
-
-      - name: Install dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            pnpm install --frozen-lockfile || pnpm install
-          elif [ -f "package-lock.json" ]; then
-            npm ci || npm install
-          else
-            npm install
-          fi
-
-      - name: Run Tests with Coverage
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          npm run test:coverage --if-present || npm test
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: unittests
-          fail_ci_if_error: true
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: ${{ env.WORKING_DIR }}/**/test-results/**
-
-  # ===========================
-  # PUBLISH PACKAGES (shared-libraries only)
+  # PUBLISH SHARED LIBRARIES
   # ===========================
   publish-packages:
-    name: 📦 Publish to GitHub Packages
-    needs: [detect, build-java, test-java, docker-build]
+    name: 📦 Publish Shared Libraries
+    needs: [build, test]
     if: |
       always() &&
-      needs.detect.outputs.project_type == 'java' &&
-      needs.test-java.result == 'success' &&
-      needs.detect.outputs.working_dir == 'shared-libraries/Backend/Java'
+      needs.test.result == 'success'
     runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     permissions:
       contents: read
       packages: write
@@ -705,8 +331,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Build and Deploy
-        working-directory: ${{ env.WORKING_DIR }}
+      - name: Deploy shared-libraries to GitHub Packages
+        working-directory: shared-libraries/Backend/Java
         run: |
           mvn clean deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
@@ -725,16 +351,14 @@ jobs:
   # ===========================
   prepare-docker:
     name: 🐳 Find Docker Services
-    needs: [detect, test-java, test-node]
+    needs: test
     if: |
       always() &&
       (inputs.build_docker == true || inputs.build_docker == 'true') &&
-      needs.test-java.result != 'failure'
+      needs.test.result != 'failure'
     runs-on: ubuntu-latest
     outputs:
       services: ${{ steps.find-services.outputs.services }}
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -742,39 +366,32 @@ jobs:
       - name: Find services with Dockerfiles
         id: find-services
         run: |
-          if [ -f "${{ env.WORKING_DIR }}/Dockerfile" ]; then
-            echo 'services=["."]' >> $GITHUB_OUTPUT
-          else
-            cd ${{ env.WORKING_DIR }}
-            SERVICES=$(find . -maxdepth 2 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | sort)
-            echo "$SERVICES" > /tmp/services.txt
-            JSON="["
-            FIRST=true
-            while IFS= read -r service; do
-              if [ -n "$service" ]; then
-                if [ "$FIRST" = true ]; then
-                  FIRST=false
-                else
-                  JSON="${JSON},"
-                fi
-                JSON="${JSON}\"${service}\""
+          SERVICES=$(find . -maxdepth 5 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | sort)
+          echo "$SERVICES" > /tmp/services.txt
+          JSON="["
+          FIRST=true
+          while IFS= read -r service; do
+            if [ -n "$service" ]; then
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                JSON="${JSON},"
               fi
-            done < /tmp/services.txt
-            JSON="${JSON}]"
-            echo "services=${JSON}" >> $GITHUB_OUTPUT
-          fi
+              JSON="${JSON}\"${service}\""
+            fi
+          done < /tmp/services.txt
+          JSON="${JSON}]"
+          echo "services=${JSON}" >> $GITHUB_OUTPUT
 
   # ===========================
   # GATE 5: BUILD & SCAN IMAGE
   # ===========================
   docker-build:
     name: 🐳 Build ${{ matrix.service }}
-    needs: [detect, prepare-docker]
+    needs: prepare-docker
     if: |
       (inputs.build_docker == true || inputs.build_docker == 'true')
     runs-on: ubuntu-latest
-    env:
-      WORKING_DIR: ${{ needs.detect.outputs.working_dir }}
     permissions:
       contents: read
       packages: write
@@ -809,11 +426,11 @@ jobs:
       - name: Build Docker image for ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ${{ env.WORKING_DIR }}/${{ matrix.service }}
+          context: ${{ matrix.service }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
+          cache-from: type:gha
           cache-to: type=gha,mode=max
 
       - name: Run Trivy vulnerability scanner for ${{ matrix.service }}
@@ -833,7 +450,7 @@ jobs:
       - name: Push Docker image for ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ${{ env.WORKING_DIR }}/${{ matrix.service }}
+          context: ${{ matrix.service }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -903,7 +520,7 @@ jobs:
   # ===========================
   notify:
     name: 📢 Notify Team
-    needs: [deploy-staging, deploy-production, build-java, build-node]
+    needs: [deploy-staging, deploy-production, build]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -921,7 +538,7 @@ jobs:
   # ===========================
   summary:
     name: 📋 Pipeline Summary
-    needs: [detect, build-java, build-node, code-quality-java, code-quality-node, test-java, test-node, security-scan-java, security-scan-node, publish-packages, prepare-docker, deploy-staging, deploy-production, notify]
+    needs: [build, code-quality, test, security-scan, publish-packages, prepare-docker, deploy-staging, deploy-production, notify]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -931,16 +548,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Detect | ${{ needs.detect.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔨 Build (Java) | ${{ needs.build-java.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔨 Build (Node) | ${{ needs.build-node.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Code Quality (Java) | ${{ needs.code-quality-java.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Code Quality (Node) | ${{ needs.code-quality-node.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Test (Java) | ${{ needs.test-java.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Test (Node) | ${{ needs.test-node.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security (Java) | ${{ needs.security-scan-java.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐳 Docker Build | ${{ needs.prepare-docker.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔨 Reactor Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Code Quality (Semgrep) | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📦 Publish Packages | ${{ needs.publish-packages.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker Build | ${{ needs.prepare-docker.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🚀 Deploy Staging | ${{ needs.deploy-staging.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🚀 Deploy Production | ${{ needs.deploy-production.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📢 Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY
