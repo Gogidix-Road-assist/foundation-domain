@@ -436,7 +436,7 @@ jobs:
           fetch-depth: 0
 
       - name: Semgrep Scan
-        uses: semgrep/semgrep@main
+        uses: returntocorp/semgrep-action@v1
         with:
           config: auto
         env:
