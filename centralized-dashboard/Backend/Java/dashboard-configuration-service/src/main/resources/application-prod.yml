@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: dashboard-configuration-service
+  profiles:
+    active: prod
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:3}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: ${REDIS_POOL_MAX_ACTIVE:20}
+        max-idle: ${REDIS_POOL_MAX_IDLE:10}
+        min-idle: ${REDIS_POOL_MIN_IDLE:5}
+
+server:
+  port: ${SERVER_PORT:8200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.gogidix.rapidassist: INFO
+    org.springframework.data: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# CORS Configuration
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}

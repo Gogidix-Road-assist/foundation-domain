@@ -1,0 +1,114 @@
+.service-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid;
+  transition: transform 0.2s;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+}
+
+.service-healthy {
+  border-left-color: #28a745;
+}
+
+.service-degraded {
+  border-left-color: #ffc107;
+}
+
+.service-down {
+  border-left-color: #dc3545;
+}
+
+.service-unknown {
+  border-left-color: #6c757d;
+}
+
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.service-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.service-healthy .status-badge {
+  background: #d4edda;
+  color: #155724;
+}
+
+.service-degraded .status-badge {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.service-down .status-badge {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.service-unknown .status-badge {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.service-info {
+  margin-bottom: 8px;
+}
+
+.service-url {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.service-port {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+}
+
+.service-last-updated {
+  font-size: 11px;
+  color: #6c757d;
+  margin: 8px 0 0 0;
+}
+
+.service-metrics {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.dark .service-card {
+  background: #2d2d2d;
+}
+
+.dark .service-url,
+.dark .service-port,
+.dark .service-last-updated,
+.dark .service-metrics {
+  color: #a0a0a0;
+}
+
+.dark .service-header h3 {
+  color: #e0e0e0;
+}

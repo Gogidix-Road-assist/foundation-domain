@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  dashboard-aggregation-service:
+    build: .
+    container_name: dashboard-aggregation-service
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/dashboard_aggregation}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - API_GATEWAY_URL=${API_GATEWAY_URL:-http://api-gateway:8080}
+      - BILLING_SERVICE_URL=${BILLING_SERVICE_URL:-http://billing-service:8081}
+      - NOTIFICATION_SERVICE_URL=${NOTIFICATION_SERVICE_URL:-http://notification-service:8082}
+      - GEOLOCATION_SERVICE_URL=${GEOLOCATION_SERVICE_URL:-http://geolocation-service:8083}
+      - AI_LEADS_SERVICE_URL=${AI_LEADS_SERVICE_URL:-http://ai-leads-service:8084}
+      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL:-http://config-service:8085}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - DASHBOARD_CACHE_TTL=${DASHBOARD_CACHE_TTL:-300}
+      - METRICS_AGGREGATION_INTERVAL=${METRICS_AGGREGATION_INTERVAL:-60000}
+      - REAL_TIME_UPDATES_ENABLED=${REAL_TIME_UPDATES_ENABLED:-true}
+      - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED:-true}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - dashboard-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongodb:
+    image: mongo:7.0
+    container_name: dashboard-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=dashboard_aggregation
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - dashboard-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: dashboard-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    networks:
+      - dashboard-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  dashboard-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
