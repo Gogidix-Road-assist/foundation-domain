@@ -50,7 +50,8 @@ import java.util.Optional;
  * {@code findAllIncludingAllTenants()} methods.
  * </p>
  *
- * @param <T>  the domain type the repository manages (typically a {@link com.gogidix.rapidassist.shared.persistence.infrastructure.mongodb.document.TenantAwareDocument})
+ * @param <T>  the domain type the repository manages
+ *               (typically a {@link TenantAwareDocument})
  * @param <ID> the type of the id of the entity the repository manages
  * @see MongoTenantContext
  * @see com.gogidix.rapidassist.shared.persistence.infrastructure.mongodb.document.TenantAwareDocument

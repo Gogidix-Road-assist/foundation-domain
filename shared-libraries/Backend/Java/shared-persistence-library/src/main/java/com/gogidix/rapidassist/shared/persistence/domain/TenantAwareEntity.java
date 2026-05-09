@@ -87,8 +87,8 @@ public abstract class TenantAwareEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         TenantAwareEntity that = (TenantAwareEntity) o;
         return Objects.equals(tenantId, that.tenantId);
     }

@@ -217,8 +217,8 @@ public abstract class TenantAwareJpaEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         TenantAwareJpaEntity that = (TenantAwareJpaEntity) o;
         return Objects.equals(tenantId, that.tenantId);
     }

@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>shared-infrastructure</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -20,7 +20,7 @@
   <properties>
     <java.version>21</java.version>
     <spring-cloud.version>2023.0.3</spring-cloud.version>
-    <shared-libraries.version>1.0.2</shared-libraries.version>
+    <shared-libraries.version>1.0.0</shared-libraries.version>
   </properties>
 
   <dependencies>

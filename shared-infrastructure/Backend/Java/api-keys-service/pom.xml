@@ -6,13 +6,13 @@
   <parent>
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>shared-infrastructure</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>com.gogidix.rapidassist</groupId>
   <artifactId>api-keys-service</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.0</version>
   <name>api-keys-service</name>
 
   <properties>
@@ -38,19 +38,19 @@
     <dependency>
       <groupId>com.gogidix.rapidassist</groupId>
       <artifactId>shared-security-library</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.gogidix.rapidassist</groupId>
       <artifactId>shared-request-context-library</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.gogidix.rapidassist</groupId>
       <artifactId>shared-exception-library</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
