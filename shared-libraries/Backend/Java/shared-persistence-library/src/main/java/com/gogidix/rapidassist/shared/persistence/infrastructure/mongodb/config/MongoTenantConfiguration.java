@@ -197,7 +197,7 @@ public class MongoTenantConfiguration {
      */
     public static class TenantRequestFilter implements Filter {
 
-        private static final Logger filterLog = LoggerFactory.getLogger(TenantRequestFilter.class);
+        private static final Logger log = LoggerFactory.getLogger(TenantRequestFilter.class);
         private static final String DEFAULT_HEADER = "X-Tenant-Id";
         private static final String DEFAULT_PARAM = "tenantId";
         private static final Long DEFAULT_TENANT = 1L;
@@ -238,16 +238,16 @@ public class MongoTenantConfiguration {
             MongoTenantContext.setTenantId(parsedTenantId);
 
             try {
-                if (filterLog.isTraceEnabled()) {
-                    filterLog.trace("Set tenant context: {} for request: {} {}",
+                if (log.isTraceEnabled()) {
+                    log.trace("Set tenant context: {} for request: {} {}",
                         parsedTenantId, httpRequest.getMethod(), httpRequest.getRequestURI());
                 }
                 chain.doFilter(request, response);
             } finally {
                 // Always clear the context to prevent thread pool contamination
                 MongoTenantContext.clear();
-                if (filterLog.isTraceEnabled()) {
-                    filterLog.trace("Cleared tenant context for request: {} {}",
+                if (log.isTraceEnabled()) {
+                    log.trace("Cleared tenant context for request: {} {}",
                         httpRequest.getMethod(), httpRequest.getRequestURI());
                 }
             }
@@ -267,7 +267,7 @@ public class MongoTenantConfiguration {
                 try {
                     return Long.parseLong(tenantId);
                 } catch (NumberFormatException e) {
-                    filterLog.warn("Invalid tenant ID format: '{}', using default: {}",
+                    log.warn("Invalid tenant ID format: '{}', using default: {}",
                         tenantId, defaultTenantId);
                 }
             }
@@ -318,7 +318,7 @@ public class MongoTenantConfiguration {
      */
     public static class TenantAwareDocumentListener extends AbstractMongoEventListener<Object> {
 
-        private static final Logger listenerLog = LoggerFactory.getLogger(TenantAwareDocumentListener.class);
+        private static final Logger log = LoggerFactory.getLogger(TenantAwareDocumentListener.class);
 
         /**
          * Handles BeforeConvertEvent to auto-populate tenant_id.
@@ -339,14 +339,14 @@ public class MongoTenantConfiguration {
                 // Only set if not already set (allows manual override)
                 if (doc.getTenantId() == null) {
                     doc.setTenantId(currentTenantId);
-                    if (listenerLog.isTraceEnabled()) {
-                        listenerLog.trace("Auto-populated tenant_id: {} for document: {}",
+                    if (log.isTraceEnabled()) {
+                        log.trace("Auto-populated tenant_id: {} for document: {}",
                             currentTenantId, doc.getClass().getSimpleName());
                     }
                 } else {
                     // Validate that the document belongs to the current tenant
                     if (!doc.getTenantId().equals(currentTenantId)) {
-                        listenerLog.warn("Document tenant_id: {} does not match current tenant: {} for document: {}",
+                        log.warn("Document tenant_id: {} does not match current tenant: {} for document: {}",
                             doc.getTenantId(), currentTenantId, doc.getClass().getSimpleName());
                     }
                 }
