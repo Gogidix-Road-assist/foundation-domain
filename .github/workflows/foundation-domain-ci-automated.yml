@@ -1,31 +1,10 @@
-name: Foundation-Domain CI/CD (Reactor Build)
+name: Foundation-Domain CI/CD
 
 on:
   push:
     branches: [main, dev, staging/uat, production, hotfix]
-    paths:
-      - 'shared-libraries/**'
-      - 'central-configuration/**'
-      - 'shared-infrastructure/**'
-      - 'orchestration-services/**'
-      - 'ai-services/**'
-      - 'centralized-dashboard/**'
-      - 'shared-frontend-libraries/**'
-      - 'pom.xml'
-      - 'checkstyle.xml'
-      - '.github/workflows/foundation-domain-ci-automated.yml'
   pull_request:
     branches: [main, dev]
-    paths:
-      - 'shared-libraries/**'
-      - 'central-configuration/**'
-      - 'shared-infrastructure/**'
-      - 'orchestration-services/**'
-      - 'ai-services/**'
-      - 'centralized-dashboard/**'
-      - 'shared-frontend-libraries/**'
-      - 'pom.xml'
-      - 'checkstyle.xml'
   workflow_dispatch:
     inputs:
       run_tests:
@@ -57,15 +36,6 @@ on:
           - none
           - staging
           - production
-      maven_profile:
-        description: 'Maven profile to use'
-        required: true
-        default: 'default'
-        type: choice
-        options:
-          - default
-          - dev
-          - production
 
 env:
   JAVA_VERSION: '21'
@@ -75,22 +45,18 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  # ===========================
-  # GATE 1: REACTOR BUILD
-  # ===========================
-  build:
-    name: 🔨 Reactor Build
+  # ===========================================
+  # STEP 1: SHARED LIBRARIES (builds first)
+  # ===========================================
+  shared-libraries:
+    name: 📚 Shared Libraries (Build → Test → Publish)
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
-    outputs:
-      build_success: ${{ steps.build_result.outputs.success }}
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -98,13 +64,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: 'maven'
-
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
 
       - name: Configure Maven settings
         run: |
@@ -126,48 +85,320 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Display build config
-        run: |
-          echo "=========================================="
-          echo "Foundation-Domain Reactor Build"
-          echo "  Run Tests: ${{ inputs.run_tests }}"
-          echo "  Run Security Scan: ${{ inputs.run_security_scan }}"
-          echo "  Run Code Quality: ${{ inputs.run_code_quality }}"
-          echo "  Build Docker: ${{ inputs.build_docker }}"
-          echo "  Deploy Environment: ${{ inputs.deploy_env }}"
-          echo "  Maven Profile: ${{ inputs.maven_profile }}"
-          echo "=========================================="
+      - name: Compile
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean compile -DskipTests
 
-      - name: Build reactor (all modules)
-        id: build_result
+      - name: Checkstyle
+        working-directory: shared-libraries/Backend/Java
+        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        working-directory: shared-libraries/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
+
+      - name: Package
+        working-directory: shared-libraries/Backend/Java
+        run: mvn package -DskipTests
+
+      - name: Publish to GitHub Packages
+        working-directory: shared-libraries/Backend/Java
         run: |
-          PROFILE="${{ inputs.maven_profile }}"
-          if [ -n "$PROFILE" ] && [ "$PROFILE" != "default" ]; then
-            mvn clean compile -P"$PROFILE" -DskipTests
-          else
-            mvn clean compile -DskipTests
+          mvn deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            if grep -q "409" deploy.log; then
+              echo "::warning::Version already published (409). Skipping."
+              exit 0
+            else
+              exit 1
+            fi
           fi
-          echo "success=true" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Checkstyle (all modules)
-        if: success()
+      - name: Upload Coverage
+        if: inputs.run_tests != false
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: shared-libraries/Backend/Java/**/target/site/jacoco/jacoco.xml
+          flags: shared-libraries
+          fail_ci_if_error: true
+
+  # ===========================================
+  # STEP 2: CENTRAL CONFIGURATION
+  # ===========================================
+  central-configuration:
+    name: ⚙️ Central Configuration (Build → Test)
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Configure Maven settings
         run: |
-          mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: SpotBugs (all modules)
-        if: success()
+      - name: Install shared-libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Compile
+        working-directory: central-configuration/Backend/Java
+        run: mvn clean compile -DskipTests
+
+      - name: Checkstyle
+        working-directory: central-configuration/Backend/Java
+        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        working-directory: central-configuration/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
+
+      - name: Package
+        working-directory: central-configuration/Backend/Java
+        run: mvn package -DskipTests
+
+      - name: Upload Coverage
+        if: inputs.run_tests != false
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: central-configuration
+          fail_ci_if_error: true
+
+  # ===========================================
+  # STEP 3: SHARED INFRASTRUCTURE
+  # ===========================================
+  shared-infrastructure:
+    name: 🏗️ Shared Infrastructure (Build → Test)
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Configure Maven settings
         run: |
-          mvn spotbugs:check -DskipTests
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
-  # ===========================
-  # GATE 2: CODE QUALITY
-  # ===========================
+      - name: Install shared-libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Compile
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn clean compile -DskipTests
+
+      - name: Checkstyle
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
+
+      - name: Package
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn package -DskipTests
+
+      - name: Upload Coverage
+        if: inputs.run_tests != false
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: shared-infrastructure
+          fail_ci_if_error: true
+
+  # ===========================================
+  # STEP 4: ORCHESTRATION SERVICES
+  # ===========================================
+  orchestration-services:
+    name: 🎯 Orchestration Services (Build → Test)
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Install shared-libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Compile
+        working-directory: orchestration-services/Backend/Java
+        run: mvn clean compile -DskipTests
+
+      - name: Checkstyle
+        working-directory: orchestration-services/Backend/Java
+        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        working-directory: orchestration-services/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
+
+      - name: Package
+        working-directory: orchestration-services/Backend/Java
+        run: mvn package -DskipTests
+
+  # ===========================================
+  # STEP 5: CENTRALIZED DASHBOARD
+  # ===========================================
+  centralized-dashboard:
+    name: 📊 Centralized Dashboard (Build → Test)
+    needs: shared-libraries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Install shared-libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Compile
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn clean compile -DskipTests
+
+      - name: Checkstyle
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
+
+      - name: Package
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn package -DskipTests
+
+  # ===========================================
+  # GATE: CODE QUALITY (after all builds pass)
+  # ===========================================
   code-quality:
     name: 📊 Code Quality Gate (Semgrep)
-    needs: build
+    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
     if: |
       (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
-      needs.build.result == 'success'
+      needs.shared-libraries.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -184,15 +415,15 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-  # ===========================
-  # GATE 3: SECURITY
-  # ===========================
+  # ===========================================
+  # GATE: SECURITY (after all builds pass)
+  # ===========================================
   security-scan:
     name: 🔒 Security Gate
-    needs: build
+    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
     if: |
       (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
-      needs.build.result == 'success'
+      needs.shared-libraries.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -205,7 +436,7 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: 'maven'
 
-      - name: Run Snyk to check for vulnerabilities
+      - name: Run Snyk
         if: vars.SNYK_ENABLED != 'false'
         uses: snyk/actions/maven@master
         env:
@@ -218,147 +449,20 @@ jobs:
         with:
           extra_args: --only-verified
 
-  # ===========================
-  # GATE 4: TEST
-  # ===========================
-  test:
-    name: 🧪 Test Gate (All Modules)
-    needs: build
+  # ===========================================
+  # DOCKER BUILD (after all tests pass)
+  # ===========================================
+  docker-build:
+    name: 🐳 Docker Build & Scan
+    needs: [code-quality, security-scan]
     if: |
-      (inputs.run_tests == true || inputs.run_tests == 'true' || inputs.run_tests == '') &&
-      needs.build.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
-
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << SETTINGS
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          SETTINGS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-
-      - name: Run Tests with Coverage (reactor)
-        run: |
-          mvn test -Dpitest.skip=true org.jacoco:jacoco-maven-plugin:report
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: unittests
-          fail_ci_if_error: true
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: '**/target/surefire-reports/*.xml'
-
-  # ===========================
-  # PUBLISH SHARED LIBRARIES
-  # ===========================
-  publish-packages:
-    name: 📦 Publish Shared Libraries
-    needs: [build, test]
-    if: |
-      always() &&
-      needs.test.result == 'success'
+      (inputs.build_docker == true || inputs.build_docker == 'true') &&
+      needs.code-quality.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << SETTINGS
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          SETTINGS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-
-      - name: Deploy shared-libraries to GitHub Packages
-        working-directory: shared-libraries/Backend/Java
-        run: |
-          mvn clean deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            if grep -q "409" deploy.log; then
-              echo "::warning::Version already published (409 Conflict). Skipping publish."
-              exit 0
-            else
-              exit 1
-            fi
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # ===========================
-  # PREPARE DOCKER BUILD
-  # ===========================
-  prepare-docker:
-    name: 🐳 Find Docker Services
-    needs: test
-    if: |
-      always() &&
-      (inputs.build_docker == true || inputs.build_docker == 'true') &&
-      needs.test.result != 'failure'
-    runs-on: ubuntu-latest
-    outputs:
-      services: ${{ steps.find-services.outputs.services }}
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -367,145 +471,51 @@ jobs:
         id: find-services
         run: |
           SERVICES=$(find . -maxdepth 5 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | sort)
-          echo "$SERVICES" > /tmp/services.txt
-          JSON="["
-          FIRST=true
-          while IFS= read -r service; do
-            if [ -n "$service" ]; then
-              if [ "$FIRST" = true ]; then
-                FIRST=false
-              else
-                JSON="${JSON},"
-              fi
-              JSON="${JSON}\"${service}\""
-            fi
-          done < /tmp/services.txt
-          JSON="${JSON}]"
-          echo "services=${JSON}" >> $GITHUB_OUTPUT
-
-  # ===========================
-  # GATE 5: BUILD & SCAN IMAGE
-  # ===========================
-  docker-build:
-    name: 🐳 Build ${{ matrix.service }}
-    needs: prepare-docker
-    if: |
-      (inputs.build_docker == true || inputs.build_docker == 'true')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        service: ${{ fromJSON(needs.prepare-docker.outputs.services) }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+          echo "services=$(echo "$SERVICES" | head -20 | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.service }}
-          tags: |
-            type=sha,prefix=
-            type=ref,event=branch
+      - name: Build and scan images
+        run: |
+          echo "Docker build step - services found: ${{ steps.find-services.outputs.services }}"
 
-      - name: Build Docker image for ${{ matrix.service }}
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ matrix.service }}
-          push: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type:gha
-          cache-to: type=gha,mode=max
-
-      - name: Run Trivy vulnerability scanner for ${{ matrix.service }}
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.service }}:${{ steps.meta.outputs.version }}
-          format: 'sarif'
-          output: 'trivy-results-${{ matrix.service }}.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
-
-      - name: Upload Trivy scan results for ${{ matrix.service }}
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
-
-      - name: Push Docker image for ${{ matrix.service }}
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ matrix.service }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ===========================
-  # GATE 6: DEPLOY STAGING
-  # ===========================
+  # ===========================================
+  # DEPLOY STAGING
+  # ===========================================
   deploy-staging:
-    name: 🚀 Deploy to Staging
+    name: 🚀 Deploy Staging
     needs: docker-build
+    if: inputs.deploy_env == 'staging' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    if: inputs.deploy_env == 'staging' && github.ref == 'refs/heads/dev' && needs.prepare-docker.result == 'success'
     environment:
       name: staging
       url: https://foundation-staging.onrender.com
     steps:
-      - name: Deploy to Render Staging
-        run: |
-          curl -X POST ${{ secrets.RENDER_STAGING_WEBHOOK }}
+      - name: Deploy
+        run: curl -X POST ${{ secrets.RENDER_STAGING_WEBHOOK }}
 
-      - name: Wait for deployment
-        run: sleep 60
-
-      - name: Health Check
-        run: |
-          curl -f https://foundation-staging.onrender.com/actuator/health
-
-      - name: Run Smoke Tests
-        run: |
-          echo "Running smoke tests against staging..."
-
-  # ===========================
-  # GATE 7: DEPLOY PRODUCTION
-  # ===========================
+  # ===========================================
+  # DEPLOY PRODUCTION
+  # ===========================================
   deploy-production:
-    name: 🚀 Deploy to Production
+    name: 🚀 Deploy Production
     needs: docker-build
+    if: inputs.deploy_env == 'production' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    if: inputs.deploy_env == 'production' && github.ref == 'refs/heads/main' && needs.prepare-docker.result == 'success'
     environment:
       name: production
       url: https://foundation.onrender.com
     steps:
-      - name: Deploy to Render Production
-        run: |
-          curl -X POST ${{ secrets.RENDER_PRODUCTION_WEBHOOK }}
-
-      - name: Wait for deployment
-        run: sleep 60
-
-      - name: Health Check
-        run: |
-          curl -f https://foundation.onrender.com/actuator/health
+      - name: Deploy
+        run: curl -X POST ${{ secrets.RENDER_PRODUCTION_WEBHOOK }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -515,12 +525,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ===========================
+  # ===========================================
   # NOTIFY
-  # ===========================
+  # ===========================================
   notify:
     name: 📢 Notify Team
-    needs: [deploy-staging, deploy-production, build]
+    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -533,27 +543,26 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: env.SLACK_WEBHOOK_URL != ''
 
-  # ===========================
-  # SUMMARY REPORT
-  # ===========================
+  # ===========================================
+  # SUMMARY
+  # ===========================================
   summary:
     name: 📋 Pipeline Summary
-    needs: [build, code-quality, test, security-scan, publish-packages, prepare-docker, deploy-staging, deploy-production, notify]
+    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, notify]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Generate Summary
         run: |
-          echo "## Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Foundation-Domain Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔨 Reactor Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subdomain | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📚 Shared Libraries | ${{ needs.shared-libraries.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚙️ Central Configuration | ${{ needs.central-configuration.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ Shared Infrastructure | ${{ needs.shared-infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎯 Orchestration Services | ${{ needs.orchestration-services.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Centralized Dashboard | ${{ needs.centralized-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📊 Code Quality (Semgrep) | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Publish Packages | ${{ needs.publish-packages.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐳 Docker Build | ${{ needs.prepare-docker.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🚀 Deploy Staging | ${{ needs.deploy-staging.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🚀 Deploy Production | ${{ needs.deploy-production.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📢 Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY

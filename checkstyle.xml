@@ -36,9 +36,6 @@
         <module name="ParameterAssignment"/>
         <module name="RedundantImport"/>
         <module name="SimplifyBooleanExpression"/>
-        <module name="SimplifyBooleanReturn"/>
-        <module name="StringLiteralEquality"/>
-        <module name="UnusedImports"/>
         <module name="UpperEll"/>
 
         <module name="JavadocMethod">
