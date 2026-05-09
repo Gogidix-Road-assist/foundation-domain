@@ -55,7 +55,7 @@ class IdempotencyControllerTest {
     @WithMockUser
     void reserveIdempotencyKey_Success() throws Exception {
         IdempotencyRecord record = new IdempotencyRecord(
-                "tenant-123", "key-abc123", IdempotencyStatus.RESERVED, Instant.now(), null
+                "tenant-123", "key-abc123", IdempotencyStatus.RESERVED, Instant.now()
         );
 
         when(reserveIdempotencyKeyCommand.reserve(eq("tenant-123"), eq("key-abc123")))
@@ -97,7 +97,7 @@ class IdempotencyControllerTest {
     @WithMockUser
     void getIdempotencyRecord_Success() throws Exception {
         IdempotencyRecord record = new IdempotencyRecord(
-                "tenant-123", "key-abc123", IdempotencyStatus.COMPLETED, Instant.now(), Instant.now()
+                "tenant-123", "key-abc123", IdempotencyStatus.COMPLETED, Instant.now()
         );
 
         when(getIdempotencyRecordQuery.get(eq("tenant-123"), eq("key-abc123")))
