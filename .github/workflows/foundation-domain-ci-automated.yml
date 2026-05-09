@@ -243,13 +243,13 @@ jobs:
         if: success()
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          mvn checkstyle:check -DskipTests || echo "Checkstyle warnings found"
+          mvn checkstyle:check -DskipTests
 
       - name: SpotBugs
         if: success()
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          mvn spotbugs:check -DskipTests || echo "SpotBugs warnings found"
+          mvn spotbugs:check -DskipTests
 
   # ===========================
   # NODE GATE 1: BUILD
@@ -395,14 +395,11 @@ jobs:
               -Dsonar.organization=${{ env.SONAR_ORG }} \
               -Dsonar.projectKey=${{ env.SONAR_ORG }}_foundation-domain \
               -Dsonar.java.binaries=target/classes \
-              -Dsonar.qualitygate.wait=false
+              -Dsonar.qualitygate.wait=true
           else
-            echo "SONAR_TOKEN not set, skipping SonarCloud analysis"
+            echo "::error::SONAR_TOKEN not set. Code quality gate cannot run."
+            exit 1
           fi
-        continue-on-error: true
-
-  # ===========================
-  # NODE GATE 2: CODE QUALITY
   # ===========================
   code-quality-node:
     name: 📊 Code Quality Gate (Node.js)
@@ -455,11 +452,11 @@ jobs:
               -Dsonar.organization=${{ env.SONAR_ORG }} \
               -Dsonar.projectKey=${{ env.SONAR_ORG }}_foundation-domain \
               -Dsonar.sources=. \
-              -Dsonar.qualitygate.wait=false
+              -Dsonar.qualitygate.wait=true
           else
-            echo "SONAR_TOKEN not set, skipping SonarCloud analysis"
+            echo "::error::SONAR_TOKEN not set. Code quality gate cannot run."
+            exit 1
           fi
-        continue-on-error: true
 
   # ===========================
   # JAVA GATE 3: SECURITY
@@ -492,7 +489,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --fail-on=all --working-directory=${{ env.WORKING_DIR }}
-        continue-on-error: true
 
       - name: OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
@@ -502,7 +498,6 @@ jobs:
           format: 'ALL'
           out: '${{ env.WORKING_DIR }}/reports'
           args: --failOnCVSS 7
-        continue-on-error: true
 
       - name: Upload OWASP Report
         if: always()
@@ -516,7 +511,6 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --only-verified
-        continue-on-error: true
 
   # ===========================
   # NODE GATE 3: SECURITY
@@ -565,18 +559,15 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --fail-on=all
-        continue-on-error: true
 
       - name: npm audit
         working-directory: ${{ env.WORKING_DIR }}
-        run: npm audit --audit-level=high || true
-        continue-on-error: true
+        run: npm audit --audit-level=high
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --only-verified
-        continue-on-error: true
 
   # ===========================
   # JAVA GATE 4: TEST
@@ -636,8 +627,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.WORKING_DIR }}/target/site/jacoco/jacoco.xml
           flags: unittests
-          fail_ci_if_error: false
-        continue-on-error: true
+          fail_ci_if_error: true
 
       - name: Upload Test Results
         if: always()
@@ -696,8 +686,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
-          fail_ci_if_error: false
-        continue-on-error: true
+          fail_ci_if_error: true
 
       - name: Upload Test Results
         if: always()
@@ -872,13 +861,12 @@ jobs:
           format: 'sarif'
           output: 'trivy-results-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
-        continue-on-error: true
+          exit-code: '1'
 
       - name: Upload Trivy scan results for ${{ matrix.service }}
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
-        continue-on-error: true
 
       - name: Push Docker image for ${{ matrix.service }}
         uses: docker/build-push-action@v5
@@ -911,8 +899,7 @@ jobs:
 
       - name: Health Check
         run: |
-          curl -f https://foundation-staging.onrender.com/actuator/health || exit 1
-        continue-on-error: true
+          curl -f https://foundation-staging.onrender.com/actuator/health
 
       - name: Run Smoke Tests
         run: |
@@ -939,8 +926,7 @@ jobs:
 
       - name: Health Check
         run: |
-          curl -f https://foundation.onrender.com/actuator/health || exit 1
-        continue-on-error: true
+          curl -f https://foundation.onrender.com/actuator/health
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
