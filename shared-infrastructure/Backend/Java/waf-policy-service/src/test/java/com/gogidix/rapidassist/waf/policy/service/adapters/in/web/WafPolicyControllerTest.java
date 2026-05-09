@@ -52,7 +52,7 @@ class WafPolicyControllerTest {
         WafDecision decision = new WafDecision(
                 true,
                 "rule-123",
-                WafDecision.Action.ALLOW,
+                "ALLOW",
                 "Request allowed",
                 Map.of("score", "0.1")
         );
@@ -80,7 +80,7 @@ class WafPolicyControllerTest {
         WafDecision decision = new WafDecision(
                 false,
                 "rule-456",
-                WafDecision.Action.BLOCK,
+                "BLOCK",
                 "SQL injection detected",
                 Map.of("score", "0.95", "pattern", "sql-injection")
         );
@@ -109,7 +109,7 @@ class WafPolicyControllerTest {
         WafDecision decision = new WafDecision(
                 true,
                 "rule-default",
-                WafDecision.Action.ALLOW,
+                "ALLOW",
                 "Default allow",
                 Map.of()
         );
@@ -128,7 +128,7 @@ class WafPolicyControllerTest {
         WafDecision decision = new WafDecision(
                 false,
                 "rule-rate-limit",
-                WafDecision.Action.THROTTLE,
+                "THROTTLE",
                 "Rate limit exceeded",
                 Map.of("limit", "100", "window", "60s")
         );
