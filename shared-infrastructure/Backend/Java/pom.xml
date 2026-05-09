@@ -29,9 +29,6 @@
         <module>identity-service</module>
         <module>integration-adapters-service</module>
         <module>logging-aggregation-service</module>
-        <module>mechanics-gps-tracker-service</module>
-        <module>mechanics-insurance-bridge-service</module>
-        <module>mechanics-vendors-bridge-service</module>
         <module>metrics-telemetry-service</module>
         <module>mfa-service</module>
         <module>rate-limiting-service</module>
