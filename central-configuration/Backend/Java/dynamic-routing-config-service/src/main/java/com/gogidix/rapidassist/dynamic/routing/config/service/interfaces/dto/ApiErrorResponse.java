@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.dynamic.routing.config.interfaces.dto;
+package com.gogidix.rapidassist.dynamic.routing.config.service.interfaces.dto;
 
 import java.time.Instant;
 

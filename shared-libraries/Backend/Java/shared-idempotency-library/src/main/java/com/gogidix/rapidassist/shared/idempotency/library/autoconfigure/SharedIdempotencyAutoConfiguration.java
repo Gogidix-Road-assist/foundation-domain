@@ -8,7 +8,7 @@ import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.databas
 import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.hash.DefaultIdempotencyRequestHasher;
 import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.metrics.IdempotencyMetrics;
 import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.noop.NoOpIdempotencyStore;
-import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.policy.DefaultIdempotencyPolicy;
+import com.gogidix.rapidassist.shared.idempotency.library.domain.policy.DefaultIdempotencyPolicy;
 import com.gogidix.rapidassist.shared.idempotency.library.infrastructure.redis.RedisIdempotencyStore;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

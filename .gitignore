@@ -42,6 +42,8 @@ test-output/
 **/node_modules/
 **/.next/
 
+shared-libraries/Frontend/
+
 # Local configs
 application-local.yml
 application-local.properties

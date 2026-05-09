@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.dynamic.routing.config.interfaces.rest;
+package com.gogidix.rapidassist.dynamic.routing.config.service.interfaces.rest;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

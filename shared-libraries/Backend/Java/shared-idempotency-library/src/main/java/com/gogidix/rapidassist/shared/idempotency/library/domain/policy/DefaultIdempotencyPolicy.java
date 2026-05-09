@@ -1,8 +1,7 @@
-package com.gogidix.rapidassist.shared.idempotency.library.infrastructure.policy;
+package com.gogidix.rapidassist.shared.idempotency.library.domain.policy;
 
 import com.gogidix.rapidassist.shared.idempotency.library.autoconfigure.IdempotencyProperties;
-import com.gogidix.rapidassist.shared.idempotency.library.domain.policy.IdempotencyDecision;
-import com.gogidix.rapidassist.shared.idempotency.library.domain.policy.IdempotencyPolicy;
+
 import com.gogidix.rapidassist.shared.idempotency.library.domain.port.out.IdempotencyStore;
 
 public class DefaultIdempotencyPolicy implements IdempotencyPolicy {
