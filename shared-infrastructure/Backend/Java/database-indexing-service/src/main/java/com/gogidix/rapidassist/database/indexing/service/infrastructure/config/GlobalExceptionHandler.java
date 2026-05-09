@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.database.indexing.infrastructure.config;
+package com.gogidix.rapidassist.database.indexing.service.infrastructure.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

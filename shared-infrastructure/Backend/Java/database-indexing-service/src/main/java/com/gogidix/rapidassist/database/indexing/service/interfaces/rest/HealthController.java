@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.database.indexing.interfaces.rest;
+package com.gogidix.rapidassist.database.indexing.service.interfaces.rest;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

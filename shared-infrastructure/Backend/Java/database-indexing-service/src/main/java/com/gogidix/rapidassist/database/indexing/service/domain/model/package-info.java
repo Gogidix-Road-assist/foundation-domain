@@ -7,4 +7,4 @@
  * @author Rapid Assist
  * @version 1.0.0
  */
-package com.gogidix.rapidassist.database.indexing.domain.model;
+package com.gogidix.rapidassist.database.indexing.service.domain.model;

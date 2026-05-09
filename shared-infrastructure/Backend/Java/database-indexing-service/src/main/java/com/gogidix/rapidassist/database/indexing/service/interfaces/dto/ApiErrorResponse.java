@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.database.indexing.interfaces.dto;
+package com.gogidix.rapidassist.database.indexing.service.interfaces.dto;
 
 import java.time.Instant;
 
