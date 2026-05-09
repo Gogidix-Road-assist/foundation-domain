@@ -242,7 +242,7 @@ jobs:
         if: success()
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          mvn checkstyle:check -DskipTests
+          mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/${{ env.WORKING_DIR }}/checkstyle.xml"
 
       - name: SpotBugs
         if: success()
