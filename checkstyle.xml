@@ -31,18 +31,11 @@
         <module name="ModifierOrder"/>
         <module name="NoClone"/>
         <module name="NoFinalizer"/>
-        <module name="NonEmptyAtclauseDescription"/>
         <module name="PackageDeclaration"/>
         <module name="ParameterAssignment"/>
         <module name="RedundantImport"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="UpperEll"/>
-
-        <module name="JavadocMethod">
-            <property name="accessModifiers" value="public"/>
-            <property name="allowMissingParamTags" value="true"/>
-            <property name="allowMissingReturnTag" value="true"/>
-        </module>
 
         <module name="RegexpSinglelineJava">
             <property name="format" value="System\.out\.println"/>
