@@ -44,12 +44,12 @@ on:
         default: true
         type: boolean
       run_security_scan:
-        description: 'Run security scans (Snyk, OWASP, Gitleaks)'
+        description: 'Run security scans (Snyk, TruffleHog)'
         required: true
         default: true
         type: boolean
       run_code_quality:
-        description: 'Run code quality checks (SonarCloud)'
+        description: 'Run code quality checks (Semgrep)'
         required: true
         default: true
         type: boolean
@@ -82,7 +82,6 @@ env:
   JAVA_DISTRIBUTION: 'temurin'
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
-  SONAR_ORG: gogidix-road-assist
   WORKING_DIR: ${{ inputs.working_dir || 'shared-libraries/Backend/Java' }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
@@ -356,12 +355,12 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: 'maven'
 
-      - name: Cache SonarCloud packages
+      - name: Cache Maven packages
         uses: actions/cache@v4
         with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Configure Maven settings
         run: |
@@ -383,23 +382,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Build and analyze
-        working-directory: ${{ env.WORKING_DIR }}
+      - name: Semgrep Scan
+        uses: semgrep/semgrep@main
+        with:
+          config: auto
+          working-directory: ${{ env.WORKING_DIR }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [ -n "$SONAR_TOKEN" ]; then
-            mvn clean verify sonar:sonar \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.organization=${{ env.SONAR_ORG }} \
-              -Dsonar.projectKey=${{ env.SONAR_ORG }}_foundation-domain \
-              -Dsonar.java.binaries=target/classes \
-              -Dsonar.qualitygate.wait=true
-          else
-            echo "::error::SONAR_TOKEN not set. Code quality gate cannot run."
-            exit 1
-          fi
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
   # ===========================
   code-quality-node:
     name: 📊 Code Quality Gate (Node.js)
@@ -440,23 +429,13 @@ jobs:
             npm install
           fi
 
-      - name: SonarCloud Scan
-        working-directory: ${{ env.WORKING_DIR }}
+      - name: Semgrep Scan
+        uses: semgrep/semgrep@main
+        with:
+          config: auto
+          working-directory: ${{ env.WORKING_DIR }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [ -n "$SONAR_TOKEN" ]; then
-            npx sonarqube-scanner \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.organization=${{ env.SONAR_ORG }} \
-              -Dsonar.projectKey=${{ env.SONAR_ORG }}_foundation-domain \
-              -Dsonar.sources=. \
-              -Dsonar.qualitygate.wait=true
-          else
-            echo "::error::SONAR_TOKEN not set. Code quality gate cannot run."
-            exit 1
-          fi
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   # ===========================
   # JAVA GATE 3: SECURITY
@@ -489,23 +468,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --fail-on=all --working-directory=${{ env.WORKING_DIR }}
-
-      - name: OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: 'Foundation Domain'
-          path: ${{ env.WORKING_DIR }}
-          format: 'ALL'
-          out: '${{ env.WORKING_DIR }}/reports'
-          args: --failOnCVSS 7
-
-      - name: Upload OWASP Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: owasp-report
-          path: ${{ env.WORKING_DIR }}/reports/
-          if-no-files-found: ignore
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@main
