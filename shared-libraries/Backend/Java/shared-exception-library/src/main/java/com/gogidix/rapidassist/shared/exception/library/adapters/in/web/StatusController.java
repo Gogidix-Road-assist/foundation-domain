@@ -1,9 +1,17 @@
 package com.gogidix.rapidassist.shared.exception.library.adapters.in.web;
 
 import com.gogidix.rapidassist.shared.exception.library.domain.port.in.GetStatusQuery;
-import com.gogidix.rapidassist.shared.exception.library.exception.*;
+import com.gogidix.rapidassist.shared.exception.library.exception.BadRequestException;
+import com.gogidix.rapidassist.shared.exception.library.exception.ConflictException;
+import com.gogidix.rapidassist.shared.exception.library.exception.ForbiddenException;
+import com.gogidix.rapidassist.shared.exception.library.exception.NotFoundException;
+import com.gogidix.rapidassist.shared.exception.library.exception.ServiceUnavailableException;
+import com.gogidix.rapidassist.shared.exception.library.exception.UnauthorizedException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
