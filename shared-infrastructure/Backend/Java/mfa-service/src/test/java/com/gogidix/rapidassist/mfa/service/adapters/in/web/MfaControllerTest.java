@@ -49,7 +49,7 @@ class MfaControllerTest {
 
     @Test
     void enroll_Success() throws Exception {
-        MfaEnrollment enrollment = new MfaEnrollment("enrollment-123", "user-456", "TOTP", Instant.now());
+        MfaEnrollment enrollment = new MfaEnrollment("tenant-123", "user-456", "TOTP", "enrollment-123", Instant.now());
         when(enrollMfaCommand.enroll(eq("tenant-123"), eq("user-456"), eq("TOTP")))
                 .thenReturn(enrollment);
 
