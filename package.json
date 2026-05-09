@@ -1,0 +1,19 @@
+{
+  "name": "foundation-domain",
+  "version": "1.0.0",
+  "description": "Shared infrastructure and utilities for the Rapid Assist platform.",
+  "main": "setup-foundation-domain-mongodb.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "mongodb": "^7.0.0"
+  }
+}

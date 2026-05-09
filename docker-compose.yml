@@ -1,0 +1,246 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  mongodb:
+    image: mongo:6.0
+    container_name: foundation-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping']"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: foundation-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: foundation
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: foundation-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Core Foundation Services
+  api-gateway:
+    build:
+      context: ./shared-infrastructure/Backend/Java/api-gateway
+      dockerfile: Dockerfile
+    container_name: foundation-api-gateway
+    ports:
+      - "8304:8304"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+      REDIS_URL: redis://redis:6379
+      POSTGRES_URL: jdbc:postgresql://admin:password123@postgres:5432/foundation
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  identity-service:
+    build:
+      context: ./shared-infrastructure/Backend/Java/identity-service
+      dockerfile: Dockerfile
+    container_name: foundation-identity-service
+    ports:
+      - "8888:8316"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  config-service:
+    build:
+      context: ./central-configuration/Backend/Java/config-service
+      dockerfile: Dockerfile
+    container_name: foundation-config-service
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  monitoring-service:
+    build:
+      context: ./orchestration-services/Backend/Java/monitoring-service
+      dockerfile: Dockerfile
+    container_name: foundation-monitoring-service
+    ports:
+      - "8091:8091"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./shared-infrastructure/Backend/Java/notification-service
+      dockerfile: Dockerfile
+    container_name: foundation-notification-service
+    ports:
+      - "8323:8323"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # AI Gateway Service
+  ai-gateway-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-gateway-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-gateway
+    ports:
+      - "8200:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Key AI Services
+  ai-inference-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-inference-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-inference
+    ports:
+      - "8201:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  ai-model-management-service:
+    build:
+      context: ./ai-services/Backend/Java/ai-model-management-service
+      dockerfile: Dockerfile
+    container_name: foundation-ai-model-mgmt
+    ports:
+      - "8202:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # Additional Core Services
+  service-registry-discovery:
+    build:
+      context: ./shared-infrastructure/Backend/Java/service-registry-discovery
+      dockerfile: Dockerfile
+    container_name: foundation-service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  rate-limiting-service:
+    build:
+      context: ./shared-infrastructure/Backend/Java/rate-limiting-service
+      dockerfile: Dockerfile
+    container_name: foundation-rate-limiting
+    ports:
+      - "8320:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  foundation-network:
+    driver: bridge
