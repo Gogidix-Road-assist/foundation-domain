@@ -102,6 +102,21 @@ jobs:
         working-directory: shared-libraries/Backend/Java
         run: mvn package -DskipTests
 
+      - name: Deploy root reactor POM
+        working-directory: .
+        run: |
+          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee root-deploy.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            if grep -q "409" root-deploy.log; then
+              echo "::warning::Root POM version already published (409). Skipping."
+              exit 0
+            else
+              exit 1
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to GitHub Packages
         working-directory: shared-libraries/Backend/Java
         run: |
@@ -166,6 +181,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Install root reactor POM
+        run: mvn install -DskipTests -N -q
 
       - name: Install shared-libraries
         working-directory: shared-libraries/Backend/Java
@@ -237,6 +255,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
+      - name: Install root reactor POM
+        run: mvn install -DskipTests -N -q
+
       - name: Install shared-libraries
         working-directory: shared-libraries/Backend/Java
         run: mvn clean install -DskipTests -q
@@ -307,6 +328,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
+      - name: Install root reactor POM
+        run: mvn install -DskipTests -N -q
+
       - name: Install shared-libraries
         working-directory: shared-libraries/Backend/Java
         run: mvn clean install -DskipTests -q
@@ -368,6 +392,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Install root reactor POM
+        run: mvn install -DskipTests -N -q
 
       - name: Install shared-libraries
         working-directory: shared-libraries/Backend/Java
