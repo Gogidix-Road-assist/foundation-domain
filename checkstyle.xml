@@ -23,7 +23,9 @@
             <property name="illegalClassNames" value="Error,RuntimeException"/>
         </module>
         <module name="IllegalImport"/>
-        <module name="IllegalThrows"/>
+        <module name="IllegalThrows">
+            <property name="illegalClassNames" value="Error,RuntimeException"/>
+        </module>
         <module name="InnerAssignment"/>
         <module name="MissingOverride"/>
         <module name="ModifierOrder"/>
