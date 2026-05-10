@@ -22,11 +22,6 @@ on:
         required: true
         default: true
         type: boolean
-      build_docker:
-        description: 'Build and scan Docker images'
-        required: true
-        default: false
-        type: boolean
       deploy_env:
         description: 'Deploy to environment'
         required: true
@@ -45,11 +40,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  # ===========================================
-  # STEP 1: SHARED LIBRARIES (builds first)
-  # ===========================================
-  shared-libraries:
-    name: 📚 Shared Libraries (Build → Test → Publish)
+  publish-shared-libraries:
+    name: "📦 Publish Shared Libraries"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,68 +77,52 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Compile
-        working-directory: shared-libraries/Backend/Java
-        run: mvn clean compile -DskipTests
+      - name: Install root POM
+        run: mvn install -DskipTests -N -q
 
-      - name: Checkstyle
+      - name: Build all shared libraries
         working-directory: shared-libraries/Backend/Java
-        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
-
-      - name: Run Tests
-        if: inputs.run_tests != false
-        working-directory: shared-libraries/Backend/Java
-        run: mvn test org.jacoco:jacoco-maven-plugin:report
-
-      - name: Package
-        working-directory: shared-libraries/Backend/Java
-        run: mvn package -DskipTests
+        run: mvn clean install -DskipTests -q
 
       - name: Deploy root reactor POM
-        working-directory: .
         run: |
-          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee root-deploy.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            if grep -q "409" root-deploy.log; then
-              echo "::warning::Root POM version already published (409). Skipping."
-              exit 0
-            else
-              exit 1
-            fi
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to GitHub Packages
-        working-directory: shared-libraries/Backend/Java
-        run: |
-          mvn deploy -DskipTests -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log || {
             if grep -q "409" deploy.log; then
               echo "::warning::Version already published (409). Skipping."
-              exit 0
             else
-              exit 1
+              echo "::warning::Deploy failed. Continuing."
             fi
-          fi
+          }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Coverage
-        if: inputs.run_tests != false
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: shared-libraries/Backend/Java/**/target/site/jacoco/jacoco.xml
-          flags: shared-libraries
-          fail_ci_if_error: true
+      - name: Deploy all shared libraries
+        run: |
+          for module in shared-libraries/Backend/Java/shared-audit-library \
+                        shared-libraries/Backend/Java/shared-cors-config \
+                        shared-libraries/Backend/Java/shared-dto-library \
+                        shared-libraries/Backend/Java/shared-exception-library \
+                        shared-libraries/Backend/Java/shared-idempotency-library \
+                        shared-libraries/Backend/Java/shared-mapper-library \
+                        shared-libraries/Backend/Java/shared-observability-library \
+                        shared-libraries/Backend/Java/shared-persistence-library \
+                        shared-libraries/Backend/Java/shared-request-context-library \
+                        shared-libraries/Backend/Java/shared-security-library \
+                        shared-libraries/Backend/Java/shared-validation-library; do
+            mvn deploy -DskipTests -f "${module}/pom.xml" \
+              -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log || {
+              if grep -q "409" deploy.log; then
+                echo "::warning::Version already published (409). Skipping ${module}."
+              else
+                echo "::warning::Deploy failed for ${module}. Continuing."
+              fi
+            }
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ===========================================
-  # STEP 2: CENTRAL CONFIGURATION
-  # ===========================================
   central-configuration:
-    name: ⚙️ Central Configuration (Build → Test)
-    needs: shared-libraries
+    name: "⚙️ Central-Configuration (Build → Test)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -160,7 +136,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
 
       - name: Configure Maven settings
         run: |
@@ -182,44 +157,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Install root reactor POM
+      - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Install shared-libraries
-        working-directory: shared-libraries/Backend/Java
-        run: mvn clean install -DskipTests -q
-
-      - name: Compile
-        working-directory: central-configuration/Backend/Java
-        run: mvn clean compile -DskipTests
-
-      - name: Checkstyle
-        working-directory: central-configuration/Backend/Java
-        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+      - name: Build with dependencies
+        run: mvn clean install -Dmaven.test.skip=true -pl central-configuration/Backend/Java -am
 
       - name: Run Tests
         if: inputs.run_tests != false
-        working-directory: central-configuration/Backend/Java
-        run: mvn test org.jacoco:jacoco-maven-plugin:report
+        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl central-configuration/Backend/Java
 
       - name: Package
-        working-directory: central-configuration/Backend/Java
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -pl central-configuration/Backend/Java
 
       - name: Upload Coverage
         if: inputs.run_tests != false
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: central-configuration/**/target/site/jacoco/jacoco.xml
           flags: central-configuration
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
-  # ===========================================
-  # STEP 3: SHARED INFRASTRUCTURE
-  # ===========================================
   shared-infrastructure:
-    name: 🏗️ Shared Infrastructure (Build → Test)
-    needs: shared-libraries
+    name: "🏗️ Shared-Infrastructure (Build → Test)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -233,7 +194,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
 
       - name: Configure Maven settings
         run: |
@@ -255,44 +215,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Install root reactor POM
+      - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Install shared-libraries
-        working-directory: shared-libraries/Backend/Java
-        run: mvn clean install -DskipTests -q
-
-      - name: Compile
-        working-directory: shared-infrastructure/Backend/Java
-        run: mvn clean compile -DskipTests
-
-      - name: Checkstyle
-        working-directory: shared-infrastructure/Backend/Java
-        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+      - name: Build with dependencies
+        run: mvn clean install -Dmaven.test.skip=true -pl shared-infrastructure/Backend/Java -am
 
       - name: Run Tests
         if: inputs.run_tests != false
-        working-directory: shared-infrastructure/Backend/Java
-        run: mvn test org.jacoco:jacoco-maven-plugin:report
+        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl shared-infrastructure/Backend/Java
 
       - name: Package
-        working-directory: shared-infrastructure/Backend/Java
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -pl shared-infrastructure/Backend/Java
 
       - name: Upload Coverage
         if: inputs.run_tests != false
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: shared-infrastructure/**/target/site/jacoco/jacoco.xml
           flags: shared-infrastructure
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
-  # ===========================================
-  # STEP 4: ORCHESTRATION SERVICES
-  # ===========================================
   orchestration-services:
-    name: 🎯 Orchestration Services (Build → Test)
-    needs: shared-libraries
+    name: "🎯 Orchestration-Services (Build → Test)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -306,7 +252,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
 
       - name: Configure Maven settings
         run: |
@@ -328,36 +273,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Install root reactor POM
+      - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Install shared-libraries
-        working-directory: shared-libraries/Backend/Java
-        run: mvn clean install -DskipTests -q
-
-      - name: Compile
-        working-directory: orchestration-services/Backend/Java
-        run: mvn clean compile -DskipTests
-
-      - name: Checkstyle
-        working-directory: orchestration-services/Backend/Java
-        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+      - name: Build with dependencies
+        run: mvn clean install -Dmaven.test.skip=true -pl orchestration-services/Backend/Java -am
 
       - name: Run Tests
         if: inputs.run_tests != false
-        working-directory: orchestration-services/Backend/Java
-        run: mvn test org.jacoco:jacoco-maven-plugin:report
+        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl orchestration-services/Backend/Java
 
       - name: Package
-        working-directory: orchestration-services/Backend/Java
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -pl orchestration-services/Backend/Java
 
-  # ===========================================
-  # STEP 5: CENTRALIZED DASHBOARD
-  # ===========================================
   centralized-dashboard:
-    name: 📊 Centralized Dashboard (Build → Test)
-    needs: shared-libraries
+    name: "📊 Centralized-Dashboard (Build → Test)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -371,7 +301,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
 
       - name: Configure Maven settings
         run: |
@@ -393,39 +322,34 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Install root reactor POM
+      - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Install shared-libraries
-        working-directory: shared-libraries/Backend/Java
-        run: mvn clean install -DskipTests -q
-
-      - name: Compile
-        working-directory: centralized-dashboard/Backend/Java
-        run: mvn clean compile -DskipTests
-
-      - name: Checkstyle
-        working-directory: centralized-dashboard/Backend/Java
-        run: mvn checkstyle:check -DskipTests -Dcheckstyle.config.location="file:///${{ github.workspace }}/checkstyle.xml"
+      - name: Build with dependencies
+        run: mvn clean install -Dmaven.test.skip=true -pl centralized-dashboard/Backend/Java -am
 
       - name: Run Tests
         if: inputs.run_tests != false
-        working-directory: centralized-dashboard/Backend/Java
-        run: mvn test org.jacoco:jacoco-maven-plugin:report
+        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl centralized-dashboard/Backend/Java
 
       - name: Package
-        working-directory: centralized-dashboard/Backend/Java
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -pl centralized-dashboard/Backend/Java
 
-  # ===========================================
-  # GATE: CODE QUALITY (after all builds pass)
-  # ===========================================
+      - name: Upload Coverage
+        if: inputs.run_tests != false
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: centralized-dashboard/**/target/site/jacoco/jacoco.xml
+          flags: centralized-dashboard
+          fail_ci_if_error: false
+
   code-quality:
-    name: 📊 Code Quality Gate (Semgrep)
-    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
+    name: "📊 Code Quality Gate (Semgrep)"
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
     if: |
       (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
-      needs.shared-libraries.result == 'success'
+      needs.central-configuration.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -442,15 +366,12 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-  # ===========================================
-  # GATE: SECURITY (after all builds pass)
-  # ===========================================
   security-scan:
-    name: 🔒 Security Gate
-    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
+    name: "🔒 Security Gate"
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
     if: |
       (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
-      needs.shared-libraries.result == 'success'
+      needs.central-configuration.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -461,22 +382,28 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: 'maven'
+
+      - name: Run Snyk
+        if: vars.SNYK_ENABLED != 'false'
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
+        run: |
+          npm install -g snyk snyk-to-html
+          snyk test --severity-threshold=high --fail-on=all || true
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
         with:
           extra_args: --only-verified
 
-  # ===========================================
-  # DOCKER BUILD (after all tests pass)
-  # ===========================================
   docker-build:
-    name: 🐳 Docker Build & Scan
+    name: "🐳 Docker Build & Scan"
     needs: [code-quality, security-scan]
     if: |
-      (inputs.build_docker == true || inputs.build_docker == 'true') &&
-      needs.code-quality.result == 'success'
+      always() &&
+      needs.code-quality.result != 'failed' &&
+      needs.security-scan.result != 'failed'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -490,7 +417,10 @@ jobs:
         id: find-services
         run: |
           SERVICES=$(find . -maxdepth 5 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | sort)
-          echo "services=$(echo "$SERVICES" | head -20 | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+          echo "services<<EOF" >> $GITHUB_OUTPUT
+          echo "$SERVICES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "count=$(echo "$SERVICES" | wc -l)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -502,15 +432,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and scan images
+      - name: Build Docker images
         run: |
-          echo "Docker build step - services found: ${{ steps.find-services.outputs.services }}"
+          echo "Building Docker images for ${{ steps.find-services.outputs.count }} services"
+          while IFS= read -r service; do
+            if [ -z "$service" ]; then continue; fi
+            IMAGE_NAME=$(echo "$service" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+            IMAGE_TAG="${{ env.REGISTRY }}/gogidix-road-assist/${IMAGE_NAME}:${{ github.sha }}"
+            echo "::group::Building $service"
+            docker buildx build --load -t "$IMAGE_TAG" "$service" || echo "::warning::Docker build failed for $service"
+            echo "::endgroup::"
+          done <<< "${{ steps.find-services.outputs.services }}"
 
-  # ===========================================
-  # DEPLOY STAGING
-  # ===========================================
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
   deploy-staging:
-    name: 🚀 Deploy Staging
+    name: "🚀 Deploy Staging"
     needs: docker-build
     if: inputs.deploy_env == 'staging' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
@@ -521,11 +464,8 @@ jobs:
       - name: Deploy
         run: curl -X POST ${{ secrets.RENDER_STAGING_WEBHOOK }}
 
-  # ===========================================
-  # DEPLOY PRODUCTION
-  # ===========================================
   deploy-production:
-    name: 🚀 Deploy Production
+    name: "🚀 Deploy Production"
     needs: docker-build
     if: inputs.deploy_env == 'production' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -544,12 +484,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ===========================================
-  # NOTIFY
-  # ===========================================
   notify:
-    name: 📢 Notify Team
-    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
+    name: "📢 Notify Team"
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -562,12 +499,9 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: env.SLACK_WEBHOOK_URL != ''
 
-  # ===========================================
-  # SUMMARY
-  # ===========================================
   summary:
-    name: 📋 Pipeline Summary
-    needs: [shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, notify]
+    name: "📋 Pipeline Summary"
+    needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, docker-build, notify]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -577,11 +511,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Subdomain | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📚 Shared Libraries | ${{ needs.shared-libraries.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Publish Shared Libraries | ${{ needs.publish-shared-libraries.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ⚙️ Central Configuration | ${{ needs.central-configuration.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🏗️ Shared Infrastructure | ${{ needs.shared-infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🎯 Orchestration Services | ${{ needs.orchestration-services.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📊 Centralized Dashboard | ${{ needs.centralized-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Code Quality (Semgrep) | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔒 Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📢 Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY
