@@ -76,6 +76,22 @@ spring:
           predicates:
             - Path=/health,/actuator/health
 
+        # Claim-Orchestrator Domain Routes
+        - id: claim-orchestrator
+          uri: ${GOGIDIX_CLAIM_ORCHESTRATOR_URL:http://localhost:8700}
+          predicates:
+            - Path=/api/claims/**,/api/incidents/**,/api/insurance-cases/**
+          filters:
+            - StripPrefix=0
+
+        # Management-Domain Gateway Route
+        - id: management-gateway
+          uri: ${GOGIDIX_MANAGEMENT_GATEWAY_URL:http://localhost:8100}
+          predicates:
+            - Path=/api/management/**
+          filters:
+            - StripPrefix=0
+
 management:
   endpoints:
     web:
