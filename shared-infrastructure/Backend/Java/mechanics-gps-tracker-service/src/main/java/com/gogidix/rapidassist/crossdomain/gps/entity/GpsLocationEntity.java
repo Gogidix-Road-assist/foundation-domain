@@ -3,7 +3,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
 
-import com.gogidix.rapidassist.shared.persistence.library.entity.BaseEntity;
+import com.gogidix.rapidassist.shared.persistence.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

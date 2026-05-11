@@ -1,6 +1,6 @@
 package com.gogidix.rapidassist.crossdomain.gps.config;
 
-import com.gogidix.rapidassist.shared.dto.library.common.ApiResponse;
+import com.gogidix.rapidassist.shared.dto.library.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

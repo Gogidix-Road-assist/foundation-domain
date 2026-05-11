@@ -2,7 +2,7 @@ package com.gogidix.rapidassist.crossdomain.gps.repository;
 
 import com.gogidix.rapidassist.crossdomain.gps.entity.GpsLocationEntity;
 import com.gogidix.rapidassist.crossdomain.gps.entity.GpsLocationEntity.LocationStatus;
-import com.gogidix.rapidassist.shared.persistence.library.repository.BaseRepository;
+import com.gogidix.rapidassist.shared.persistence.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
