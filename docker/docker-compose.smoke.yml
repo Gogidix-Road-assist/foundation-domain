@@ -24,6 +24,8 @@ services:
       - SERVER_PORT=8333
       - REDIS_HOST=redis
       - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -44,6 +46,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -64,6 +68,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -84,6 +90,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -104,6 +112,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
