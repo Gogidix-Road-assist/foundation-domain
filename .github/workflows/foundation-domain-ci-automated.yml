@@ -520,31 +520,23 @@ jobs:
           done
 
       - name: Deploy to ECS via RunCommand
+        env:
+          ALIBABA_AK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }}
+          ALIBABA_SK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }}
         run: |
-          SCRIPT=$(cat <<'DEPLOY_SCRIPT'
-          #!/bin/bash
+          DEPLOY_SCRIPT='#!/bin/bash
           cd /opt/gogidix/jars
-
-          # Download all JARs from OSS
           for jar in config-service-1.0.0.jar tenant-org-service-1.0.0.jar service-registry-discovery-1.0.0.jar monitoring-service-1.0.0.jar dashboard-configuration-service-1.0.0.jar; do
             echo "Downloading $jar..."
-            ossutil64 cp "oss://gogidix-platform-assets/deploy/$jar" "/opt/gogidix/jars/$jar" \
-              -e oss-eu-central-1.aliyuncs.com \
-              -i LTAI5tBaGhMFMK1Yt7sJXuBA \
-              -k '${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }}' \
-              -f 2>/dev/null || echo "Skip $jar (not found)"
+            ossutil64 cp "oss://gogidix-platform-assets/deploy/$jar" "/opt/gogidix/jars/$jar" -e oss-eu-central-1.aliyuncs.com -i LTAI5tBaGhMFMK1Yt7sJXuBA -k '"'$ALIBABA_SK'"' -f 2>/dev/null || echo "Skip $jar"
           done
-
-          # Restart all foundation services
           cd /opt/gogidix
           docker compose -f docker-compose-foundation.yml down
           sleep 5
           docker compose -f docker-compose-foundation.yml up -d
-          echo "Deployment complete"
-          DEPLOY_SCRIPT
-          )
+          echo "Deployment complete"'
 
-          B64_SCRIPT=$(echo "$SCRIPT" | base64 -w0)
+          B64_SCRIPT=$(echo "$DEPLOY_SCRIPT" | base64 -w0)
           aliyun ecs RunCommand \
             --RegionId "${{ vars.ALIBABA_CLOUD_REGION || 'eu-central-1' }}" \
             --InstanceId.1 "${{ vars.ALIBABA_CLOUD_ECS_INSTANCE_ID || 'i-gw80uxaqcmiep4d2uqj5' }}" \
