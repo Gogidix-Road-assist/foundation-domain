@@ -13,12 +13,13 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapid_assist_tenant_org?appName=Cluster0}
       database: ${MONGODB_DATABASE:rapid_assist_tenant_org}
 
   redis:
-    host: ${REDIS_HOST:localhost}
+    host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
     port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
     timeout: 2000ms
     lettuce:
       pool:

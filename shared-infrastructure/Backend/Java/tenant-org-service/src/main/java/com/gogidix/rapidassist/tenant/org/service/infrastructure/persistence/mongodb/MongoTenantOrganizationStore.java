@@ -5,6 +5,7 @@ import com.gogidix.rapidassist.tenant.org.service.domain.port.out.TenantOrganiza
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Component
+@Primary
 public class MongoTenantOrganizationStore implements TenantOrganizationStore {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoTenantOrganizationStore.class);

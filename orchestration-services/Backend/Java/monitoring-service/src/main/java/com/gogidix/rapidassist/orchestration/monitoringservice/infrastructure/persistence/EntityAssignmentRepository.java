@@ -18,7 +18,5 @@ public interface EntityAssignmentRepository extends MongoRepository<EntityAssign
 
     List<EntityAssignment> findByProviderIdAndStatusIn(String providerId, List<EntityAssignment.AssignmentStatus> statuses);
 
-    List<EntityAssignment> findByAssignedProviderIdAndStatusIn(String providerId, List<EntityAssignment.AssignmentStatus> statuses);
-
-    List<EntityAssignment> findByTenantIdAndCurrentStatus(String tenantId, EntityAssignment.AssignmentStatus status);
+    List<EntityAssignment> findByTenantIdAndStatus(String tenantId, EntityAssignment.AssignmentStatus status);
 }

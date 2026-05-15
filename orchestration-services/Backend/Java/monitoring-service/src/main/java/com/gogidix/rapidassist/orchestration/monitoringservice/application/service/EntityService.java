@@ -2,7 +2,6 @@ package com.gogidix.rapidassist.orchestration.monitoringservice.application.serv
 
 import com.gogidix.rapidassist.orchestration.monitoringservice.application.dto.*;
 import com.gogidix.rapidassist.orchestration.monitoringservice.domain.model.*;
-import com.gogidix.rapidassist.orchestration.monitoringservice.domain.repository.EntityRepository;
 import com.gogidix.rapidassist.orchestration.monitoringservice.infrastructure.persistence.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -228,7 +227,7 @@ public class EntityService {
     }
 
     public List<EntityProvider> getAvailableProviders(String tenantId) {
-        return providerRepository.findByTenantIdAndCurrentStatus(
+        return providerRepository.findByTenantIdAndStatus(
             tenantId,
             EntityProvider.ProviderStatus.AVAILABLE
         );

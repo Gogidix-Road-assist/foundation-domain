@@ -10,9 +10,9 @@ spring:
     name: mechanics-gps-tracker-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/gogidix_mechanics
-    username: gogidix_user
-    password: ${DB_PASSWORD:change_me_in_production}
+    url: jdbc:postgresql://${DB_HOST:pgm-4xo2o56xw3355a3z.pgsql.germany.rds.aliyuncs.com}:${DB_PORT:5432}/${DB_NAME:gogidix_mechanics}
+    username: ${DB_USERNAME:gogidix_admin}
+    password: ${DB_PASSWORD:Gog1d1xPlatform2026}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -38,9 +38,9 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
       database: 2
       timeout: 5000ms
       lettuce:

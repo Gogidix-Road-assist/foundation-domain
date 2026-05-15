@@ -15,7 +15,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapid_assist_gateway?appName=Cluster0}
       database: ${MONGODB_DATABASE:rapid_assist_gateway}
 
   cloud:

@@ -18,5 +18,13 @@ public interface EntityRepository extends MongoRepository<Entity, String> {
 
     List<Entity> findByAssignedProviderIdAndStatusIn(String providerId, List<Entity.EntityStatus> statuses);
 
-    List<Entity> findByTenantIdAndCurrentStatus(String tenantId, Entity.EntityStatus status);
+    List<Entity> findByTenantIdAndStatus(String tenantId, Entity.EntityStatus status);
+
+    Optional<Entity> findByEntityId(String entityId);
+
+    List<Entity> findByRequestId(String requestId);
+
+    List<Entity> findByTenantIdAndStatusIn(String tenantId, List<Entity.EntityStatus> statuses);
+
+    boolean existsByEntityId(String entityId);
 }

@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface EntityTrackingRepository extends MongoRepository<EntityTracking, String> {
 
-    List<EntityTracking> findByEntityIdOrderByEventTimestampDesc(String entityId);
+    List<EntityTracking> findByEntityIdOrderByTimestampDesc(String entityId);
 }

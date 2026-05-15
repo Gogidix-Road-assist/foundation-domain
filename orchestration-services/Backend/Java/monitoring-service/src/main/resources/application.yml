@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/orchestration_monitoring_service_db?authSource=admin
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/orchestration_monitoring_service_db?appName=Cluster0}
       auto-index-creation: true
 
   kafka:

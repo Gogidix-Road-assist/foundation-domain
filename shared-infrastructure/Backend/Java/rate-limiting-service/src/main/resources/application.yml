@@ -24,12 +24,12 @@ gogidix:
 spring:
   data:
     mongodb:
-      uri: ${GOGIDIX_MONGODB_URI:mongodb://localhost:27017/rapidassist}
+      uri: ${GOGIDIX_MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapidassist?appName=Cluster0}
       database: ${GOGIDIX_RATE_LIMITING_DB:rate_limiting}
   redis:
-    host: ${GOGIDIX_REDIS_HOST:localhost}
+    host: ${GOGIDIX_REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
     port: ${GOGIDIX_REDIS_PORT:6379}
-    password: ${GOGIDIX_REDIS_PASSWORD:}
+    password: ${GOGIDIX_REDIS_PASSWORD:Gog1d1xPlatform2026}
     timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
     lettuce:
       pool:

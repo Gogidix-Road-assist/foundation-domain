@@ -20,7 +20,7 @@ gogidix:
 spring:
   data:
     mongodb:
-      uri: ${GOGIDIX_MONGODB_URI:mongodb://localhost:27017/rapidassist}
+      uri: ${GOGIDIX_MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapidassist?appName=Cluster0}
       database: ${GOGIDIX_API_KEYS_DB:api_keys}
 
 management:

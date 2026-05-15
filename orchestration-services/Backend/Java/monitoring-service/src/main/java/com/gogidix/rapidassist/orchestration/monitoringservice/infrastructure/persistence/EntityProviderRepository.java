@@ -15,6 +15,4 @@ public interface EntityProviderRepository extends MongoRepository<EntityProvider
     List<EntityProvider> findByTenantIdAndStatus(String tenantId, EntityProvider.ProviderStatus status);
 
     List<EntityProvider> findByTenantId(String tenantId);
-
-    List<EntityProvider> findByTenantIdAndCurrentStatus(String tenantId, EntityProvider.ProviderStatus status);
 }
