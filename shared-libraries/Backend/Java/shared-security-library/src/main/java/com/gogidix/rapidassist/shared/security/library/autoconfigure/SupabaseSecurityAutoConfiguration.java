@@ -37,7 +37,9 @@ public class SupabaseSecurityAutoConfiguration {
             return http.build();
         }
 
-        http.authorizeHttpRequests((authz) -> authz.anyRequest().authenticated());
+        http.authorizeHttpRequests((authz) -> authz
+                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+                .anyRequest().authenticated());
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(new SupabaseJwtAuthoritiesConverter(props));
 
