@@ -1,15 +1,17 @@
-name: Auto Promote
+name: Auto Promote and Deploy
 
 on:
   workflow_run:
     workflows: ["Foundation-Domain CI/CD"]
     types: [completed]
-    branches: [dev]
+    branches: [dev, staging/uat]
 
 jobs:
-  promote-to-staging:
+  promote-dev-to-staging:
     name: "Promote dev to staging/uat"
-    if: github.event.workflow_run.conclusion == 'success'
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'dev'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -32,11 +34,30 @@ jobs:
           git merge dev --no-edit
           git push origin staging/uat
 
-  promote-staging-to-main:
-    name: "Promote staging/uat to main"
+  deploy-staging:
+    name: "Deploy to Alibaba Cloud Staging"
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'staging/uat'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: http://8.220.73.6:8333/actuator/health
+    steps:
+      - name: Checkout staging/uat
+        uses: actions/checkout@v4
+        with:
+          ref: staging/uat
+
+      - name: Placeholder - staging deployment
+        run: |
+          echo "Alibaba Cloud staging deployment will be configured here."
+          echo "Target: Alibaba Cloud ECS (eu-central-1)"
+
+  promote-staging-to-main:
+    name: "Promote staging/uat to main"
+    needs: deploy-staging
+    if: success()
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -58,3 +79,29 @@ jobs:
           git checkout main
           git merge staging/uat --no-edit
           git push origin main
+
+  deploy-production:
+    name: "Deploy to Alibaba Cloud Production"
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Placeholder - production deployment
+        run: |
+          echo "Alibaba Cloud production deployment will be configured here."

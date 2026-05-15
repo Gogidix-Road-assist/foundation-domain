@@ -480,108 +480,9 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
-  deploy-staging:
-    name: "🚀 Deploy Staging (Alibaba Cloud ECS)"
-    needs: docker-build
-    if: |
-      (inputs.deploy_env == 'staging' || github.ref == 'refs/heads/dev') &&
-      needs.docker-build.result == 'success'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: http://8.220.73.6:8333/actuator/health
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all JAR artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: all-jars
-          merge-multiple: true
-
-      - name: List built artifacts
-        run: find all-jars -name "*.jar" ! -name "*.original" | head -30
-
-      - name: Install Alibaba Cloud CLI
-        run: |
-          curl -o aliyun-cli.tgz https://aliyun-cli.alicdn.com/aliyun-cli-linux-latest-amd64.tgz
-          tar -xzf aliyun-cli.tgz
-          chmod +x aliyun
-          sudo mv aliyun /usr/local/bin/
-          aliyun configure set --profile staging --mode AK --access-key-id ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }} --access-key-secret ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }} --region ${{ vars.ALIBABA_CLOUD_REGION || 'eu-central-1' }}
-
-      - name: Upload JARs to OSS
-        run: |
-          find all-jars -name "*.jar" ! -name "*.original" | while read jar; do
-            filename=$(basename "$jar")
-            echo "Uploading $filename to OSS..."
-            aliyun oss cp "$jar" "oss://${{ vars.ALIBABA_CLOUD_OSS_BUCKET || 'gogidix-platform-assets' }}/deploy/$filename" --force
-          done
-
-      - name: Deploy to ECS via RunCommand
-        env:
-          ALIBABA_AK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }}
-          ALIBABA_SK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }}
-        run: |
-          DEPLOY_SCRIPT='#!/bin/bash
-          cd /opt/gogidix/jars
-          for jar in config-service-1.0.0.jar tenant-org-service-1.0.0.jar service-registry-discovery-1.0.0.jar monitoring-service-1.0.0.jar dashboard-configuration-service-1.0.0.jar; do
-            echo "Downloading $jar..."
-            ossutil64 cp "oss://gogidix-platform-assets/deploy/$jar" "/opt/gogidix/jars/$jar" -e oss-eu-central-1.aliyuncs.com -i LTAI5tBaGhMFMK1Yt7sJXuBA -k '"'$ALIBABA_SK'"' -f 2>/dev/null || echo "Skip $jar"
-          done
-          cd /opt/gogidix
-          docker compose -f docker-compose-foundation.yml down
-          sleep 5
-          docker compose -f docker-compose-foundation.yml up -d
-          echo "Deployment complete"'
-
-          B64_SCRIPT=$(echo "$DEPLOY_SCRIPT" | base64 -w0)
-          aliyun ecs RunCommand \
-            --RegionId "${{ vars.ALIBABA_CLOUD_REGION || 'eu-central-1' }}" \
-            --InstanceId.1 "${{ vars.ALIBABA_CLOUD_ECS_INSTANCE_ID || 'i-gw80uxaqcmiep4d2uqj5' }}" \
-            --Type RunShellScript \
-            --CommandContent "$B64_SCRIPT" \
-            --ContentEncoding Base64 \
-            --Timeout 300
-
-      - name: Wait for services to start
-        run: sleep 120
-
-      - name: Health check
-        run: |
-          echo "Checking Foundation services health..."
-          for svc in "service-registry:8333" "config-service:8080" "tenant-org:8085" "monitoring:8091" "dashboard-config:8200"; do
-            name=$(echo $svc | cut -d: -f1)
-            port=$(echo $svc | cut -d: -f2)
-            status=$(curl -s -o /dev/null -w "%{http_code}" http://8.220.73.6:$port/actuator/health 2>/dev/null || echo "000")
-            echo "$name ($port): HTTP $status"
-          done
-
-  deploy-production:
-    name: "🚀 Deploy Production (TBD)"
-    needs: docker-build
-    if: inputs.deploy_env == 'production' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-    steps:
-      - name: Production deployment placeholder
-        run: |
-          echo "Production deployment will be configured once staging is approved."
-          echo "Target: dedicated Alibaba Cloud production infrastructure."
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ github.run_number }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   notify:
-    name: "📢 Notify Team"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
+    name: "Notify Team"
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -595,7 +496,7 @@ jobs:
         if: env.SLACK_WEBHOOK_URL != ''
 
   summary:
-    name: "📋 Pipeline Summary"
+    name: "Pipeline Summary"
     needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, docker-build, notify]
     if: always()
     runs-on: ubuntu-latest
@@ -606,12 +507,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Subdomain | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Publish Shared Libraries | ${{ needs.publish-shared-libraries.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚙️ Central Configuration | ${{ needs.central-configuration.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏗️ Shared Infrastructure | ${{ needs.shared-infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🎯 Orchestration Services | ${{ needs.orchestration-services.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Centralized Dashboard | ${{ needs.centralized-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐳 Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📢 Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Publish Shared Libraries | ${{ needs.publish-shared-libraries.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Central Configuration | ${{ needs.central-configuration.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shared Infrastructure | ${{ needs.shared-infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Orchestration Services | ${{ needs.orchestration-services.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Centralized Dashboard | ${{ needs.centralized-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY
