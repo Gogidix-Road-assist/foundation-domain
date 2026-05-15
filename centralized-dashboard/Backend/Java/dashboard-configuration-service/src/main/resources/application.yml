@@ -6,18 +6,17 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapid_assist_dashboard_config?appName=Cluster0}
       database: ${MONGODB_DATABASE:rapid_assist_dashboard_config}
-
-  redis:
-    host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
-    database: 3
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 2
+    redis:
+      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
+      database: 3
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
 
 server:
   port: 8200

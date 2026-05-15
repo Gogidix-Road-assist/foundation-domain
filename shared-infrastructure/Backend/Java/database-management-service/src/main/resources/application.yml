@@ -1,10 +1,11 @@
 spring:
   application:
     name: database-management-service
-  redis:
-    host: localhost
-    port: 6379
-    timeout: 3000
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 3000
 
 server:
   port: 0

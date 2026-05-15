@@ -8,11 +8,11 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rate_limit_policy_db?appName=Cluster0}
       auto-index-creation: true
-  redis:
-    host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
-    port: 6379
-    password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
-    database: 6
+    redis:
+      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
+      port: 6379
+      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
+      database: 6
 
 management:
   endpoints:
