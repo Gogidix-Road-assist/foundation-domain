@@ -416,13 +416,13 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Run Snyk
-        if: vars.SNYK_ENABLED == 'true'
+        if: vars.SNYK_ENABLED != 'false'
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
         run: |
           if [ -z "$SNYK_TOKEN" ]; then
-            echo "::error::SNYK_ENABLED is true but SNYK_TOKEN secret is not set"
+            echo "::error::SNYK_TOKEN secret is not configured"
             exit 1
           fi
           npm install -g snyk snyk-to-html
