@@ -4,17 +4,18 @@ on:
   workflow_run:
     workflows: ["Foundation-Domain CI/CD"]
     types: [completed]
-    branches: [dev, staging/uat]
+    branches: [dev]
 
 jobs:
-  promote-dev-to-staging:
-    name: "Promote dev to staging/uat"
+  promote-and-verify:
+    name: "Promote dev → staging/uat & verify images"
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'dev'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read
     steps:
       - name: Checkout dev
         uses: actions/checkout@v4
@@ -34,21 +35,6 @@ jobs:
           git merge dev --no-edit
           git push origin staging/uat
 
-      - name: Summary
-        run: |
-          echo "### dev → staging/uat Promotion" >> $GITHUB_STEP_SUMMARY
-          echo "Status: Merged and pushed" >> $GITHUB_STEP_SUMMARY
-          echo "SHA: \`${{ github.event.workflow_run.head_sha }}\`" >> $GITHUB_STEP_SUMMARY
-
-  verify-staging-images:
-    name: "Verify staging/uat images in GHCR"
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'staging/uat'
-    runs-on: ubuntu-latest
-    permissions:
-      packages: read
-    steps:
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -72,18 +58,31 @@ jobs:
           echo "Verifying images for SHA: ${SHORT_SHA}"
           echo ""
 
+          PASS=0
+          FAIL=0
           for img in "${REQUIRED_IMAGES[@]}"; do
             IMAGE="ghcr.io/${REPO}/${img}:${SHORT_SHA}"
             echo "Checking ${IMAGE}..."
             if docker manifest inspect "${IMAGE}" > /dev/null 2>&1; then
               echo "  OK: ${IMAGE}"
+              PASS=$((PASS + 1))
             else
               echo "::error::Image not found in GHCR: ${IMAGE}"
-              exit 1
+              FAIL=$((FAIL + 1))
             fi
           done
 
           echo ""
-          echo "### Staging/uat Image Verification" >> $GITHUB_STEP_SUMMARY
-          echo "All ${#REQUIRED_IMAGES[@]} required images verified in GHCR" >> $GITHUB_STEP_SUMMARY
+          echo "### dev → staging/uat Promotion" >> $GITHUB_STEP_SUMMARY
+          echo "Status: Merged and pushed" >> $GITHUB_STEP_SUMMARY
           echo "SHA: \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Image Verification" >> $GITHUB_STEP_SUMMARY
+          echo "Passed: ${PASS}/${#REQUIRED_IMAGES[@]}" >> $GITHUB_STEP_SUMMARY
+          echo "Failed: ${FAIL}/${#REQUIRED_IMAGES[@]}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${FAIL}" -ne 0 ]; then
+            echo "::error::${FAIL} image(s) not found in GHCR"
+            exit 1
+          fi
+          echo "All ${#REQUIRED_IMAGES[@]} required images verified in GHCR"
