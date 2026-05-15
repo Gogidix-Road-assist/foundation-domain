@@ -609,6 +609,154 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
+  smoke-test:
+    name: "🧪 Smoke Test"
+    needs: [docker-build]
+    if: always() && needs.docker-build.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get runner public IP
+        id: runner-ip
+        run: echo "ip=$(curl -sf https://api.ipify.org)" >> "$GITHUB_OUTPUT"
+
+      - name: Whitelist runner IP on MongoDB Atlas
+        run: |
+          RUNNER_IP="${{ steps.runner-ip.outputs.ip }}"
+          echo "Whitelisting CI runner IP: ${RUNNER_IP}"
+          RESPONSE=$(curl -sf -u "${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}:${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}" \
+            --digest \
+            -X POST \
+            "https://cloud.mongodb.com/api/atlas/v2/groups/${{ secrets.MONGODB_ATLAS_PROJECT_ID }}/accessList" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.atlas.2024-08-05+json" \
+            -d "[{\"ipAddress\":\"${RUNNER_IP}\",\"comment\":\"CI smoke-test $(date -u +%Y%m%d%H%M)\"}]" 2>&1) || {
+              echo "::warning::Atlas whitelist API call failed (may already exist): ${RESPONSE}"
+            }
+          echo "Waiting 15s for Atlas IP whitelist propagation..."
+          sleep 15
+
+      - name: Pull Docker images
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          for img in service-registry-discovery config-service tenant-org-service monitoring-service dashboard-configuration-service; do
+            echo "Pulling ${img}..."
+            docker pull "ghcr.io/${REPO_LOWER}/${img}:${SHORT_SHA}"
+          done
+
+      - name: Start services
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          export GHCR_REPO="ghcr.io/${REPO_LOWER}"
+          export IMAGE_TAG="${SHORT_SHA}"
+          docker compose -f docker/docker-compose.smoke.yml up -d
+
+      - name: Wait for services and run health checks
+        id: health-check
+        run: |
+          declare -A SERVICES=(
+            [service-registry]=8333
+            [config-service]=8080
+            [tenant-org-service]=8085
+            [monitoring-service]=8091
+            [dashboard-configuration-service]=8200
+          )
+
+          TIMEOUT=120
+          PASS=0
+          FAIL=0
+          RESULTS=""
+
+          for svc in "${!SERVICES[@]}"; do
+            PORT="${SERVICES[$svc]}"
+            echo "::group::Waiting for ${svc} (port ${PORT})"
+            ELAPSED=0
+            HEALTHY=false
+            while [ $ELAPSED -lt $TIMEOUT ]; do
+              HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "http://localhost:${PORT}/actuator/health" 2>/dev/null || echo "000")
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "${svc}: HEALTHY (${HTTP_CODE}) after ${ELAPSED}s"
+                HEALTHY=true
+                break
+              fi
+              if [ "$HTTP_CODE" != "000" ]; then
+                echo "  ${ELAPSED}s: HTTP ${HTTP_CODE} (waiting for 200)"
+              else
+                echo "  ${ELAPSED}s: no response yet"
+              fi
+              sleep 5
+              ELAPSED=$((ELAPSED + 5))
+            done
+
+            if $HEALTHY; then
+              PASS=$((PASS + 1))
+              RESULTS="${RESULTS}| ${svc} | :white_check_mark: HEALTHY |\n"
+            else
+              FAIL=$((FAIL + 1))
+              RESULTS="${RESULTS}| ${svc} | :x: UNHEALTHY |\n"
+              echo "::error::${svc} failed health check on port ${PORT} within ${TIMEOUT}s"
+              docker logs "smoke-${svc}" 2>&1 | tail -50
+            fi
+            echo "::endgroup::"
+          done
+
+          echo "pass=${PASS}" >> "$GITHUB_OUTPUT"
+          echo "fail=${FAIL}" >> "$GITHUB_OUTPUT"
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo -e "$RESULTS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Passed: **${PASS}/5** | Failed: **${FAIL}/5**" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${FAIL}" -ne 0 ]; then
+            echo "::error::${FAIL} service(s) failed smoke test"
+            exit 1
+          fi
+
+      - name: Collect container logs on failure
+        if: always() && steps.health-check.outputs.fail != '0'
+        run: |
+          for svc in service-registry config-service tenant-org-service monitoring-service dashboard-configuration-service; do
+            echo "=== ${svc} logs ==="
+            docker logs "smoke-${svc}" 2>&1 | tail -100
+            echo ""
+          done
+
+      - name: Stop services
+        if: always()
+        run: |
+          docker compose -f docker/docker-compose.smoke.yml down -v --remove-orphans 2>/dev/null || true
+
+      - name: Remove runner IP from MongoDB Atlas
+        if: always()
+        run: |
+          RUNNER_IP="${{ steps.runner-ip.outputs.ip }}"
+          echo "Removing CI runner IP from Atlas: ${RUNNER_IP}"
+          curl -sf -u "${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}:${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}" \
+            --digest \
+            -X DELETE \
+            "https://cloud.mongodb.com/api/atlas/v2/groups/${{ secrets.MONGODB_ATLAS_PROJECT_ID }}/accessList/${RUNNER_IP}" \
+            -H "Accept: application/vnd.atlas.2024-08-05+json" 2>&1 || {
+              echo "::warning::Failed to remove Atlas IP (may have already been removed)"
+            }
+
   notify:
     name: "Notify Team"
     needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
@@ -626,7 +774,7 @@ jobs:
 
   summary:
     name: "Pipeline Summary"
-    needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, docker-build, notify]
+    needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, docker-build, smoke-test, notify]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -644,4 +792,5 @@ jobs:
           echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Smoke Test | ${{ needs.smoke-test.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY

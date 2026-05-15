@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  service-registry:
+    image: ${GHCR_REPO}/service-registry-discovery:${IMAGE_TAG}
+    container_name: smoke-service-registry
+    ports:
+      - "8333:8333"
+    environment:
+      - SERVER_PORT=8333
+      - SPRING_DATA_REDIS_USERNAME=default
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8333/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
+
+  config-service:
+    image: ${GHCR_REPO}/config-service:${IMAGE_TAG}
+    container_name: smoke-config-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_REDIS_USERNAME=default
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
+
+  tenant-org-service:
+    image: ${GHCR_REPO}/tenant-org-service:${IMAGE_TAG}
+    container_name: smoke-tenant-org-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATA_REDIS_USERNAME=default
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
+
+  monitoring-service:
+    image: ${GHCR_REPO}/monitoring-service:${IMAGE_TAG}
+    container_name: smoke-monitoring-service
+    ports:
+      - "8091:8091"
+    environment:
+      - SPRING_DATA_REDIS_USERNAME=default
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
+
+  dashboard-configuration-service:
+    image: ${GHCR_REPO}/dashboard-configuration-service:${IMAGE_TAG}
+    container_name: smoke-dashboard-configuration-service
+    ports:
+      - "8200:8200"
+    environment:
+      - SPRING_DATA_REDIS_USERNAME=default
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
