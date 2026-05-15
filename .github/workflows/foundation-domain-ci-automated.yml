@@ -164,15 +164,18 @@ jobs:
       - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Build with dependencies
-        run: mvn clean install -Dmaven.test.skip=true -pl central-configuration/Backend/Java -am
+      - name: Build shared libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Build and package
+        working-directory: central-configuration/Backend/Java
+        run: mvn clean package -DskipTests
 
       - name: Run Tests
         if: inputs.run_tests != false
-        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl central-configuration/Backend/Java
-
-      - name: Package
-        run: mvn package -DskipTests -pl central-configuration/Backend/Java
+        working-directory: central-configuration/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
 
       - name: Upload Coverage
         if: inputs.run_tests != false
@@ -245,15 +248,18 @@ jobs:
       - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Build with dependencies
-        run: mvn clean install -Dmaven.test.skip=true -pl shared-infrastructure/Backend/Java -am
+      - name: Build shared libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Build and package
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn clean package -DskipTests
 
       - name: Run Tests
         if: inputs.run_tests != false
-        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl shared-infrastructure/Backend/Java
-
-      - name: Package
-        run: mvn package -DskipTests -pl shared-infrastructure/Backend/Java
+        working-directory: shared-infrastructure/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
 
       - name: Upload Coverage
         if: inputs.run_tests != false
@@ -326,15 +332,18 @@ jobs:
       - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Build with dependencies
-        run: mvn clean install -Dmaven.test.skip=true -pl orchestration-services/Backend/Java -am
+      - name: Build shared libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Build and package
+        working-directory: orchestration-services/Backend/Java
+        run: mvn clean package -DskipTests
 
       - name: Run Tests
         if: inputs.run_tests != false
-        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl orchestration-services/Backend/Java
-
-      - name: Package
-        run: mvn package -DskipTests -pl orchestration-services/Backend/Java
+        working-directory: orchestration-services/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
 
       - name: Collect JAR artifacts
         run: |
@@ -398,15 +407,18 @@ jobs:
       - name: Install root POM
         run: mvn install -DskipTests -N -q
 
-      - name: Build with dependencies
-        run: mvn clean install -Dmaven.test.skip=true -pl centralized-dashboard/Backend/Java -am
+      - name: Build shared libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Build and package
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn clean package -DskipTests
 
       - name: Run Tests
         if: inputs.run_tests != false
-        run: mvn test org.jacoco:jacoco-maven-plugin:report -pl centralized-dashboard/Backend/Java
-
-      - name: Package
-        run: mvn package -DskipTests -pl centralized-dashboard/Backend/Java
+        working-directory: centralized-dashboard/Backend/Java
+        run: mvn test org.jacoco:jacoco-maven-plugin:report
 
       - name: Upload Coverage
         if: inputs.run_tests != false
