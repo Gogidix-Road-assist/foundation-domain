@@ -1,4 +1,4 @@
-name: Auto Promote and Deploy
+name: Auto Promote
 
 on:
   workflow_run:
@@ -31,77 +31,59 @@ jobs:
         run: |
           git fetch origin staging/uat
           git checkout staging/uat
-          git merge dev --no-edit --allow-unrelated-histories
+          git merge dev --no-edit
           git push origin staging/uat
 
-  deploy-staging:
-    name: "Deploy to Alibaba Cloud Staging"
+      - name: Summary
+        run: |
+          echo "### dev → staging/uat Promotion" >> $GITHUB_STEP_SUMMARY
+          echo "Status: Merged and pushed" >> $GITHUB_STEP_SUMMARY
+          echo "SHA: \`${{ github.event.workflow_run.head_sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  verify-staging-images:
+    name: "Verify staging/uat images in GHCR"
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'staging/uat'
     runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: http://8.220.73.6:8333/actuator/health
-    steps:
-      - name: Checkout staging/uat
-        uses: actions/checkout@v4
-        with:
-          ref: staging/uat
-
-      - name: Placeholder - staging deployment
-        run: |
-          echo "Alibaba Cloud staging deployment will be configured here."
-          echo "Target: Alibaba Cloud ECS (eu-central-1)"
-
-  promote-staging-to-main:
-    name: "Promote staging/uat to main"
-    needs: deploy-staging
-    if: success()
-    runs-on: ubuntu-latest
     permissions:
-      contents: write
+      packages: read
     steps:
-      - name: Checkout staging/uat
-        uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          ref: staging/uat
-          fetch-depth: 0
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure Git
+      - name: Verify all required images exist
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
 
-      - name: Merge staging/uat into main
-        run: |
-          git fetch origin main
-          git checkout main
-          git merge staging/uat --no-edit
-          git push origin main
+          REQUIRED_IMAGES=(
+            service-registry-discovery
+            config-service
+            tenant-org-service
+            monitoring-service
+            dashboard-configuration-service
+          )
 
-  deploy-production:
-    name: "Deploy to Alibaba Cloud Production"
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-    steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
-        with:
-          ref: main
+          echo "Verifying images for SHA: ${SHORT_SHA}"
+          echo ""
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ github.run_number }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          for img in "${REQUIRED_IMAGES[@]}"; do
+            IMAGE="ghcr.io/${REPO}/${img}:${SHORT_SHA}"
+            echo "Checking ${IMAGE}..."
+            if docker manifest inspect "${IMAGE}" > /dev/null 2>&1; then
+              echo "  OK: ${IMAGE}"
+            else
+              echo "::error::Image not found in GHCR: ${IMAGE}"
+              exit 1
+            fi
+          done
 
-      - name: Placeholder - production deployment
-        run: |
-          echo "Alibaba Cloud production deployment will be configured here."
+          echo ""
+          echo "### Staging/uat Image Verification" >> $GITHUB_STEP_SUMMARY
+          echo "All ${#REQUIRED_IMAGES[@]} required images verified in GHCR" >> $GITHUB_STEP_SUMMARY
+          echo "SHA: \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY

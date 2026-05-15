@@ -90,7 +90,9 @@ jobs:
             if grep -q "409" deploy.log; then
               echo "::warning::Version already published (409). Skipping."
             else
-              echo "::warning::Deploy failed. Continuing."
+              echo "::error::Root POM deploy failed"
+              cat deploy.log
+              exit 1
             fi
           }
         env:
@@ -114,7 +116,9 @@ jobs:
               if grep -q "409" deploy.log; then
                 echo "::warning::Version already published (409). Skipping ${module}."
               else
-                echo "::warning::Deploy failed for ${module}. Continuing."
+                echo "::error::Deploy failed for ${module}"
+                cat deploy.log
+                exit 1
               fi
             }
           done
@@ -412,13 +416,17 @@ jobs:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Run Snyk
-        if: vars.SNYK_ENABLED != 'false'
+        if: vars.SNYK_ENABLED == 'true'
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
         run: |
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "::error::SNYK_ENABLED is true but SNYK_TOKEN secret is not set"
+            exit 1
+          fi
           npm install -g snyk snyk-to-html
-          snyk test --severity-threshold=high --fail-on=all || true
+          snyk test --severity-threshold=high --fail-on=all
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
@@ -426,7 +434,7 @@ jobs:
           extra_args: --only-verified
 
   docker-build:
-    name: "🐳 Docker Build & Scan"
+    name: "🐳 Docker Build & Push"
     needs: [code-quality, security-scan]
     if: |
       always() &&
@@ -441,14 +449,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Find services with Dockerfiles
-        id: find-services
-        run: |
-          SERVICES=$(find . -maxdepth 5 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | sort)
-          echo "services<<EOF" >> $GITHUB_OUTPUT
-          echo "$SERVICES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "count=$(echo "$SERVICES" | wc -l)" >> $GITHUB_OUTPUT
+      - name: Download JAR artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-jars'
+          path: artifacts
+          merge-multiple: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -460,17 +466,74 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker images
+      - name: Build and push Docker images
         run: |
-          echo "Building Docker images for ${{ steps.find-services.outputs.count }} services"
-          while IFS= read -r service; do
-            if [ -z "$service" ]; then continue; fi
-            IMAGE_NAME=$(echo "$service" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
-            IMAGE_TAG="${{ env.REGISTRY }}/gogidix-road-assist/${IMAGE_NAME}:${{ github.sha }}"
-            echo "::group::Building $service"
-            docker buildx build --load -t "$IMAGE_TAG" "$service" || echo "::warning::Docker build failed for $service"
+          DOCKERFILE=docker/Dockerfile.service
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+
+          declare -A SERVICE_PORTS=(
+            [service-registry-discovery]=8333
+            [config-service]=8080
+            [tenant-org-service]=8085
+            [monitoring-service]=8091
+            [dashboard-configuration-service]=8200
+            [api-gateway]=8304
+            [feature-flags-service]=8100
+            [dynamic-routing-config-service]=8102
+            [rate-limit-policy-service]=8104
+            [release-rollout-config-service]=8105
+            [tenancy-configuration-service]=8106
+            [dashboard-analytics-service]=8201
+            [dashboard-reporting-service]=8202
+            [mechanics-vendors-bridge-service]=8097
+            [mechanics-insurance-bridge-service]=8096
+            [mechanics-gps-tracker-service]=8098
+          )
+
+          IMAGE_COUNT=0
+
+          while IFS= read -r jar; do
+            SERVICE_NAME=$(echo "$jar" | sed -n 's|.*/Backend/Java/\([^/]*\)/target/.*|\1|p')
+
+            if [ -z "$SERVICE_NAME" ]; then
+              continue
+            fi
+
+            if ! unzip -l "$jar" 2>/dev/null | grep -q "BOOT-INF/"; then
+              continue
+            fi
+
+            IMAGE_NAME=$(echo "$SERVICE_NAME" | tr '_' '-' | tr '[:upper:]' '[:lower:]')
+            GHCR_IMAGE="ghcr.io/${REPO_LOWER}/${IMAGE_NAME}"
+            PORT=${SERVICE_PORTS[$SERVICE_NAME]:-8080}
+
+            BUILD_CTX=$(mktemp -d)
+            cp "$jar" "$BUILD_CTX/app.jar"
+            cp "$DOCKERFILE" "$BUILD_CTX/Dockerfile"
+
+            echo "::group::Building and pushing ${IMAGE_NAME} (port ${PORT})"
+            docker buildx build --push \
+              --build-arg SERVICE_PORT="${PORT}" \
+              -t "${GHCR_IMAGE}:${{ github.sha }}" \
+              -t "${GHCR_IMAGE}:${SHORT_SHA}" \
+              -t "${GHCR_IMAGE}:latest" \
+              "$BUILD_CTX"
             echo "::endgroup::"
-          done <<< "${{ steps.find-services.outputs.services }}"
+
+            echo "Built and pushed ${IMAGE_NAME}"
+            IMAGE_COUNT=$((IMAGE_COUNT + 1))
+
+            rm -rf "$BUILD_CTX"
+          done < <(find artifacts -name "*.jar" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar")
+
+          if [ "$IMAGE_COUNT" -eq 0 ]; then
+            echo "::error::No Docker images were built"
+            exit 1
+          fi
+
+          echo "### Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Images built and pushed: **${IMAGE_COUNT}**" >> $GITHUB_STEP_SUMMARY
 
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@v0.36.0
@@ -478,7 +541,7 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
           severity: 'CRITICAL,HIGH'
-          exit-code: '0'
+          exit-code: '1'
 
   notify:
     name: "Notify Team"

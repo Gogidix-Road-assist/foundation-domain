@@ -1,0 +1,22 @@
+FROM eclipse-temurin:21-jre
+
+ARG SERVICE_PORT=8080
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r spring && useradd -r -g spring spring
+
+WORKDIR /app
+COPY app.jar application.jar
+RUN chown -R spring:spring /app
+
+USER spring
+EXPOSE ${SERVICE_PORT}
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${SERVICE_PORT}/actuator/health || exit 1
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/application.jar"]
