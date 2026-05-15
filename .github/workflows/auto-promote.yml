@@ -31,7 +31,7 @@ jobs:
         run: |
           git fetch origin staging/uat
           git checkout staging/uat
-          git merge dev --no-edit
+          git merge dev --no-edit --allow-unrelated-histories
           git push origin staging/uat
 
   deploy-staging:
