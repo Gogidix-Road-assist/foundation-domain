@@ -1,14 +1,31 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: smoke-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   service-registry:
     image: ${GHCR_REPO}/service-registry-discovery:${IMAGE_TAG}
     container_name: smoke-service-registry
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8333:8333"
     environment:
       - SERVER_PORT=8333
-      - SPRING_DATA_REDIS_USERNAME=default
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_USERNAME=
+      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8333/actuator/health"]
       interval: 10s
@@ -19,10 +36,16 @@ services:
   config-service:
     image: ${GHCR_REPO}/config-service:${IMAGE_TAG}
     container_name: smoke-config-service
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATA_REDIS_USERNAME=default
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_USERNAME=
+      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -33,10 +56,16 @@ services:
   tenant-org-service:
     image: ${GHCR_REPO}/tenant-org-service:${IMAGE_TAG}
     container_name: smoke-tenant-org-service
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8085:8085"
     environment:
-      - SPRING_DATA_REDIS_USERNAME=default
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_USERNAME=
+      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
       interval: 10s
@@ -47,10 +76,16 @@ services:
   monitoring-service:
     image: ${GHCR_REPO}/monitoring-service:${IMAGE_TAG}
     container_name: smoke-monitoring-service
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8091:8091"
     environment:
-      - SPRING_DATA_REDIS_USERNAME=default
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_USERNAME=
+      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
       interval: 10s
@@ -61,10 +96,16 @@ services:
   dashboard-configuration-service:
     image: ${GHCR_REPO}/dashboard-configuration-service:${IMAGE_TAG}
     container_name: smoke-dashboard-configuration-service
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8200:8200"
     environment:
-      - SPRING_DATA_REDIS_USERNAME=default
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_USERNAME=
+      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
       interval: 10s

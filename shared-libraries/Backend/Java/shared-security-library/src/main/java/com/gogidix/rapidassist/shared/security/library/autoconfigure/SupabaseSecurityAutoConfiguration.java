@@ -52,6 +52,12 @@ public class SupabaseSecurityAutoConfiguration {
     @ConditionalOnProperty(prefix = "gogidix.security.supabase", name = "issuer-uri")
     public JwtDecoder jwtDecoder(SupabaseSecurityProperties props) {
         String issuerUri = props.getIssuerUri();
+        if (issuerUri == null || issuerUri.isBlank()) {
+            return token -> {
+                throw new org.springframework.security.oauth2.jwt.JwtValidationException(
+                        "Supabase issuer-uri not configured", java.util.List.of());
+            };
+        }
         JwtDecoder base = JwtDecoders.fromIssuerLocation(issuerUri);
 
         if (base instanceof NimbusJwtDecoder nimbus) {
