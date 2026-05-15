@@ -567,7 +567,9 @@ jobs:
       name: production
     steps:
       - name: Production deployment placeholder
-        run: echo "Production deployment will be configured once staging is approved. Current target: dedicated Alibaba Cloud production infrastructure."
+        run: |
+          echo "Production deployment will be configured once staging is approved."
+          echo "Target: dedicated Alibaba Cloud production infrastructure."
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
