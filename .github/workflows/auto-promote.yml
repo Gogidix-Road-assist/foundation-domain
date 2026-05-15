@@ -1,0 +1,60 @@
+name: Auto Promote
+
+on:
+  workflow_run:
+    workflows: ["Foundation-Domain CI/CD"]
+    types: [completed]
+    branches: [dev]
+
+jobs:
+  promote-to-staging:
+    name: "Promote dev to staging/uat"
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge dev into staging/uat
+        run: |
+          git fetch origin staging/uat
+          git checkout staging/uat
+          git merge dev --no-edit
+          git push origin staging/uat
+
+  promote-staging-to-main:
+    name: "Promote staging/uat to main"
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'staging/uat'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout staging/uat
+        uses: actions/checkout@v4
+        with:
+          ref: staging/uat
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge staging/uat into main
+        run: |
+          git fetch origin main
+          git checkout main
+          git merge staging/uat --no-edit
+          git push origin main

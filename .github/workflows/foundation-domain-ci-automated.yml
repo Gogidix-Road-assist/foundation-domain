@@ -480,78 +480,21 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
-  promote-to-staging:
-    name: "🔼 Promote dev → staging/uat"
-    needs: [summary]
-    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout dev
-        uses: actions/checkout@v4
-        with:
-          ref: dev
-          fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Merge dev into staging/uat
-        run: |
-          git fetch origin staging/uat
-          git checkout staging/uat
-          git merge dev --no-edit
-          git push origin staging/uat
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy-staging:
-    name: "🚀 Deploy Staging (Alibaba Cloud ECS)"
+    name: "Deploy Staging"
     needs: [summary]
     if: github.ref == 'refs/heads/staging/uat' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: http://8.220.73.6:8333/actuator/health
     steps:
       - name: Staging deployment placeholder
         run: |
-          echo "Staging deployment will be triggered from staging/uat branch."
+          echo "Staging deployment triggered from staging/uat branch."
           echo "Target: Alibaba Cloud ECS (eu-central-1)"
 
-  promote-to-main:
-    name: "🔼 Promote staging/uat → main"
-    needs: [summary]
-    if: github.ref == 'refs/heads/staging/uat' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout staging/uat
-        uses: actions/checkout@v4
-        with:
-          ref: staging/uat
-          fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Merge staging/uat into main
-        run: |
-          git fetch origin main
-          git checkout main
-          git merge staging/uat --no-edit
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy-production:
-    name: "🚀 Deploy Production"
+    name: "Deploy Production"
     needs: [summary]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -561,7 +504,6 @@ jobs:
       - name: Production deployment placeholder
         run: |
           echo "Production deployment will be configured once staging is approved."
-          echo "Target: dedicated Alibaba Cloud production infrastructure."
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -573,7 +515,7 @@ jobs:
 
   notify:
     name: "📢 Notify Team"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production, promote-to-staging, promote-to-main]
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
     if: always()
     runs-on: ubuntu-latest
     steps:
