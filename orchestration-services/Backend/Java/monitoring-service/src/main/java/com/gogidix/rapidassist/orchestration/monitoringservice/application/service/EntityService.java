@@ -3,9 +3,9 @@ package com.gogidix.rapidassist.orchestration.monitoringservice.application.serv
 import com.gogidix.rapidassist.orchestration.monitoringservice.application.dto.*;
 import com.gogidix.rapidassist.orchestration.monitoringservice.domain.model.*;
 import com.gogidix.rapidassist.orchestration.monitoringservice.infrastructure.persistence.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EntityService {
 
     private final EntityRepository entityRepository;
@@ -25,7 +24,22 @@ public class EntityService {
     private final EntityTrackingRepository trackingRepository;
     private final EntityProviderRepository providerRepository;
     private final EntityRouteRepository routeRepository;
+    @Nullable
     private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public EntityService(EntityRepository entityRepository,
+                         EntityAssignmentRepository assignmentRepository,
+                         EntityTrackingRepository trackingRepository,
+                         EntityProviderRepository providerRepository,
+                         EntityRouteRepository routeRepository,
+                         @Nullable KafkaTemplate<String, Object> kafkaTemplate) {
+        this.entityRepository = entityRepository;
+        this.assignmentRepository = assignmentRepository;
+        this.trackingRepository = trackingRepository;
+        this.providerRepository = providerRepository;
+        this.routeRepository = routeRepository;
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @Transactional
     public EntityResponse createEntity(CreateEntityRequest request) {
@@ -357,6 +371,7 @@ public class EntityService {
     }
 
     private void publishEntityEvent(Entity entity, String eventType) {
+        if (kafkaTemplate == null) return;
         try {
             kafkaTemplate.send("entity-events", entity.getEntityId(),
                 new EntityEvent(eventType, entity.getEntityId(), entity.getTenantId(),
@@ -367,6 +382,7 @@ public class EntityService {
     }
 
     private void publishAssignmentEvent(EntityAssignment assignment, String eventType) {
+        if (kafkaTemplate == null) return;
         try {
             kafkaTemplate.send("assignment-events", assignment.getId(),
                 new AssignmentEvent(eventType, assignment.getId(), assignment.getEntityId(),

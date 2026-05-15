@@ -480,88 +480,80 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
+  promote-to-staging:
+    name: "🔼 Promote dev → staging/uat"
+    needs: [summary]
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge dev into staging/uat
+        run: |
+          git fetch origin staging/uat
+          git checkout staging/uat
+          git merge dev --no-edit
+          git push origin staging/uat
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy-staging:
     name: "🚀 Deploy Staging (Alibaba Cloud ECS)"
-    needs: docker-build
-    if: |
-      (inputs.deploy_env == 'staging' || github.ref == 'refs/heads/dev') &&
-      needs.docker-build.result == 'success'
+    needs: [summary]
+    if: github.ref == 'refs/heads/staging/uat' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: staging
       url: http://8.220.73.6:8333/actuator/health
     steps:
-      - name: Checkout code
+      - name: Staging deployment placeholder
+        run: |
+          echo "Staging deployment will be triggered from staging/uat branch."
+          echo "Target: Alibaba Cloud ECS (eu-central-1)"
+
+  promote-to-main:
+    name: "🔼 Promote staging/uat → main"
+    needs: [summary]
+    if: github.ref == 'refs/heads/staging/uat' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout staging/uat
         uses: actions/checkout@v4
-
-      - name: Download all JAR artifacts
-        uses: actions/download-artifact@v4
         with:
-          path: all-jars
-          merge-multiple: true
+          ref: staging/uat
+          fetch-depth: 0
 
-      - name: List built artifacts
-        run: find all-jars -name "*.jar" ! -name "*.original" | head -30
-
-      - name: Install Alibaba Cloud CLI
+      - name: Configure Git
         run: |
-          curl -o aliyun-cli.tgz https://aliyun-cli.alicdn.com/aliyun-cli-linux-latest-amd64.tgz
-          tar -xzf aliyun-cli.tgz
-          chmod +x aliyun
-          sudo mv aliyun /usr/local/bin/
-          aliyun configure set --profile staging --mode AK --access-key-id ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }} --access-key-secret ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }} --region ${{ vars.ALIBABA_CLOUD_REGION || 'eu-central-1' }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Upload JARs to OSS
+      - name: Merge staging/uat into main
         run: |
-          find all-jars -name "*.jar" ! -name "*.original" | while read jar; do
-            filename=$(basename "$jar")
-            echo "Uploading $filename to OSS..."
-            aliyun oss cp "$jar" "oss://${{ vars.ALIBABA_CLOUD_OSS_BUCKET || 'gogidix-platform-assets' }}/deploy/$filename" --force
-          done
-
-      - name: Deploy to ECS via RunCommand
+          git fetch origin main
+          git checkout main
+          git merge staging/uat --no-edit
+          git push origin main
         env:
-          ALIBABA_AK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }}
-          ALIBABA_SK: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }}
-        run: |
-          DEPLOY_SCRIPT='#!/bin/bash
-          cd /opt/gogidix/jars
-          for jar in config-service-1.0.0.jar tenant-org-service-1.0.0.jar service-registry-discovery-1.0.0.jar monitoring-service-1.0.0.jar dashboard-configuration-service-1.0.0.jar; do
-            echo "Downloading $jar..."
-            ossutil64 cp "oss://gogidix-platform-assets/deploy/$jar" "/opt/gogidix/jars/$jar" -e oss-eu-central-1.aliyuncs.com -i LTAI5tBaGhMFMK1Yt7sJXuBA -k '"'$ALIBABA_SK'"' -f 2>/dev/null || echo "Skip $jar"
-          done
-          cd /opt/gogidix
-          docker compose -f docker-compose-foundation.yml down
-          sleep 5
-          docker compose -f docker-compose-foundation.yml up -d
-          echo "Deployment complete"'
-
-          B64_SCRIPT=$(echo "$DEPLOY_SCRIPT" | base64 -w0)
-          aliyun ecs RunCommand \
-            --RegionId "${{ vars.ALIBABA_CLOUD_REGION || 'eu-central-1' }}" \
-            --InstanceId.1 "${{ vars.ALIBABA_CLOUD_ECS_INSTANCE_ID || 'i-gw80uxaqcmiep4d2uqj5' }}" \
-            --Type RunShellScript \
-            --CommandContent "$B64_SCRIPT" \
-            --ContentEncoding Base64 \
-            --Timeout 300
-
-      - name: Wait for services to start
-        run: sleep 120
-
-      - name: Health check
-        run: |
-          echo "Checking Foundation services health..."
-          for svc in "service-registry:8333" "config-service:8080" "tenant-org:8085" "monitoring:8091" "dashboard-config:8200"; do
-            name=$(echo $svc | cut -d: -f1)
-            port=$(echo $svc | cut -d: -f2)
-            status=$(curl -s -o /dev/null -w "%{http_code}" http://8.220.73.6:$port/actuator/health 2>/dev/null || echo "000")
-            echo "$name ($port): HTTP $status"
-          done
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-production:
-    name: "🚀 Deploy Production (TBD)"
-    needs: docker-build
-    if: inputs.deploy_env == 'production' && github.ref == 'refs/heads/main'
+    name: "🚀 Deploy Production"
+    needs: [summary]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -581,7 +573,7 @@ jobs:
 
   notify:
     name: "📢 Notify Team"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production]
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, deploy-staging, deploy-production, promote-to-staging, promote-to-main]
     if: always()
     runs-on: ubuntu-latest
     steps:

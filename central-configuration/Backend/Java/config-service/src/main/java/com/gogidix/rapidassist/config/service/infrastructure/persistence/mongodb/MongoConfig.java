@@ -2,6 +2,8 @@ package com.gogidix.rapidassist.config.service.infrastructure.persistence.mongod
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,12 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     @Override
     protected String getDatabaseName() {
         return "config_service";
+    }
+
+    @Override
+    @Bean
+    public MongoClient mongoClient() {
+        return MongoClients.create(mongoUri);
     }
 
     @Bean
