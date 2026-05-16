@@ -23,10 +23,13 @@ services:
     environment:
       - SERVER_PORT=8333
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8333/actuator/health"]
@@ -45,10 +48,13 @@ services:
       - "8080:8080"
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
@@ -67,10 +73,13 @@ services:
       - "8085:8085"
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
@@ -89,10 +98,13 @@ services:
       - "8091:8091"
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
@@ -111,10 +123,13 @@ services:
       - "8200:8200"
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
       - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
