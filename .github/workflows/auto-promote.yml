@@ -28,12 +28,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge dev into staging/uat
+      - name: Sync staging/uat to dev
         run: |
           git fetch origin staging/uat
           git checkout staging/uat
-          git merge dev --no-edit --allow-unrelated-histories
-          git push origin staging/uat
+          git reset --hard dev
+          git push origin staging/uat --force
 
       - name: Login to GHCR
         uses: docker/login-action@v3
