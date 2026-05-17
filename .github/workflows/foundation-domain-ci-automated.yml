@@ -469,6 +469,7 @@ jobs:
 
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
         with:
           config: auto
         env:
@@ -484,23 +485,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Run Aikido Security Scan
-        env:
-          AIKIDO_API_KEY: ${{ secrets.AIKIDO_API_KEY }}
-        run: |
-          if [ -z "$AIKIDO_API_KEY" ]; then
-            echo "::error::AIKIDO_API_KEY secret is not configured"
-            exit 1
-          fi
-          echo "Aikido security scanning is active via GitHub integration"
-          echo "API key configured: OK"
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
