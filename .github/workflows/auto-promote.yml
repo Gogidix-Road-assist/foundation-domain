@@ -30,8 +30,12 @@ jobs:
 
       - name: Sync staging/uat to dev
         run: |
-          git fetch origin staging/uat
-          git checkout staging/uat
+          git fetch origin staging/uat 2>/dev/null || true
+          if git rev-parse --verify origin/staging/uat >/dev/null 2>&1; then
+            git checkout staging/uat
+          else
+            git checkout -b staging/uat dev
+          fi
           git reset --hard dev
           git push origin staging/uat --force
 
