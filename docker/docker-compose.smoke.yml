@@ -4,10 +4,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: smoke-redis
+    command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru --requirepass smokepass123
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "smokepass123", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -24,11 +25,11 @@ services:
       - SERVER_PORT=8333
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
-      - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_DATA_REDIS_PASSWORD=smokepass123
+      - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -49,11 +50,11 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
-      - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_DATA_REDIS_PASSWORD=smokepass123
+      - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -74,11 +75,11 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
-      - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_DATA_REDIS_PASSWORD=smokepass123
+      - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -99,11 +100,11 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
-      - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_DATA_REDIS_PASSWORD=smokepass123
+      - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
@@ -124,11 +125,11 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
-      - SPRING_DATA_REDIS_USERNAME=
+      - SPRING_DATA_REDIS_PASSWORD=smokepass123
+      - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:

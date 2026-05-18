@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8304}
+  shutdown: graceful
 
 gogidix:
   gateway:
@@ -11,99 +12,117 @@ gogidix:
 
 spring:
   application:
-    name: api-gateway
+    name: edge-api-gateway
 
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapid_assist_gateway?appName=Cluster0}
       database: ${MONGODB_DATABASE:rapid_assist_gateway}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
 
   cloud:
     gateway:
       routes:
-        # Management Domain Routes
-        - id: management-domain
-          uri: ${GOGIDIX_MANAGEMENT_DOMAIN_URL:http://localhost:8081}
-          predicates:
-            - Path=/api/v1/management/**
+        # ========================================
+        # Domain Gateway Routes (Edge → Domain GW)
+        # ========================================
 
-        # Business Domain - Marketplace Routes
-        - id: vendor-service
-          uri: ${GOGIDIX_VENDOR_SERVICE_URL:http://localhost:8095}
+        - id: business-domain
+          uri: ${BUSINESS_DOMAIN_GATEWAY_URL:http://localhost:8060}
           predicates:
-            - Path=/api/vendor/**
+            - Path=/api/monitoring/**,/api/vendor/**,/api/towing/**,/api/mechanics/**,/api/onboarding/**,/api/users/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: businessDomainCB
+                fallbackUri: forward:/api/gateway/fallback
 
-        - id: marketplace-service
-          uri: ${GOGIDIX_MARKETPLACE_SERVICE_URL:http://localhost:8091}
+        - id: shared-business-core
+          uri: ${SHARED_BUSINESS_CORE_GATEWAY_URL:http://localhost:8305}
           predicates:
-            - Path=/api/marketplace/**
+            - Path=/api/dispatch/**,/api/fleet/**,/api/billing/**,/api/pricing/**,/api/policy-engine/**,/api/risk-assessment/**,/api/analytics/**,/api/adapters/**,/api/workflow/**,/api/ai/**,/api/reporting/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: sharedBusinessCoreCB
+                fallbackUri: forward:/api/gateway/fallback
 
-        - id: cart-service
-          uri: ${GOGIDIX_CART_SERVICE_URL:http://localhost:8093}
-          predicates:
-            - Path=/api/cart/**
-          filters:
-            - StripPrefix=1
-
-        - id: delivery-service
-          uri: ${GOGIDIX_DELIVERY_SERVICE_URL:http://localhost:8094}
-          predicates:
-            - Path=/api/delivery/**
-          filters:
-            - StripPrefix=1
-
-        - id: search-service
-          uri: ${GOGIDIX_SEARCH_SERVICE_URL:http://localhost:8091}
-          predicates:
-            - Path=/api/search/**
-          filters:
-            - StripPrefix=1
-
-        - id: reporting-service
-          uri: ${GOGIDIX_REPORTING_SERVICE_URL:http://localhost:8099}
-          predicates:
-            - Path=/api/reporting/**
-          filters:
-            - StripPrefix=1
-
-        # Health check routes
-        - id: health-check
-          uri: ${GOGIDIX_HEALTH_URL:http://localhost:8080}
-          predicates:
-            - Path=/health,/actuator/health
-
-        # Claim-Orchestrator Domain Routes
         - id: claim-orchestrator
-          uri: ${GOGIDIX_CLAIM_ORCHESTRATOR_URL:http://localhost:8700}
+          uri: ${CLAIM_ORCHESTRATOR_GATEWAY_URL:http://localhost:8700}
           predicates:
-            - Path=/api/claims/**,/api/incidents/**,/api/insurance-cases/**
+            - Path=/api/claims/**,/api/incidents/**,/api/insurance-cases/**,/api/settlements/**,/api/v1/claims/**,/api/v1/incidents/**,/api/v1/insurance-cases/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: claimOrchestratorCB
+                fallbackUri: forward:/api/gateway/fallback
 
-        # Management-Domain Gateway Route
-        - id: management-gateway
-          uri: ${GOGIDIX_MANAGEMENT_GATEWAY_URL:http://localhost:8100}
+        - id: management-domain
+          uri: ${MANAGEMENT_DOMAIN_GATEWAY_URL:http://localhost:8100}
           predicates:
-            - Path=/api/management/**
+            - Path=/api/management/**,/api/cms/**,/api/hr/**,/api/finance/**,/api/sales/**,/api/pricing-policy/**,/api/compliance/**,/api/marketing/**,/api/country-admin/**,/api/customer-support/**,/api/executive/**,/api/global-admin/**,/api/pages/**,/api/blog/**,/api/media/**,/api/forms/**,/api/team/**,/api/testimonials/**,/api/careers/**,/api/products/**,/api/auth/**,/api/public/**,/api/insurance-content/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: managementDomainCB
+                fallbackUri: forward:/api/gateway/fallback
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3019,http://localhost:3020}"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - X-Correlation-Id
+              - Authorization
+            allowCredentials: true
+            maxAge: 3600
+
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 30s
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
 
 logging:
   level:
     com.gogidix.rapidassist.api.gateway: DEBUG
     org.springframework.cloud.gateway: INFO
-    org.springframework.data.mongodb: DEBUG
-
-# CORS Configuration (environment variable: ALLOWED_ORIGINS)
-# Example: ALLOWED_ORIGINS=http://localhost:3000,https://app.rapidassist.com
-allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
