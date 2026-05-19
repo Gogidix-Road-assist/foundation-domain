@@ -86,20 +86,32 @@ jobs:
 
       - name: Deploy root reactor POM
         run: |
-          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log || {
+          DEPLOY_EXIT=0
+          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1
+          DEPLOY_EXIT=$?
+          if [ $DEPLOY_EXIT -ne 0 ]; then
             if grep -q "409" deploy.log; then
-              echo "::warning::Version already published (409). Skipping."
+              echo "## :warning: Root POM: version 1.0.0 already published (409)" >> $GITHUB_STEP_SUMMARY
+              echo "::warning::Root POM version 1.0.0 already published (409). Code changes will NOT be published until version is bumped."
             else
-              echo "::error::Root POM deploy failed"
+              echo "## :x: Root POM deploy FAILED" >> $GITHUB_STEP_SUMMARY
+              echo "::error::Root POM deploy failed (non-409 error)"
               cat deploy.log
               exit 1
             fi
-          }
+          else
+            echo "## :white_check_mark: Root POM: deployed 1.0.0" >> $GITHUB_STEP_SUMMARY
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy all shared libraries
         run: |
+          DEPLOY_OK=0
+          DEPLOY_SKIP=0
+          DEPLOY_FAIL=0
+          echo "| Library | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
           for module in shared-libraries/Backend/Java/shared-audit-library \
                         shared-libraries/Backend/Java/shared-cors-config \
                         shared-libraries/Backend/Java/shared-dto-library \
@@ -111,17 +123,34 @@ jobs:
                         shared-libraries/Backend/Java/shared-request-context-library \
                         shared-libraries/Backend/Java/shared-security-library \
                         shared-libraries/Backend/Java/shared-validation-library; do
+            lib_name=$(basename "${module}")
             mvn deploy -DskipTests -f "${module}/pom.xml" \
-              -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain 2>&1 | tee deploy.log || {
+              -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1
+            DEPLOY_EXIT=$?
+            if [ $DEPLOY_EXIT -ne 0 ]; then
               if grep -q "409" deploy.log; then
-                echo "::warning::Version already published (409). Skipping ${module}."
+                DEPLOY_SKIP=$((DEPLOY_SKIP + 1))
+                echo "| ${lib_name} | :warning: Already published (409) |" >> $GITHUB_STEP_SUMMARY
               else
-                echo "::error::Deploy failed for ${module}"
+                DEPLOY_FAIL=$((DEPLOY_FAIL + 1))
+                echo "| ${lib_name} | :x: FAILED |" >> $GITHUB_STEP_SUMMARY
+                echo "::error::Deploy FAILED for ${lib_name} (non-409 error)"
                 cat deploy.log
-                exit 1
               fi
-            }
+            else
+              DEPLOY_OK=$((DEPLOY_OK + 1))
+              echo "| ${lib_name} | :white_check_mark: Deployed |" >> $GITHUB_STEP_SUMMARY
+            fi
           done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Summary**: ${DEPLOY_OK} deployed, ${DEPLOY_SKIP} skipped (409), ${DEPLOY_FAIL} failed" >> $GITHUB_STEP_SUMMARY
+          if [ "${DEPLOY_FAIL}" -gt 0 ]; then
+            echo "::error::${DEPLOY_FAIL} library deploy(s) failed with non-409 errors"
+            exit 1
+          fi
+          if [ "${DEPLOY_SKIP}" -gt 0 ] && [ "${DEPLOY_OK}" -eq 0 ]; then
+            echo "::warning::All ${DEPLOY_SKIP} libraries skipped (409). Code changes will NOT be published until version is bumped from 1.0.0."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
