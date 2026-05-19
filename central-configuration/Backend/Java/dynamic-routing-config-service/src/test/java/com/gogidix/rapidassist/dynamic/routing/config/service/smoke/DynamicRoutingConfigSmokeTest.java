@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(properties = {
     "management.health.redis.enabled=false",
-    "spring.redis.host=localhost",
-    "spring.redis.port=6379"
+    "spring.data.redis.host=localhost",
+    "spring.data.redis.port=6379"
 })
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
