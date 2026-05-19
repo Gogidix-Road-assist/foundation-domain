@@ -86,10 +86,9 @@ jobs:
 
       - name: Deploy root reactor POM
         run: |
-          DEPLOY_EXIT=0
-          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1
-          DEPLOY_EXIT=$?
-          if [ $DEPLOY_EXIT -ne 0 ]; then
+          mvn deploy -DskipTests -N -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1 || true
+          DEPLOY_EXIT=$(grep -c "BUILD SUCCESS" deploy.log || echo "0")
+          if [ "$DEPLOY_EXIT" -eq 0 ]; then
             if grep -q "409" deploy.log; then
               echo "## :warning: Root POM: version 1.0.0 already published (409)" >> $GITHUB_STEP_SUMMARY
               echo "::warning::Root POM version 1.0.0 already published (409). Code changes will NOT be published until version is bumped."
@@ -125,9 +124,9 @@ jobs:
                         shared-libraries/Backend/Java/shared-validation-library; do
             lib_name=$(basename "${module}")
             mvn deploy -DskipTests -f "${module}/pom.xml" \
-              -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1
-            DEPLOY_EXIT=$?
-            if [ $DEPLOY_EXIT -ne 0 ]; then
+              -DaltDeploymentRepository=github::https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain > deploy.log 2>&1 || true
+            DEPLOY_OK_NOW=$(grep -c "BUILD SUCCESS" deploy.log || echo "0")
+            if [ "$DEPLOY_OK_NOW" -eq 0 ]; then
               if grep -q "409" deploy.log; then
                 DEPLOY_SKIP=$((DEPLOY_SKIP + 1))
                 echo "| ${lib_name} | :warning: Already published (409) |" >> $GITHUB_STEP_SUMMARY
