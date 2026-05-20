@@ -572,9 +572,6 @@ jobs:
             [tenancy-configuration-service]=8106
             [dashboard-analytics-service]=8201
             [dashboard-reporting-service]=8202
-            [mechanics-vendors-bridge-service]=8097
-            [mechanics-insurance-bridge-service]=8096
-            [mechanics-gps-tracker-service]=8098
           )
 
           IMAGE_COUNT=0
