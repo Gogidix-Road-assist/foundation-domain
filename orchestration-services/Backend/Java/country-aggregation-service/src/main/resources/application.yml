@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: country-aggregation-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/country_aggregation_service_db?appName=Cluster0}
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: country-aggregation-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+  cache:
+    type: simple
+
+server:
+  port: 8095
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+aggregation:
+  downstream:
+    foundation-gateway-url: ${FOUNDATION_GATEWAY_URL:http://localhost:8304}
+    shared-biz-gateway-url: ${SHARED_BIZ_GATEWAY_URL:http://localhost:8305}
+    claim-gateway-url: ${CLAIM_GATEWAY_URL:http://localhost:8700}
+    intelligence-base-url: ${INTELLIGENCE_BASE_URL:http://localhost:8400}
+  cache:
+    ttl-minutes: 5
+  countries:
+    supported: DE,FR,ES,IT,NL,BE,AT,CH,PL,PT,GB,US,CA,AU

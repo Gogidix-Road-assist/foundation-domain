@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: executive-aggregation-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/executive_aggregation_service_db?appName=Cluster0}
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: executive-aggregation-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+  cache:
+    type: simple
+
+server:
+  port: 8096
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+aggregation:
+  downstream:
+    country-aggregation-url: ${COUNTRY_AGGREGATION_URL:http://localhost:8095}
+    foundation-gateway-url: ${FOUNDATION_GATEWAY_URL:http://localhost:8304}
+    shared-biz-gateway-url: ${SHARED_BIZ_GATEWAY_URL:http://localhost:8305}
+    claim-gateway-url: ${CLAIM_GATEWAY_URL:http://localhost:8700}
+  cache:
+    ttl-minutes: 15
+  alerts:
+    sla-threshold-percent: 95
+    revenue-drop-threshold-percent: 10
+    incident-spike-threshold: 50

@@ -17,5 +17,7 @@
 
     <modules>
         <module>monitoring-service</module>
+        <module>country-aggregation-service</module>
+        <module>executive-aggregation-service</module>
     </modules>
 </project>

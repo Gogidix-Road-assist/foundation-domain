@@ -572,6 +572,8 @@ jobs:
             [tenancy-configuration-service]=8106
             [dashboard-analytics-service]=8201
             [dashboard-reporting-service]=8202
+            [country-aggregation-service]=8095
+            [executive-aggregation-service]=8096
           )
 
           IMAGE_COUNT=0
