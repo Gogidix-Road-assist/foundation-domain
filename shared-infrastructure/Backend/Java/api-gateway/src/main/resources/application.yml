@@ -74,6 +74,124 @@ spring:
                 name: managementDomainCB
                 fallbackUri: forward:/api/gateway/fallback
 
+        # ========================================
+        # Aggregation Services (Layer 3 → Layer 2)
+        # ========================================
+
+        - id: country-aggregation
+          uri: ${COUNTRY_AGGREGATION_URL:http://localhost:8095}
+          predicates:
+            - Path=/api/v1/country-aggregation/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: countryAggregationCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: executive-aggregation
+          uri: ${EXECUTIVE_AGGREGATION_URL:http://localhost:8096}
+          predicates:
+            - Path=/api/v1/executive-aggregation/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: executiveAggregationCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        # ========================================
+        # Intelligence Domain Routes
+        # ========================================
+
+        - id: incident-orchestration-domain
+          uri: ${INCIDENT_ORCHESTRATION_GW_URL:http://localhost:8400}
+          predicates:
+            - Path=/api/incidents/orchestration/**,/api/v1/incident-orchestration/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: incidentOrchestrationCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: emergency-dispatch-domain
+          uri: ${EMERGENCY_DISPATCH_GW_URL:http://localhost:8450}
+          predicates:
+            - Path=/api/emergency/**,/api/v1/emergency-dispatch/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: emergencyDispatchCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: government-integration-domain
+          uri: ${GOVERNMENT_INTEGRATION_GW_URL:http://localhost:8500}
+          predicates:
+            - Path=/api/government/**,/api/v1/government-integration/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: governmentIntegrationCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: national-compliance-domain
+          uri: ${NATIONAL_COMPLIANCE_GW_URL:http://localhost:8550}
+          predicates:
+            - Path=/api/compliance/gdpr/**,/api/compliance/iso27001/**,/api/v1/national-compliance/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: nationalComplianceCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: incident-ai-intelligence-domain
+          uri: ${INCIDENT_AI_GW_URL:http://localhost:8650}
+          predicates:
+            - Path=/api/ai/prediction/**,/api/ai/ml/**,/api/v1/incident-ai/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: incidentAiCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: public-safety-intelligence-domain
+          uri: ${PUBLIC_SAFETY_GW_URL:http://localhost:8600}
+          predicates:
+            - Path=/api/public-safety/**,/api/v1/public-safety/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: publicSafetyCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: cross-border-coordination-domain
+          uri: ${CROSS_BORDER_GW_URL:http://localhost:8700}
+          predicates:
+            - Path=/api/cross-border/**,/api/v1/cross-border-coordination/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: crossBorderCB
+                fallbackUri: forward:/api/gateway/fallback
+
+        - id: simulation-sandbox-domain
+          uri: ${SIMULATION_SANDBOX_GW_URL:http://localhost:8800}
+          predicates:
+            - Path=/api/simulation/**,/api/v1/simulation-sandbox/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: simulationSandboxCB
+                fallbackUri: forward:/api/gateway/fallback
+
       globalcors:
         cors-configurations:
           '[/**]':
