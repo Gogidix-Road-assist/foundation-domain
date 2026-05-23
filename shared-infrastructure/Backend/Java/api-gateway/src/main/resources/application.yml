@@ -29,9 +29,6 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-
-  cloud:
-    gateway:
       routes:
         # ========================================
         # Domain Gateway Routes (Edge → Domain GW)
@@ -244,8 +241,19 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
     gateway:
       enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    mongo:
+      enabled: false
+    redis:
+      enabled: false
 
 logging:
   level:
