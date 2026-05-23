@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "gateway.mongodb.enabled", havingValue = "true", matchIfMissing = false)
 public class MongoGatewayRouteStore implements GatewayRouteStore {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoGatewayRouteStore.class);
