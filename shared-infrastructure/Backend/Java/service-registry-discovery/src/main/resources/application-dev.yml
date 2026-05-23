@@ -4,17 +4,10 @@ server:
 spring:
   application:
     name: service-registry-discovery
-  profiles:
-    active: dev
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: service_registry_service_db
+      uri: mongodb://localhost:27017/service_registry_service_db
       auto-index-creation: true
-      username: ${MONGODB_USERNAME:}
-      password: ${MONGODB_PASSWORD:}
-      authentication-database: ${MONGODB_AUTH_DB:admin}
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
