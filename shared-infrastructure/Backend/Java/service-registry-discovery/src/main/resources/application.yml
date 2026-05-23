@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8333}
+  port: ${SERVER_PORT:8761}
 
 gogidix:
   security:
@@ -26,6 +26,18 @@ spring:
           max-idle: 8
           min-idle: 0
 
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    enable-self-preservation: true
+    eviction-interval-timer-in-ms: 30000
+
 management:
   endpoints:
     web:
@@ -36,3 +48,5 @@ logging:
   level:
     com.gogidix.rapidassist.service.registry.discovery: DEBUG
     org.springframework.data.mongodb: DEBUG
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
