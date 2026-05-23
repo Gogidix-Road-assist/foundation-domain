@@ -11,6 +11,8 @@ gogidix:
       audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
 
 spring:
+  main:
+    web-application-type: reactive
   application:
     name: edge-api-gateway
 
