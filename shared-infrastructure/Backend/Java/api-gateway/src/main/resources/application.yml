@@ -25,6 +25,13 @@ spring:
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+  cloud:
+    gateway:
       routes:
         # ========================================
         # Domain Gateway Routes (Edge → Domain GW)
@@ -244,3 +251,13 @@ logging:
   level:
     com.gogidix.rapidassist.api.gateway: DEBUG
     org.springframework.cloud.gateway: INFO
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
