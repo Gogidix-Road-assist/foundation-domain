@@ -497,7 +497,6 @@ jobs:
 
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
-        continue-on-error: true
         with:
           config: auto
         env:
@@ -618,7 +617,7 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
           severity: 'CRITICAL,HIGH'
-          exit-code: '0'
+          exit-code: '1'
 
   smoke-test:
     name: "🧪 Smoke Test"
@@ -674,6 +673,11 @@ jobs:
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           export GHCR_REPO="ghcr.io/${REPO_LOWER}"
           export IMAGE_TAG="${SHORT_SHA}"
+          export MONGODB_URI="${{ secrets.MONGODB_URI }}"
+          if [ -z "$MONGODB_URI" ]; then
+            echo "::error::MONGODB_URI secret is not set. Smoke test requires MongoDB Atlas connection string."
+            exit 1
+          fi
           docker compose -f docker/docker-compose.smoke.yml up -d
 
       - name: Wait for services and run health checks
@@ -737,12 +741,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Passed: **${PASS}/5** | Failed: **${FAIL}/5**" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${FAIL}" -gt 0 ] && [ "${PASS}" -eq 0 ]; then
-            echo "::error::${FAIL} service(s) failed smoke test (all failed)"
-            exit 1
-          fi
           if [ "${FAIL}" -gt 0 ]; then
-            echo "::warning::${FAIL} service(s) failed smoke test but ${PASS} passed (partial pass allowed)"
+            echo "::error::${FAIL} service(s) failed smoke test"
+            exit 1
           fi
 
       - name: Collect container logs on failure

@@ -23,6 +23,8 @@ services:
       - "8761:8761"
     environment:
       - SERVER_PORT=8761
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DATABASE=rapid_assist_service_registry
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
@@ -48,6 +50,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - MONGODB_URI=${MONGODB_URI}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
@@ -73,6 +76,8 @@ services:
     ports:
       - "8085:8085"
     environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DATABASE=rapid_assist_tenant_org
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
@@ -98,6 +103,7 @@ services:
     ports:
       - "8091:8091"
     environment:
+      - MONGODB_URI=${MONGODB_URI}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
@@ -123,6 +129,8 @@ services:
     ports:
       - "8200:8200"
     environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DATABASE=rapid_assist_dashboard_config
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
