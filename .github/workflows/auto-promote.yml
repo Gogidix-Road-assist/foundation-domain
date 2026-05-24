@@ -90,3 +90,14 @@ jobs:
             exit 1
           fi
           echo "All ${#REQUIRED_IMAGES[@]} required images verified in GHCR"
+
+      - name: Trigger Infrastructure Deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_SECRET }}
+        run: |
+          echo "Triggering infrastructure deploy-staging via workflow_dispatch..."
+          gh workflow run deploy-staging.yml \
+            --repo Gogidix-Road-assist/infrastructure \
+            --ref staging/uat \
+            -f terraform_action=apply || echo "::warning::Failed to trigger infrastructure deploy (may need manual trigger)"
