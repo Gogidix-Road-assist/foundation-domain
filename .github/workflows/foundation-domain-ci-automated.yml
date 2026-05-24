@@ -559,7 +559,7 @@ jobs:
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
 
           declare -A SERVICE_PORTS=(
-            [service-registry-discovery]=8333
+            [service-registry-discovery]=8761
             [config-service]=8080
             [tenant-org-service]=8085
             [monitoring-service]=8091
@@ -680,7 +680,7 @@ jobs:
         id: health-check
         run: |
           declare -A SERVICES=(
-            [service-registry]=8333
+            [service-registry]=8761
             [config-service]=8080
             [tenant-org-service]=8085
             [monitoring-service]=8091

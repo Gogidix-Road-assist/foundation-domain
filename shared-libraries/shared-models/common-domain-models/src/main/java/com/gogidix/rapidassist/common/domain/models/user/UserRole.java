@@ -1,0 +1,195 @@
+package com.gogidix.rapidassist.common.domain.models.user;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * UserRole entity representing a role that can be assigned to users.
+ * Supports hierarchical role structure and permissions.
+ */
+@Document(collection = "user_role")
+public class UserRole {
+
+    @Id
+        private String id;
+
+    @NotBlank(message = "Role name is required")
+    @Size(min = 2, max = 50)
+        private String name;
+
+    @Size(max = 100)
+    private String displayName;
+
+        private String description;
+
+        private String tenantId;
+
+        private Boolean systemRole = false;
+
+        private Boolean isDefault = false;
+
+            private UserRole parentRole;
+
+        private Set<UserRole> childRoles = new HashSet<>();
+
+        private Set<User> users = new HashSet<>();
+
+    private Set<Permission> permissions = new HashSet<>();
+
+        private LocalDateTime createdAt;
+
+        private LocalDateTime updatedAt;
+
+    // Constructors
+    public UserRole() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public UserRole(String name, String displayName) {
+        this();
+        this.name = name;
+        this.displayName = displayName;
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public Boolean getSystemRole() {
+        return systemRole;
+    }
+
+    public void setSystemRole(Boolean systemRole) {
+        this.systemRole = systemRole;
+    }
+
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+
+    public UserRole getParentRole() {
+        return parentRole;
+    }
+
+    public void setParentRole(UserRole parentRole) {
+        this.parentRole = parentRole;
+    }
+
+    public Set<UserRole> getChildRoles() {
+        return childRoles;
+    }
+
+    public void setChildRoles(Set<UserRole> childRoles) {
+        this.childRoles = childRoles;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<Permission> permissions) {
+        this.permissions = permissions;
+    }
+
+    public void addPermission(Permission permission) {
+        this.permissions.add(permission);
+    }
+
+    public void removePermission(Permission permission) {
+        this.permissions.remove(permission);
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+        protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean hasPermission(String permissionName) {
+        return permissions.stream()
+                .anyMatch(p -> p.getName().equals(permissionName));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserRole)) return false;
+        UserRole userRole = (UserRole) o;
+        return id != null && id.equals(userRole.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

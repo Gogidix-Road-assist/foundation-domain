@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/executive_aggregation_service_db?appName=Cluster0}
+      uri: ${MONGODB_URI:}
       auto-index-creation: true
 
   kafka:

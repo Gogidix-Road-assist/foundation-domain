@@ -20,9 +20,9 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "8333:8333"
+      - "8761:8761"
     environment:
-      - SERVER_PORT=8333
+      - SERVER_PORT=8761
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=smokepass123
@@ -33,7 +33,7 @@ services:
       - SPRING_PROFILES_ACTIVE=default
       - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8333/actuator/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 18

@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: country-localization-config-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  # MongoDB Test Configuration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test_country_localization_db
+      auto-index-creation: true
+
+  # Redis Test Configuration (disabled for tests)
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+
+  # Kafka Test Configuration (disabled for tests)
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      group-id: test-country-localization-config-service
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+  # Disable Redis health check for tests (Redis is optional)
+  health:
+    redis:
+      enabled: false
+
+# Logging Configuration
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.test: DEBUG
+    org.springframework.data.mongodb: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# OpenAPI Configuration (disabled for tests)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# Application Configuration
+app:
+  config:
+    environment: test
+    cache:
+      enabled: false  # Disable cache for tests
+    events:
+      enabled: false  # Disable event publishing for tests
+      async-publishing: false
+  tenant-service:
+    base-url: http://localhost:8081
+    api-key: test-api-key-123

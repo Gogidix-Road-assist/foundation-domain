@@ -7,7 +7,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/config_service?appName=Cluster0}
+      uri: ${MONGODB_URI:}
       auto-index-creation: true
 
     # Redis is OPTIONAL - used for config caching

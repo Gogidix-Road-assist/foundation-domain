@@ -28,7 +28,7 @@ gogidix:
 spring:
   data:
     mongodb:
-      uri: ${GOGIDIX_MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapidassist?appName=Cluster0}
+      uri: ${MONGODB_URI:}
       database: ${GOGIDIX_MFA_DB:mfa}
 
 management:

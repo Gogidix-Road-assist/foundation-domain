@@ -47,6 +47,10 @@
 
     <modules>
         <module>shared-libraries/Backend/Java</module>
+        <module>shared-libraries/shared-models/common-domain-models</module>
+        <module>shared-libraries/shared-models/country-localization-config-service</module>
+        <module>shared-libraries/shared-models/user-profile-service</module>
+        <module>shared-libraries/shared-events/event-schemas</module>
         <module>central-configuration/Backend/Java</module>
         <module>shared-infrastructure/Backend/Java</module>
         <module>orchestration-services/Backend/Java</module>
