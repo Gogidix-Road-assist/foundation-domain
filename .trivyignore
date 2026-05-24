@@ -1,0 +1,12 @@
+# Trivy ignore file — suppress known CVEs with justification
+# These must be revisited when compatible Spring Cloud versions are available
+
+# CVE-2026-22731: Spring Boot Actuator - Auth bypass via misconfigured Health Group additional path
+# Fixed in: Spring Boot 3.5.12 (requires Spring Cloud 2025.0.x, not yet adopted)
+# Risk: LOW — actuator endpoints are internal-only (Docker health checks), not exposed publicly
+CVE-2026-22731
+
+# CVE-2026-22733: Spring Boot Actuator - Auth bypass under CloudFoundry endpoints
+# Fixed in: Spring Boot 3.5.12 (requires Spring Cloud 2025.0.x, not yet adopted)
+# Risk: LOW — CloudFoundry endpoints are not used in our deployment (AWS/Docker)
+CVE-2026-22733
