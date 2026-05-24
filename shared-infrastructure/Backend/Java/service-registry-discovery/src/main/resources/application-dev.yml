@@ -6,10 +6,10 @@ spring:
     name: service-registry-discovery
   data:
     mongodb:
-      uri: mongodb://localhost:27017/service_registry_service_db
+      uri: ${MONGODB_URI:mongodb://localhost:27017/service_registry_service_db}
       auto-index-creation: true
   redis:
-    host: ${REDIS_HOST:localhost}
+    host: ${REDIS_HOST:}
     port: ${REDIS_PORT:6379}
     password: ${REDIS_PASSWORD:}
     timeout: 2000ms
@@ -18,21 +18,12 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    consumer:
-      group-id: service-registry-discovery_group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 # Database Per Service Architecture
 # Each service has its own dedicated database
 # Service: service-registry-discovery
 # Database: service_registry_service_db
+# Redis is optional - used for caching service instances
 
 management:
   endpoints:
@@ -42,6 +33,10 @@ management:
   endpoint:
     health:
       show-details: always
+    mongo:
+      enabled: true
+    redis:
+      enabled: false  # Optional - don't fail health check if unavailable
   metrics:
     export:
       prometheus:

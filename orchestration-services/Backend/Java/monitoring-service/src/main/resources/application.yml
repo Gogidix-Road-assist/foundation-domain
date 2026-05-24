@@ -4,16 +4,29 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/orchestration_monitoring_service_db?appName=Cluster0}
+      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimomy2907@cluster0.ggksiwg.mongodb.net/orchestration_monitoring_service_db?appName=Cluster0}
       auto-index-creation: true
 
+  # Kafka is REQUIRED for monitoring events
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
+    properties:
+      # Retry configuration for robustness
+      retries: 3
+      retry.backoff.ms: 1000
+      # Connection timeout
+      request.timeout.ms: 5000
+      # Session timeout
+      session.timeout.ms: 10000
+      # Heartbeat interval
+      heartbeat.interval.ms: 3000
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
       retries: 3
+      # Delivery timeout
+      delivery.timeout.ms: 10000
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -21,6 +34,10 @@ spring:
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "*"
+        # Session timeout
+        session.timeout.ms: 10000
+        # Heartbeat interval
+        heartbeat.interval.ms: 3000
 
 server:
   port: 8091
@@ -34,15 +51,19 @@ management:
   endpoint:
     health:
       show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+    # MongoDB is required for metrics storage
+    mongo:
+      enabled: true
+    # Kafka is required for event processing
+    kafka:
+      enabled: true
 
 logging:
   level:
-    com.gogidix.rapidassist: DEBUG
-    org.springframework.data.mongodb: DEBUG
+    com.gogidix.rapidassist: INFO
+    org.springframework.data.mongodb: WARN
+    org.springframework.kafka: INFO
+    org.apache.kafka: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 

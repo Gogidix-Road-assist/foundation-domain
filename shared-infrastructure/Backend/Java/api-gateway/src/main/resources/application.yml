@@ -21,14 +21,24 @@ spring:
       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
 
+  # Redis is OPTIONAL - only used for rate limiting and caching
+  # Gateway will start without Redis if not configured
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/rapid_assist_gateway?appName=Cluster0}
-      database: ${MONGODB_DATABASE:rapid_assist_gateway}
+      uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:}
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+    # Conditionally load Redis only if host is provided
+    condition-on-property: "spring.redis.host"
 
   cloud:
     gateway:
@@ -252,20 +262,21 @@ management:
         enabled: true
     gateway:
       enabled: true
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
+    # API Gateway is stateless - no database health check
     mongo:
       enabled: false
+    # Redis is optional - only for rate limiting
     redis:
       enabled: false
+    diskSpace:
+      enabled: true
 
 logging:
   level:
-    com.gogidix.rapidassist.api.gateway: DEBUG
+    com.gogidix.rapidassist.api.gateway: INFO
     org.springframework.cloud.gateway: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
 
 eureka:
   client:

@@ -10,16 +10,20 @@ spring:
       uri: ${MONGODB_URI:mongodb+srv://gazalgidix_db_user:Ajimmy2907@cluster0.ggksiwg.mongodb.net/config_service?appName=Cluster0}
       auto-index-creation: true
 
+    # Redis is OPTIONAL - used for config caching
+    # Service will start without Redis if not configured
     redis:
-      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
+      host: ${REDIS_HOST:}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
+      password: ${REDIS_PASSWORD:}
       timeout: 3000ms
       lettuce:
         pool:
           max-active: 20
           max-idle: 10
           min-idle: 5
+      # Conditionally load Redis only if host is provided
+      condition-on-property: "spring.redis.host"
 
   security:
     oauth2:
@@ -105,6 +109,12 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+    # MongoDB is required for config storage
+    mongo:
+      enabled: true
+    # Redis is optional - only for caching
+    redis:
+      enabled: false
   metrics:
     export:
       prometheus:
