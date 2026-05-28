@@ -33,7 +33,6 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
-      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
       interval: 10s
@@ -59,7 +58,6 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
-      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -86,7 +84,6 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
-      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
       interval: 10s
@@ -112,7 +109,6 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
-      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
       interval: 10s
@@ -139,7 +135,6 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
-      - GOGIDIX_SUPABASE_ISSUER_URI=https://vppgddndvloynomybnpu.supabase.co/auth/v1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
       interval: 10s
