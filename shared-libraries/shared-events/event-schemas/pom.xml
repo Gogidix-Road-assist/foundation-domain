@@ -7,13 +7,13 @@
   <parent>
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>foundation-domain</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <groupId>com.gogidix.rapidassist</groupId>
   <artifactId>event-schemas</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>event-schemas</name>
 
   <properties>

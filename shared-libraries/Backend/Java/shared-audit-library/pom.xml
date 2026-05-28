@@ -7,13 +7,13 @@
   <parent>
     <groupId>com.gogidix.rapidassist</groupId>
     <artifactId>shared-libraries</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>com.gogidix.rapidassist</groupId>
   <artifactId>shared-audit-library</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>shared-audit-library</name>
 
   <properties>
