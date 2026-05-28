@@ -192,7 +192,7 @@ spring:
                 fallbackUri: forward:/api/gateway/fallback
 
         - id: cross-border-coordination-domain
-          uri: ${CROSS_BORDER_GW_URL:http://localhost:8700}
+          uri: ${CROSS_BORDER_GW_URL:http://localhost:8350}
           predicates:
             - Path=/api/cross-border/**,/api/v1/cross-border-coordination/**
           filters:
