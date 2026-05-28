@@ -41,7 +41,6 @@ import java.util.UUID;
  * @version 1.0
  * @since 2026-01-13
  */
-@NoRepositoryBean
 public interface TenantAwareRepository<T, ID> extends MongoRepository<T, ID> {
 
     /**
