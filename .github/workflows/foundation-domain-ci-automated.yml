@@ -13,7 +13,7 @@ on:
         default: true
         type: boolean
       run_security_scan:
-        description: 'Run security scans (Semgrep)'
+        description: 'Run security scans (Snyk, TruffleHog)'
         required: true
         default: true
         type: boolean
@@ -598,13 +598,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Semgrep Secret Scan
-        uses: returntocorp/semgrep-action@v1
+      - name: Secret Scan
+        uses: trufflesecurity/trufflehog@v3.95.2
         with:
-          config: >-
-            p/secret-detection
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+          extra_args: --only-verified
 
   docker-build:
     name: "🐳 Docker Build & Push"
