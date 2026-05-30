@@ -480,9 +480,94 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  shared-models:
+    name: "🗄️ Shared-Models (Build → Test)"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Install root POM
+        run: mvn install -DskipTests -N -q
+
+      - name: Build shared libraries
+        working-directory: shared-libraries/Backend/Java
+        run: mvn clean install -DskipTests -q
+
+      - name: Build and package
+        run: |
+          for svc in shared-libraries/shared-models/*/; do
+            if [ -f "${svc}pom.xml" ]; then
+              echo "Building $(basename ${svc})..."
+              mvn clean package -DskipTests -f "${svc}pom.xml"
+            fi
+          done
+
+      - name: Run Tests
+        if: inputs.run_tests != false
+        run: |
+          for svc in shared-libraries/shared-models/*/; do
+            if [ -f "${svc}pom.xml" ]; then
+              echo "Testing $(basename ${svc})..."
+              mvn test org.jacoco:jacoco-maven-plugin:report -f "${svc}pom.xml" || true
+            fi
+          done
+
+      - name: Collect JAR artifacts
+        run: |
+          mkdir -p /tmp/jars
+          find shared-libraries/shared-models -name "*.jar" -path "*/target/*" \
+            ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read jar; do
+            service=$(basename "$jar" | sed 's/-[0-9].*//')
+            cp "$jar" "/tmp/jars/${service}.jar"
+          done
+          JAR_COUNT=$(ls /tmp/jars/*.jar 2>/dev/null | wc -l)
+          if [ "$JAR_COUNT" -eq 0 ]; then
+            echo "::error::No JAR artifacts found for shared-models"
+            exit 1
+          fi
+          echo "Collected ${JAR_COUNT} JAR(s)"
+
+      - name: Upload JAR artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-models-jars
+          path: /tmp/jars/
+          if-no-files-found: error
+          retention-days: 1
+
   code-quality:
     name: "📊 Code Quality Gate (Semgrep)"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
     if: |
       (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
       needs.central-configuration.result == 'success'
@@ -504,7 +589,7 @@ jobs:
 
   security-scan:
     name: "🔒 Security Gate"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
     if: |
       (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
       needs.central-configuration.result == 'success'
@@ -573,6 +658,31 @@ jobs:
             [dashboard-reporting-service]=8202
             [country-aggregation-service]=8095
             [executive-aggregation-service]=8096
+            [mechanics-vendors-bridge-service]=8097
+            [common-domain-models]=8261
+            [country-localization-config-service]=8262
+            [user-profile-service]=8310
+            [access-control-service]=8311
+            [alerting-service]=8312
+            [api-keys-service]=8313
+            [audit-correlation-service]=8314
+            [database-management-service]=8315
+            [event-audit-service]=8316
+            [idempotency-service]=8317
+            [identity-access-service]=8318
+            [identity-service]=8319
+            [integration-adapters-service]=8320
+            [logging-aggregation-service]=8321
+            [mechanics-gps-tracker-service]=8322
+            [mechanics-insurance-bridge-service]=8323
+            [metrics-telemetry-service]=8324
+            [mfa-service]=8325
+            [rate-limiting-service]=8326
+            [request-routing-service]=8327
+            [service-health-monitor]=8328
+            [service-health-monitor-service]=8329
+            [session-token-service]=8330
+            [waf-policy-service]=8331
           )
 
           IMAGE_COUNT=0
@@ -773,9 +883,45 @@ jobs:
               echo "::warning::Failed to remove Atlas IP (may have already been removed)"
             }
 
+  trigger-infra-deploy:
+    name: "🚀 Trigger Infrastructure Deploy"
+    needs: [smoke-test]
+    if: >-
+      always() &&
+      needs.smoke-test.result == 'success' &&
+      (github.ref == 'refs/heads/staging/uat' || github.ref == 'refs/heads/production')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger infrastructure deploy
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.INFRA_REPO_PAT }}
+          script: |
+            const [owner, repo] = '${{ github.repository }}'.split('/');
+            const infraRepo = '${{ vars.INFRA_REPO_NAME || 'Gogidix-Road-assist/infrastructure' }}'.split('/');
+            const shortSha = '${{ github.sha }}'.substring(0, 7);
+            const environment = '${{ github.ref }}'.includes('production') ? 'production' : 'staging';
+
+            await github.rest.repos.createDispatchEvent({
+              owner: infraRepo[0],
+              repo: infraRepo[1],
+              event_type: 'deploy-domain',
+              client_payload: {
+                domain: 'foundation-domain',
+                environment: environment,
+                image_tag: shortSha,
+                full_sha: '${{ github.sha }}',
+                triggered_by: '${{ github.actor }}',
+                source_repo: '${{ github.repository }}',
+                source_run_id: '${{ github.run_id }}'
+              }
+            });
+
+            console.log(`Triggered deploy of foundation-domain (${environment}) with tag ${shortSha}`);
+
   notify:
     name: "Notify Team"
-    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard]
+    needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -790,7 +936,7 @@ jobs:
 
   summary:
     name: "Pipeline Summary"
-    needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, code-quality, security-scan, docker-build, smoke-test, notify]
+    needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models, code-quality, security-scan, docker-build, smoke-test, trigger-infra-deploy, notify]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -805,8 +951,10 @@ jobs:
           echo "| Shared Infrastructure | ${{ needs.shared-infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Orchestration Services | ${{ needs.orchestration-services.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Centralized Dashboard | ${{ needs.centralized-dashboard.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shared Models | ${{ needs.shared-models.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Gate | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Smoke Test | ${{ needs.smoke-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger Infra Deploy | ${{ needs.trigger-infra-deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Notify | ${{ needs.notify.result }} |" >> $GITHUB_STEP_SUMMARY

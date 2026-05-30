@@ -1,0 +1,50 @@
+server:
+  port: 8323
+
+spring:
+  application:
+    name: mechanics-insurance-bridge-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+services:
+  insurance:
+    base-url: ${INSURANCE_SERVICE_URL:http://localhost:8083}
+    claims-service: ${CLAIMS_SERVICE_URL:http://localhost:8092}
+    policy-service: ${POLICY_SERVICE_URL:http://localhost:8083}
+
+  mechanics:
+    base-url: ${MECHANICS_SERVICE_URL:http://localhost:8089}
+    workshop-booking: ${WORKSHOP_BOOKING_URL:http://localhost:8089}
+    mobile-mechanic: ${MOBILE_MECHANIC_URL:http://localhost:8088}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      insuranceService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+      mechanicsService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+
+  retry:
+    instances:
+      insuranceService:
+        max-attempts: 3
+        wait-duration: 1000
+      mechanicsService:
+        max-attempts: 3
+        wait-duration: 1000
+
+logging:
+  level:
+    com.gogidix.rapidassist: DEBUG
+    org.springframework.web.reactive: DEBUG
