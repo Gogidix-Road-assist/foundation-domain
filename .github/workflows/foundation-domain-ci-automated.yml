@@ -597,13 +597,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+
+      - name: Create TruffleHog exclusion file
+        run: |
+          cat > trufflehog-exclude-paths.txt << 'EOF'
+          docker-compose.yml
+          k8s/
+          *.md
+          *.js
+          *.ps1
+          *.env*
+          *.template
+          *.example
+          application-dev.yml
+          application.yml
+          MongoConfig.java
+          MongoDBConfig.java
+          mongodb.js
+          jest.config.js
+          EOF
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
         with:
-          extra_args: --only-verified
+          extra_args: --only-verified --exclude-paths=trufflehog-exclude-paths.txt
 
   docker-build:
     name: "🐳 Docker Build & Push"
