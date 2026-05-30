@@ -597,11 +597,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
         with:
-          extra_args: --only-verified --exclude-paths="docker-compose.yml,k8s/,*.md,*.js,*.ps1,*.env*,*.template,application-dev.yml,MongoConfig.java,mongodb.js,MongoDBConfig.java"
+          extra_args: --only-verified
 
   docker-build:
     name: "🐳 Docker Build & Push"
