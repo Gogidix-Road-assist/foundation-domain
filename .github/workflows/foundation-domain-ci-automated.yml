@@ -13,7 +13,7 @@ on:
         default: true
         type: boolean
       run_security_scan:
-        description: 'Run security scans (Snyk, TruffleHog)'
+        description: 'Run security scans (Semgrep)'
         required: true
         default: true
         type: boolean
@@ -598,29 +598,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create TruffleHog exclusion file
-        run: |
-          cat > trufflehog-exclude-paths.txt << 'EOF'
-          ^docker-compose\.yml$
-          ^k8s/
-          .*\.md$
-          .*\.js$
-          .*\.ps1$
-          .*\.env
-          .*\.template$
-          .*\.example$
-          .*application-dev\.yml$
-          .*application\.yml$
-          .*MongoConfig\.java$
-          .*MongoDBConfig\.java$
-          .*mongodb\.js$
-          .*jest\.config\.js$
-          EOF
-
-      - name: Secret Scan
-        uses: trufflesecurity/trufflehog@v3.95.2
+      - name: Semgrep Secret Scan
+        uses: returntocorp/semgrep-action@v1
         with:
-          extra_args: --only-verified --exclude-paths=trufflehog-exclude-paths.txt
+          config: >-
+            p/secret-detection
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   docker-build:
     name: "🐳 Docker Build & Push"
