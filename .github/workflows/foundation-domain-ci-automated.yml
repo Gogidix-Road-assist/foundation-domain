@@ -895,7 +895,7 @@ jobs:
       - name: Trigger infrastructure deploy
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.INFRA_REPO_PAT }}
+          github-token: ${{ secrets.PAT_SECRET }}
           script: |
             const [owner, repo] = '${{ github.repository }}'.split('/');
             const infraRepo = '${{ vars.INFRA_REPO_NAME || 'Gogidix-Road-assist/infrastructure' }}'.split('/');
