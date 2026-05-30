@@ -601,20 +601,20 @@ jobs:
       - name: Create TruffleHog exclusion file
         run: |
           cat > trufflehog-exclude-paths.txt << 'EOF'
-          docker-compose.yml
-          k8s/
-          *.md
-          *.js
-          *.ps1
-          *.env*
-          *.template
-          *.example
-          application-dev.yml
-          application.yml
-          MongoConfig.java
-          MongoDBConfig.java
-          mongodb.js
-          jest.config.js
+          ^docker-compose\.yml$
+          ^k8s/
+          .*\.md$
+          .*\.js$
+          .*\.ps1$
+          .*\.env
+          .*\.template$
+          .*\.example$
+          .*application-dev\.yml$
+          .*application\.yml$
+          .*MongoConfig\.java$
+          .*MongoDBConfig\.java$
+          .*mongodb\.js$
+          .*jest\.config\.js$
           EOF
 
       - name: Secret Scan
