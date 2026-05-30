@@ -601,7 +601,7 @@ jobs:
       - name: Secret Scan
         uses: trufflesecurity/trufflehog@v3.95.2
         with:
-          extra_args: --only-verified --no-git-history
+          extra_args: --only-verified
 
   docker-build:
     name: "🐳 Docker Build & Push"
