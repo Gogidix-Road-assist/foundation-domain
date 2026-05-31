@@ -98,8 +98,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_SECRET }}
         run: |
+          SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
           echo "Triggering infrastructure deploy-staging via workflow_dispatch..."
           gh workflow run deploy-staging.yml \
             --repo Gogidix-Road-assist/infrastructure \
             --ref staging/uat \
-            -f terraform_action=apply || echo "::warning::Failed to trigger infrastructure deploy (may need manual trigger)"
+            -f terraform_action=apply || echo "::warning::Failed to trigger infrastructure terraform deploy"
+
+          echo "Triggering Helm deploy of foundation-domain to EKS..."
+          gh workflow run deploy-domain-to-eks.yml \
+            --repo Gogidix-Road-assist/infrastructure \
+            --ref main \
+            -f domain=foundation-domain \
+            -f environment=staging \
+            -f image_tag="${SHORT_SHA}" || echo "::warning::Failed to trigger Helm deploy"
