@@ -49,6 +49,8 @@ jobs:
       - name: Verify all required images exist
         run: |
           REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          ORG=$(echo "${REPO}" | cut -d'/' -f1)
+          REPO_NAME=$(echo "${REPO}" | cut -d'/' -f2)
           SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
 
           REQUIRED_IMAGES=(
@@ -65,7 +67,7 @@ jobs:
           PASS=0
           FAIL=0
           for img in "${REQUIRED_IMAGES[@]}"; do
-            IMAGE="ghcr.io/${REPO}/${img}:${SHORT_SHA}"
+            IMAGE="ghcr.io/${ORG}/${REPO_NAME}-${img}:${SHORT_SHA}"
             echo "Checking ${IMAGE}..."
             if docker manifest inspect "${IMAGE}" > /dev/null 2>&1; then
               echo "  OK: ${IMAGE}"
