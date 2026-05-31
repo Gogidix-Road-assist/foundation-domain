@@ -645,10 +645,10 @@ jobs:
           declare -A SERVICE_PORTS=(
             [service-registry-discovery]=8761
             [config-service]=8080
-            [tenant-org-service]=8085
+            [api-gateway]=8084
+            [tenant-org-service]=8116
             [monitoring-service]=8091
             [dashboard-configuration-service]=8200
-            [api-gateway]=8304
             [feature-flags-service]=8100
             [dynamic-routing-config-service]=8102
             [rate-limit-policy-service]=8104
@@ -658,10 +658,10 @@ jobs:
             [dashboard-reporting-service]=8202
             [country-aggregation-service]=8095
             [executive-aggregation-service]=8096
-            [mechanics-vendors-bridge-service]=8097
             [common-domain-models]=8261
             [country-localization-config-service]=8262
-            [user-profile-service]=8310
+            [user-profile-service]=8117
+            [database-indexing-service]=8090
             [access-control-service]=8311
             [alerting-service]=8312
             [api-keys-service]=8313
