@@ -23,15 +23,15 @@ gogidix:
 spring:
   data:
     redis:
-      host: ${GOGIDIX_REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
-      port: ${GOGIDIX_REDIS_PORT:6379}
-      password: ${GOGIDIX_REDIS_PASSWORD:Gog1d1xPlatform2026}
-      timeout: ${GOGIDIX_REDIS_TIMEOUT:2000}
+      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
+      timeout: ${REDIS_TIMEOUT:2000}
       lettuce:
         pool:
-          max-active: ${GOGIDIX_REDIS_POOL_MAX_ACTIVE:8}
-          max-idle: ${GOGIDIX_REDIS_POOL_MAX_IDLE:8}
-          min-idle: ${GOGIDIX_REDIS_POOL_MIN_IDLE:0}
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
 
 management:
   endpoints:

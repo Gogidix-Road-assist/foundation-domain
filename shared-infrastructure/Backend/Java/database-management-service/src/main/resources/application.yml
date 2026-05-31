@@ -3,7 +3,7 @@ spring:
     name: database-management-service
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST:localhost}
       port: 6379
       timeout: 3000
 

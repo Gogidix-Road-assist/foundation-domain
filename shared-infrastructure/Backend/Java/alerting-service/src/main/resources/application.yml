@@ -14,7 +14,7 @@ gogidix:
 spring:
   data:
     mongodb:
-      uri: ${GOGIDIX_ALERTING_MONGO_URI:}
+      uri: ${MONGODB_URI:}
 
 management:
   endpoints:

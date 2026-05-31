@@ -13,7 +13,7 @@ gogidix:
 spring:
   data:
     mongodb:
-      uri: ${GOGIDIX_CORRELATION_MONGO_URI:}
+      uri: ${MONGODB_URI:}
 
 management:
   endpoints:

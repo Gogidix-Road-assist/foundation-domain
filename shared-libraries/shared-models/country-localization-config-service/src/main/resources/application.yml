@@ -13,9 +13,7 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      host: ${MONGODB_HOST:localhost}
-      port: ${MONGODB_PORT:27017}
-      database: ${MONGODB_DB:country-localization-db}
+      uri: ${MONGODB_URI:}
       auto-index-creation: true
     redis:
       host: ${REDIS_HOST:localhost}

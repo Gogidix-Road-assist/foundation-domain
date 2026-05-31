@@ -1,11 +1,10 @@
 server:
   port: 8331
 
-gogidix:
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:}
 
 management:
   endpoints:
