@@ -111,4 +111,4 @@ jobs:
             --ref main \
             -f domain=foundation-domain \
             -f environment=staging \
-            -f image_tag="${SHORT_SHA}" || echo "::warning::Failed to trigger Helm deploy"
+            -f image_tag="${SHORT_SHA}"
