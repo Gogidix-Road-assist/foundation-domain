@@ -1,4 +1,5 @@
-# Foundation-Domain Infrastructure - MongoDB, PostgreSQL, Redis
+# Foundation-Domain Infrastructure - ExternalName Services for Atlas/RDS/ElastiCache
+# In-cluster databases REMOVED — using AWS managed services
 ---
 apiVersion: v1
 kind: Secret
@@ -7,288 +8,44 @@ metadata:
   namespace: foundation
 type: Opaque
 stringData:
-  mongodb-root-username: admin
-  mongodb-root-password: foundation123
-  postgres-user: foundation
-  postgres-password: foundation123
-  redis-password: foundation123
+  mongodb-uri: ""
+  rds-url: ""
+  rds-username: ""
+  rds-password: ""
+  redis-uri: ""
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-  namespace: foundation
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-  storageClassName: standard
-
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: mongodb
-  namespace: foundation
-  labels:
-    app: mongodb
-spec:
-  serviceName: mongodb
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongodb
-  template:
-    metadata:
-      labels:
-        app: mongodb
-    spec:
-      containers:
-      - name: mongodb
-        image: mongo:6.0
-        ports:
-        - containerPort: 27017
-          name: mongodb
-        env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: database-secrets
-              key: mongodb-root-username
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: database-secrets
-              key: mongodb-root-password
-        volumeMounts:
-        - name: mongodb-data
-          mountPath: /data/db
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "1000m"
-        livenessProbe:
-          exec:
-            command:
-            - mongosh
-            - --eval
-            - "db.adminCommand('ping')"
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - mongosh
-            - --eval
-            - "db.adminCommand('ping')"
-          initialDelaySeconds: 10
-          periodSeconds: 5
-  volumeClaimTemplates:
-  - metadata:
-      name: mongodb-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 20Gi
-
----
+# MongoDB Atlas - ExternalName Service
+# Update externalName to your Atlas cluster endpoint (e.g. cluster0.ggksiwg.mongodb.net)
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: mongodb-atlas
   namespace: foundation
 spec:
-  selector:
-    app: mongodb
-  ports:
-  - port: 27017
-    targetPort: 27017
-  clusterIP: None
+  type: ExternalName
+  externalName: cluster0.ggksiwg.mongodb.net
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-  namespace: foundation
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: standard
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: postgres
-  namespace: foundation
-  labels:
-    app: postgres
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: postgres
-  template:
-    metadata:
-      labels:
-        app: postgres
-    spec:
-      containers:
-      - name: postgres
-        image: postgres:15-alpine
-        ports:
-        - containerPort: 5432
-          name: postgres
-        env:
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: database-secrets
-              key: postgres-user
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: database-secrets
-              key: postgres-password
-        - name: POSTGRES_DB
-          value: foundation
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - foundation
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - foundation
-          initialDelaySeconds: 10
-          periodSeconds: 5
-      volumes:
-      - name: postgres-data
-        persistentVolumeClaim:
-          claimName: postgres-pvc
-
----
+# AWS RDS PostgreSQL - ExternalName Service
+# Update externalName to your RDS endpoint (e.g. gogidix-dev-postgres.xxx.use1.rds.amazonaws.com)
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres
+  name: rds-postgresql
   namespace: foundation
 spec:
-  selector:
-    app: postgres
-  ports:
-  - port: 5432
-    targetPort: 5432
+  type: ExternalName
+  externalName: REPLACE_WITH_RDS_ENDPOINT
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-pvc
-  namespace: foundation
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: standard
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redis
-  namespace: foundation
-  labels:
-    app: redis
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-    spec:
-      containers:
-      - name: redis
-        image: redis:7-alpine
-        ports:
-        - containerPort: 6379
-          name: redis
-        command:
-        - redis-server
-        - --requirepass
-        - foundation123
-        volumeMounts:
-        - name: redis-data
-          mountPath: /data
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-        livenessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 10
-          periodSeconds: 5
-      volumes:
-      - name: redis-data
-        persistentVolumeClaim:
-          claimName: redis-pvc
-
----
+# AWS ElastiCache Redis - ExternalName Service
+# Update externalName to your ElastiCache primary endpoint
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: elasticache-redis
   namespace: foundation
 spec:
-  selector:
-    app: redis
-  ports:
-  - port: 6379
-    targetPort: 6379
+  type: ExternalName
+  externalName: REPLACE_WITH_ELASTICACHE_ENDPOINT

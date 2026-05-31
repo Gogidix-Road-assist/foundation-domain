@@ -1,15 +1,6 @@
 # Foundation-Domain AI Services Deployment
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ai-config
-  namespace: foundation
-data:
-  SPRING_PROFILES_ACTIVE: "kubernetes"
-  MONGODB_URL: "mongodb://admin:foundation123@mongodb:27017"
-  REDIS_URL: "redis://:foundation123@redis:6379"
-
+# NOTE: These are AI-Domain services deployed in foundation namespace
+# for Eureka/registry proximity. Image paths from docker-compose-ec2-2.yml.
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,28 +27,27 @@ spec:
     spec:
       containers:
       - name: ai-gateway
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-gateway-service:dev
+        image: ghcr.io/gogidix-road-assist/ai-domain/ai-gateway-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
+              name: foundation-config
               key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
-              key: MONGODB_URL
-        - name: REDIS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: ai-config
-              key: REDIS_URL
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         resources:
           requests:
             memory: "512Mi"
@@ -88,7 +78,7 @@ spec:
   selector:
     app: ai-gateway
   ports:
-  - port: 8200
+  - port: 8080
     targetPort: 8080
 
 ---
@@ -117,23 +107,27 @@ spec:
     spec:
       containers:
       - name: ai-inference
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-inference-service:dev
+        image: ghcr.io/gogidix-road-assist/ai-domain/ai-inference-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
+              name: foundation-config
               key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
-              key: MONGODB_URL
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         resources:
           requests:
             memory: "1Gi"
@@ -164,7 +158,7 @@ spec:
   selector:
     app: ai-inference
   ports:
-  - port: 8201
+  - port: 8080
     targetPort: 8080
 
 ---
@@ -193,23 +187,27 @@ spec:
     spec:
       containers:
       - name: ai-model-management
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-model-management-service:dev
+        image: ghcr.io/gogidix-road-assist/ai-domain/ai-model-management-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
+              name: foundation-config
               key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
-              key: MONGODB_URL
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         resources:
           requests:
             memory: "512Mi"
@@ -240,7 +238,7 @@ spec:
   selector:
     app: ai-model-management
   ports:
-  - port: 8202
+  - port: 8080
     targetPort: 8080
 
 ---
@@ -269,23 +267,27 @@ spec:
     spec:
       containers:
       - name: ai-chatbot
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-chatbot-service:dev
+        image: ghcr.io/gogidix-road-assist/ai-domain/ai-chatbot-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
+              name: foundation-config
               key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
-              key: MONGODB_URL
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         resources:
           requests:
             memory: "512Mi"
@@ -316,7 +318,7 @@ spec:
   selector:
     app: ai-chatbot
   ports:
-  - port: 8214
+  - port: 8080
     targetPort: 8080
 
 ---
@@ -345,18 +347,27 @@ spec:
     spec:
       containers:
       - name: ai-nlp
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/ai-nlp-processing-service:dev
+        image: ghcr.io/gogidix-road-assist/ai-domain/ai-nlp-processing-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: ai-config
+              name: foundation-config
               key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         resources:
           requests:
             memory: "512Mi"
@@ -387,5 +398,5 @@ spec:
   selector:
     app: ai-nlp
   ports:
-  - port: 8210
+  - port: 8080
     targetPort: 8080

@@ -2,10 +2,6 @@ server:
   port: 8329
 
 gogidix:
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
   service-health:
     retention: ${GOGIDIX_SERVICE_HEALTH_RETENTION:30d}
     mongo-enabled: ${GOGIDIX_SERVICE_HEALTH_MONGO_ENABLED:false}

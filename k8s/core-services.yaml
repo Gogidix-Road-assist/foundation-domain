@@ -1,4 +1,5 @@
 # Foundation-Domain Core Services Deployment
+# Image paths from: deploy/docker/docker-compose-ec2-1.yml
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -7,247 +8,20 @@ metadata:
   namespace: foundation
 data:
   SPRING_PROFILES_ACTIVE: "kubernetes"
-  MONGODB_URL: "mongodb://admin:foundation123@mongodb:27017"
-  POSTGRES_URL: "jdbc:postgresql://foundation:foundation123@postgres:5432/foundation"
-  REDIS_URL: "redis://:foundation123@redis:6379"
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api-gateway
-  namespace: foundation
-  labels:
-    app: api-gateway
-    domain: foundation
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: api-gateway
-  template:
-    metadata:
-      labels:
-        app: api-gateway
-        domain: foundation
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8304"
-        prometheus.io/path: "/actuator/prometheus"
-    spec:
-      containers:
-      - name: api-gateway
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/api-gateway:dev
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8304
-          name: http
-          protocol: TCP
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: MONGODB_URL
-        - name: REDIS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: REDIS_URL
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8304
-          initialDelaySeconds: 60
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8304
-          initialDelaySeconds: 30
-          periodSeconds: 10
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://service-registry:8761/eureka/"
+  JAVA_OPTS: "-Xmx192m -Xms64m"
 
 ---
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: api-gateway
+  name: foundation-secrets
   namespace: foundation
-  labels:
-    app: api-gateway
-spec:
-  type: LoadBalancer
-  selector:
-    app: api-gateway
-  ports:
-  - port: 8304
-    targetPort: 8304
-    protocol: TCP
-  sessionAffinity: ClientIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: identity-service
-  namespace: foundation
-  labels:
-    app: identity-service
-    domain: foundation
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: identity-service
-  template:
-    metadata:
-      labels:
-        app: identity-service
-        domain: foundation
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8316"
-        prometheus.io/path: "/actuator/prometheus"
-    spec:
-      containers:
-      - name: identity-service
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/identity-service:dev
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8316
-          name: http
-          protocol: TCP
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: MONGODB_URL
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8316
-          initialDelaySeconds: 60
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8316
-          initialDelaySeconds: 30
-          periodSeconds: 10
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: identity-service
-  namespace: foundation
-spec:
-  selector:
-    app: identity-service
-  ports:
-  - port: 8316
-    targetPort: 8316
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: notification-service
-  namespace: foundation
-  labels:
-    app: notification-service
-    domain: foundation
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: notification-service
-  template:
-    metadata:
-      labels:
-        app: notification-service
-        domain: foundation
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8323"
-        prometheus.io/path: "/actuator/prometheus"
-    spec:
-      containers:
-      - name: notification-service
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/notification-service:dev
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8323
-          name: http
-          protocol: TCP
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: MONGODB_URL
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "250m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8323
-          initialDelaySeconds: 60
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8323
-          initialDelaySeconds: 30
-          periodSeconds: 10
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: notification-service
-  namespace: foundation
-spec:
-  selector:
-    app: notification-service
-  ports:
-  - port: 8323
-    targetPort: 8323
+type: Opaque
+stringData:
+  MONGODB_URI: ""
+  REDIS_HOST: ""
+  REDIS_PASSWORD: ""
 
 ---
 apiVersion: apps/v1
@@ -275,18 +49,21 @@ spec:
     spec:
       containers:
       - name: service-registry
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/service-registry-discovery:dev
+        image: ghcr.io/gogidix-road-assist/foundation-domain/service-registry-discovery:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8761
           name: http
-          protocol: TCP
         env:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
               name: foundation-config
               key: SPRING_PROFILES_ACTIVE
+        - name: SERVER_PORT
+          value: "8761"
+        - name: JAVA_OPTS
+          value: "-Xmx256m -Xms128m"
         resources:
           requests:
             memory: "512Mi"
@@ -325,20 +102,427 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rate-limiting-service
+  name: api-gateway
   namespace: foundation
   labels:
-    app: rate-limiting-service
+    app: api-gateway
     domain: foundation
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: rate-limiting-service
+      app: api-gateway
   template:
     metadata:
       labels:
-        app: rate-limiting-service
+        app: api-gateway
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8304"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: api-gateway
+        image: ghcr.io/gogidix-road-assist/foundation-domain/api-gateway:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8304
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        - name: SERVER_PORT
+          value: "8304"
+        - name: GATEWAY_MONGODB_ENABLED
+          value: "false"
+        - name: JAVA_OPTS
+          value: "-Xmx256m -Xms128m"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8304
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8304
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: foundation
+spec:
+  type: ClusterIP
+  selector:
+    app: api-gateway
+  ports:
+  - port: 8304
+    targetPort: 8304
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-service
+  namespace: foundation
+  labels:
+    app: config-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-service
+  template:
+    metadata:
+      labels:
+        app: config-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8888"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: config-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/config-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8888
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8888
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service
+  namespace: foundation
+spec:
+  selector:
+    app: config-service
+  ports:
+  - port: 8888
+    targetPort: 8888
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenant-org-service
+  namespace: foundation
+  labels:
+    app: tenant-org-service
+    domain: foundation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tenant-org-service
+  template:
+    metadata:
+      labels:
+        app: tenant-org-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8085"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: tenant-org-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/tenant-org-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8085
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8085
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8085
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenant-org-service
+  namespace: foundation
+spec:
+  selector:
+    app: tenant-org-service
+  ports:
+  - port: 8085
+    targetPort: 8085
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-service
+  namespace: foundation
+  labels:
+    app: monitoring-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monitoring-service
+  template:
+    metadata:
+      labels:
+        app: monitoring-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8091"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: monitoring-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/monitoring-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8091
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8091
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8091
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-service
+  namespace: foundation
+spec:
+  selector:
+    app: monitoring-service
+  ports:
+  - port: 8091
+    targetPort: 8091
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-configuration-service
+  namespace: foundation
+  labels:
+    app: dashboard-configuration-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-configuration-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-configuration-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8200"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: dashboard-configuration-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/dashboard-configuration-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8200
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: foundation-secrets
+              key: MONGODB_URI
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: foundation-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8200
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8200
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-configuration-service
+  namespace: foundation
+spec:
+  selector:
+    app: dashboard-configuration-service
+  ports:
+  - port: 8200
+    targetPort: 8200
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feature-flags-service
+  namespace: foundation
+  labels:
+    app: feature-flags-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: feature-flags-service
+  template:
+    metadata:
+      labels:
+        app: feature-flags-service
         domain: foundation
       annotations:
         prometheus.io/scrape: "true"
@@ -346,24 +530,17 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
-      - name: rate-limiting-service
-        image: ghcr.io/gogidix-road-assist-saas/rapid-assist/rate-limiting-service:dev
+      - name: feature-flags-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/feature-flags-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
-          protocol: TCP
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: REDIS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: REDIS_URL
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         resources:
           requests:
             memory: "256Mi"
@@ -375,24 +552,645 @@ spec:
           httpGet:
             path: /actuator/health/liveness
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 20
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
             port: 8080
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 10
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rate-limiting-service
+  name: feature-flags-service
   namespace: foundation
 spec:
   selector:
-    app: rate-limiting-service
+    app: feature-flags-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamic-routing-config-service
+  namespace: foundation
+  labels:
+    app: dynamic-routing-config-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamic-routing-config-service
+  template:
+    metadata:
+      labels:
+        app: dynamic-routing-config-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: dynamic-routing-config-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/dynamic-routing-config-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynamic-routing-config-service
+  namespace: foundation
+spec:
+  selector:
+    app: dynamic-routing-config-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rate-limit-policy-service
+  namespace: foundation
+  labels:
+    app: rate-limit-policy-service
+    domain: foundation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rate-limit-policy-service
+  template:
+    metadata:
+      labels:
+        app: rate-limit-policy-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: rate-limit-policy-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/rate-limit-policy-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rate-limit-policy-service
+  namespace: foundation
+spec:
+  selector:
+    app: rate-limit-policy-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-rollout-config-service
+  namespace: foundation
+  labels:
+    app: release-rollout-config-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: release-rollout-config-service
+  template:
+    metadata:
+      labels:
+        app: release-rollout-config-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: release-rollout-config-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/release-rollout-config-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-rollout-config-service
+  namespace: foundation
+spec:
+  selector:
+    app: release-rollout-config-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenancy-configuration-service
+  namespace: foundation
+  labels:
+    app: tenancy-configuration-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tenancy-configuration-service
+  template:
+    metadata:
+      labels:
+        app: tenancy-configuration-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: tenancy-configuration-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/tenancy-configuration-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenancy-configuration-service
+  namespace: foundation
+spec:
+  selector:
+    app: tenancy-configuration-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-analytics-service
+  namespace: foundation
+  labels:
+    app: dashboard-analytics-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-analytics-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-analytics-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: dashboard-analytics-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/dashboard-analytics-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-analytics-service
+  namespace: foundation
+spec:
+  selector:
+    app: dashboard-analytics-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-reporting-service
+  namespace: foundation
+  labels:
+    app: dashboard-reporting-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-reporting-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-reporting-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: dashboard-reporting-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/dashboard-reporting-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-reporting-service
+  namespace: foundation
+spec:
+  selector:
+    app: dashboard-reporting-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mechanics-vendors-bridge-service
+  namespace: foundation
+  labels:
+    app: mechanics-vendors-bridge-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mechanics-vendors-bridge-service
+  template:
+    metadata:
+      labels:
+        app: mechanics-vendors-bridge-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: mechanics-vendors-bridge-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/mechanics-vendors-bridge-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mechanics-vendors-bridge-service
+  namespace: foundation
+spec:
+  selector:
+    app: mechanics-vendors-bridge-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mechanics-insurance-bridge-service
+  namespace: foundation
+  labels:
+    app: mechanics-insurance-bridge-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mechanics-insurance-bridge-service
+  template:
+    metadata:
+      labels:
+        app: mechanics-insurance-bridge-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: mechanics-insurance-bridge-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/mechanics-insurance-bridge-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mechanics-insurance-bridge-service
+  namespace: foundation
+spec:
+  selector:
+    app: mechanics-insurance-bridge-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mechanics-gps-tracker-service
+  namespace: foundation
+  labels:
+    app: mechanics-gps-tracker-service
+    domain: foundation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mechanics-gps-tracker-service
+  template:
+    metadata:
+      labels:
+        app: mechanics-gps-tracker-service
+        domain: foundation
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: mechanics-gps-tracker-service
+        image: ghcr.io/gogidix-road-assist/foundation-domain/mechanics-gps-tracker-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mechanics-gps-tracker-service
+  namespace: foundation
+spec:
+  selector:
+    app: mechanics-gps-tracker-service
   ports:
   - port: 8080
     targetPort: 8080

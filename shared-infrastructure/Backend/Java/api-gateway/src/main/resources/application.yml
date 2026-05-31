@@ -5,11 +5,6 @@ server:
 gogidix:
   gateway:
     correlation-id-header: ${GOGIDIX_CORRELATION_ID_HEADER:X-Correlation-Id}
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
-
 spring:
   main:
     web-application-type: reactive

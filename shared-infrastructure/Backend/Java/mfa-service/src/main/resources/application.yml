@@ -2,10 +2,6 @@ server:
   port: 8325
 
 gogidix:
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
   mfa:
     provider:
       type: ${GOGIDIX_MFA_PROVIDER:comprehensive} # comprehensive or noop

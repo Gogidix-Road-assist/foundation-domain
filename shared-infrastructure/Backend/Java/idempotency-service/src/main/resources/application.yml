@@ -2,10 +2,6 @@ server:
   port: 8317
 
 gogidix:
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
   idempotency:
     persistence:
       type: ${GOGIDIX_IDEMPOTENCY_PERSISTENCE:redis} # redis or memory

@@ -1,6 +1,6 @@
 # Foundation-Domain Network Policies for Security
+# Updated for ExternalName services (Atlas/RDS/ElastiCache)
 ---
-# Default deny all ingress traffic
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -12,7 +12,6 @@ spec:
   - Ingress
 
 ---
-# Allow DNS resolution
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -28,9 +27,38 @@ spec:
     ports:
     - protocol: UDP
       port: 53
+    - protocol: TCP
+      port: 53
 
 ---
-# Allow API Gateway to communicate with all services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-egress
+  namespace: foundation
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 27017
+    - protocol: TCP
+      port: 5432
+    - protocol: TCP
+      port: 6379
+
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -53,66 +81,11 @@ spec:
       port: 8304
   egress:
   - to:
-    - podSelector:
-        matchLabels:
-          app: identity-service
-    ports:
-    - protocol: TCP
-      port: 8316
-  - to:
-    - podSelector:
-        matchLabels:
-          app: mongodb
-    ports:
-    - protocol: TCP
-      port: 27017
-  - to:
-    - podSelector:
-        matchLabels:
-          app: redis
-    ports:
-    - protocol: TCP
-      port: 6379
-  - to:
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
-    ports:
-    - protocol: UDP
-      port: 53
-
----
-# Allow services to communicate with databases
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: database-access-policy
-  namespace: foundation
-spec:
-  podSelector:
-    matchExpressions:
-    - key: app
-      operator: In
-      values: [mongodb, postgres, redis]
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          domain: foundation
-    ports:
-    - protocol: TCP
-  - from:
-    - podSelector:
-        matchLabels:
-          domain: ai-services
+    - podSelector: {}
     ports:
     - protocol: TCP
 
 ---
-# Allow monitoring to scrape metrics
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -127,18 +100,8 @@ spec:
     - podSelector:
         matchLabels:
           app: prometheus
-    ports:
-    - protocol: TCP
-      port: 9090
-  - from:
-    - podSelector:
-        matchLabels:
-          app: prometheus
-    ports:
-    - protocol: TCP
 
 ---
-# Allow AI services to communicate with each other and databases
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -166,26 +129,6 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: mongodb
-    ports:
-    - protocol: TCP
-      port: 27017
-  - to:
-    - podSelector:
-        matchLabels:
-          app: redis
-    ports:
-    - protocol: TCP
-      port: 6379
-  - to:
-    - podSelector:
-        matchLabels:
           domain: ai-services
-  - to:
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
     ports:
-    - protocol: UDP
-      port: 53
+    - protocol: TCP

@@ -2,10 +2,6 @@ server:
   port: 8326
 
 gogidix:
-  security:
-    supabase:
-      issuer-uri: ${GOGIDIX_SUPABASE_ISSUER_URI:}
-      audience: ${GOGIDIX_SUPABASE_AUDIENCE:}
   rate-limiting:
     provider:
       type: ${GOGIDIX_RATE_LIMITING_PROVIDER:comprehensive} # comprehensive or noop
