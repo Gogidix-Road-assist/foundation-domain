@@ -1,6 +1,17 @@
 server:
   port: 8320
 
+spring:
+  datasource:
+    url: jdbc:h2:mem:integrationdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
 management:
   endpoints:
     web:

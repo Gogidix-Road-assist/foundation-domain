@@ -2,14 +2,12 @@ package com.gogidix.rapidassist.user.profile.service.infrastructure.persistence.
 
 import com.gogidix.rapidassist.user.profile.service.domain.model.UserProfile;
 import com.gogidix.rapidassist.user.profile.service.domain.port.out.UserProfileStore;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 @Deprecated
 public class InMemoryUserProfileStore implements UserProfileStore {
 

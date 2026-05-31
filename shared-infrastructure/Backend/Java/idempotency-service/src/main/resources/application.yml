@@ -12,9 +12,9 @@ gogidix:
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:r-4xo326106227c264.redis.germany.rds.aliyuncs.com}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:Gog1d1xPlatform2026}
+      password: ${REDIS_PASSWORD:}
       timeout: ${REDIS_TIMEOUT:2000}
       lettuce:
         pool:
