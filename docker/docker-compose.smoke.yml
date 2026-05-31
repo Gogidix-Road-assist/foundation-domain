@@ -14,7 +14,7 @@ services:
       retries: 5
 
   service-registry:
-    image: ${GHCR_REPO}/service-registry-discovery:${IMAGE_TAG}
+    image: ${GHCR_REPO}-service-registry-discovery:${IMAGE_TAG}
     container_name: smoke-service-registry
     depends_on:
       redis:
@@ -41,7 +41,7 @@ services:
       start_period: 60s
 
   config-service:
-    image: ${GHCR_REPO}/config-service:${IMAGE_TAG}
+    image: ${GHCR_REPO}-config-service:${IMAGE_TAG}
     container_name: smoke-config-service
     depends_on:
       redis:
@@ -66,7 +66,7 @@ services:
       start_period: 60s
 
   tenant-org-service:
-    image: ${GHCR_REPO}/tenant-org-service:${IMAGE_TAG}
+    image: ${GHCR_REPO}-tenant-org-service:${IMAGE_TAG}
     container_name: smoke-tenant-org-service
     depends_on:
       redis:
@@ -92,7 +92,7 @@ services:
       start_period: 60s
 
   monitoring-service:
-    image: ${GHCR_REPO}/monitoring-service:${IMAGE_TAG}
+    image: ${GHCR_REPO}-monitoring-service:${IMAGE_TAG}
     container_name: smoke-monitoring-service
     depends_on:
       redis:
@@ -117,7 +117,7 @@ services:
       start_period: 60s
 
   dashboard-configuration-service:
-    image: ${GHCR_REPO}/dashboard-configuration-service:${IMAGE_TAG}
+    image: ${GHCR_REPO}-dashboard-configuration-service:${IMAGE_TAG}
     container_name: smoke-dashboard-configuration-service
     depends_on:
       redis:

@@ -772,18 +772,20 @@ jobs:
 
       - name: Pull Docker images
         run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          ORG_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | cut -d'/' -f1)
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | cut -d'/' -f2)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           for img in service-registry-discovery config-service tenant-org-service monitoring-service dashboard-configuration-service; do
             echo "Pulling ${img}..."
-            docker pull "ghcr.io/${REPO_LOWER}/${img}:${SHORT_SHA}"
+            docker pull "ghcr.io/${ORG_LOWER}/${REPO_NAME}-${img}:${SHORT_SHA}"
           done
 
       - name: Start services
         run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          ORG_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | cut -d'/' -f1)
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]' | cut -d'/' -f2)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          export GHCR_REPO="ghcr.io/${REPO_LOWER}"
+          export GHCR_REPO="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
           export IMAGE_TAG="${SHORT_SHA}"
           export MONGODB_URI="${{ secrets.MONGODB_URI }}"
           if [ -z "$MONGODB_URI" ]; then
