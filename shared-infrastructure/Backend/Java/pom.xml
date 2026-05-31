@@ -33,6 +33,7 @@
         <module>mfa-service</module>
         <module>rate-limiting-service</module>
         <module>request-routing-service</module>
+        <module>service-health-monitor</module>
         <module>service-health-monitor-service</module>
         <module>service-registry-discovery</module>
         <module>session-token-service</module>

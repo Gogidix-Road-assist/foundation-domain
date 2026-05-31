@@ -691,7 +691,9 @@ jobs:
             SERVICE_NAME=$(basename "$jar" .jar)
 
             IMAGE_NAME=$(echo "$SERVICE_NAME" | tr '_' '-' | tr '[:upper:]' '[:lower:]')
-            GHCR_IMAGE="ghcr.io/${REPO_LOWER}/${IMAGE_NAME}"
+            ORG_LOWER=$(echo "${REPO_LOWER}" | cut -d'/' -f1)
+            REPO_NAME=$(echo "${REPO_LOWER}" | cut -d'/' -f2)
+            GHCR_IMAGE="ghcr.io/${ORG_LOWER}/${REPO_NAME}-${IMAGE_NAME}"
             PORT=${SERVICE_PORTS[$SERVICE_NAME]:-8080}
 
             BUILD_CTX=$(mktemp -d)
