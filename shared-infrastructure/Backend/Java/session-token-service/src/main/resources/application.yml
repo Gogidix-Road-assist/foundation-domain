@@ -8,7 +8,7 @@ gogidix:
     key-prefix: ${GOGIDIX_SESSION_TOKEN_KEY_PREFIX:rapidassist:session}
     enable-refresh-tokens: ${GOGIDIX_SESSION_TOKEN_ENABLE_REFRESH:true}
     jwt:
-      secret: ${GOGIDIX_JWT_SECRET:} # MUST be provided in production
+      secret: ${GOGIDIX_JWT_SECRET:default-staging-jwt-secret-key-change-in-production-32chars!!}
       algorithm: ${GOGIDIX_JWT_ALGORITHM:HS256}
       issuer: ${GOGIDIX_JWT_ISSUER:Gogidix RapidAssist}
       access-token-ttl-seconds: ${GOGIDIX_ACCESS_TOKEN_TTL:3600}

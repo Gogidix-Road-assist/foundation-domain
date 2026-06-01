@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 @AutoConfiguration
 @ConditionalOnClass(Flux.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+@ConditionalOnProperty(prefix = "gogidix.security.supabase", name = "issuer-uri")
 @EnableConfigurationProperties(SupabaseSecurityProperties.class)
 public class SupabaseReactiveSecurityAutoConfiguration {
 

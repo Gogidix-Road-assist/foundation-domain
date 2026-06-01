@@ -14,8 +14,8 @@ gogidix:
       length: ${GOGIDIX_MFA_OTP_LENGTH:6}
       expiration-seconds: ${GOGIDIX_MFA_OTP_EXPIRY:300}
       max-attempts: ${GOGIDIX_MFA_MAX_ATTEMPTS:3}
-      sms-template: ${GOGIDIX_MFA_SMS_TEMPLATE:Your verification code is: {code}}
-      email-template: ${GOGIDIX_MFA_EMAIL_TEMPLATE:Your verification code is: {code}}
+      sms-template: "${GOGIDIX_MFA_SMS_TEMPLATE:Your verification code is: {code}}"
+      email-template: "${GOGIDIX_MFA_EMAIL_TEMPLATE:Your verification code is: {code}}"
     backup-codes:
       count: ${GOGIDIX_MFA_BACKUP_COUNT:10}
       code-length: ${GOGIDIX_MFA_BACKUP_LENGTH:8}

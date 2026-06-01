@@ -1,6 +1,7 @@
 package com.gogidix.rapidassist.api.gateway.infrastructure.security;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @EnableWebFluxSecurity
 @EnableConfigurationProperties(SupabaseSecurityProperties.class)
+@ConditionalOnProperty(prefix = "gogidix.security.supabase", name = "issuer-uri")
 public class SupabaseGatewaySecurityConfiguration {
 
     @Bean

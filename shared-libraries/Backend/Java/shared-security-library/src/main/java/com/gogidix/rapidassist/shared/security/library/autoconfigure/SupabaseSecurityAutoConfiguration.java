@@ -20,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @AutoConfiguration
 @EnableConfigurationProperties(SupabaseSecurityProperties.class)
+@ConditionalOnProperty(prefix = "gogidix.security.supabase", name = "issuer-uri")
 public class SupabaseSecurityAutoConfiguration {
 
     @Bean

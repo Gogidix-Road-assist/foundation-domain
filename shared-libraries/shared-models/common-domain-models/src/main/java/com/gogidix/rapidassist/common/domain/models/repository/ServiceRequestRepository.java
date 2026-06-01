@@ -90,7 +90,7 @@ public interface ServiceRequestRepository extends MongoRepository<ServiceRequest
      * Finds pending service requests ordered by priority and creation date.
      * @return list of pending service requests
      */
-    List<ServiceRequest> findByStatusOrderByPriorityDescCreatedAtAsc(String status);
+    List<ServiceRequest> findByStatusOrderByPriorityLevelDescCreatedAtAsc(String status);
 
     /**
      * Finds service requests that need attention (high priority or urgent).

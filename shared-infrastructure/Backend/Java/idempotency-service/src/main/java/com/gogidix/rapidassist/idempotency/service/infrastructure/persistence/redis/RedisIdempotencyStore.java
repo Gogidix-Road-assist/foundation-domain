@@ -9,8 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.stereotype.Component;
+import org.springframework.data.redis.core.lua.RedisScript;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
 @ConditionalOnClass(RedisTemplate.class)
 public class RedisIdempotencyStore implements IdempotencyStore {
 

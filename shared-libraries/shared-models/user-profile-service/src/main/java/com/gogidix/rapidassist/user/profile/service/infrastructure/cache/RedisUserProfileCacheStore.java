@@ -7,6 +7,7 @@ import com.gogidix.rapidassist.user.profile.service.domain.port.out.UserProfileC
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Component
+@ConditionalOnBean(RedisTemplate.class)
 public class RedisUserProfileCacheStore implements UserProfileCacheStore {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisUserProfileCacheStore.class);
