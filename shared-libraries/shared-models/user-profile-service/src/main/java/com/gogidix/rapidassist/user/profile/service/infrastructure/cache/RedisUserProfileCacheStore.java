@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-@ConditionalOnBean(RedisTemplate.class)
+@ConditionalOnBean(name = "redisTemplate")
 public class RedisUserProfileCacheStore implements UserProfileCacheStore {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisUserProfileCacheStore.class);
