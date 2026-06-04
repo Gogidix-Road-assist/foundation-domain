@@ -11,9 +11,10 @@ steps:
       - mkdir -p ~/.m2
       - echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0'><servers><server><id>github</id><username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password></server><server><id>github-foundation</id><username>${GITHUB_ACTOR}</username><password>${PAT_SECRET}</password></server></servers></settings>" > ~/.m2/settings.xml
       - cd .
-      - mvn install -DskipTests -N -q && mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
-      - mvn clean package -DskipTests -q 2>&1 | tail -20
-      - echo "BUILD SUCCESS"
+      - mvn install -DskipTests -N -q       - mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
+      - echo "BUILD DONE"
+    when:
+      - event: [push, pull_request]
 
   test:
     image: maven:3.9-eclipse-temurin-21
@@ -23,8 +24,8 @@ steps:
       - mkdir -p ~/.m2
       - echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0'><servers><server><id>github</id><username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password></server><server><id>github-foundation</id><username>${GITHUB_ACTOR}</username><password>${PAT_SECRET}</password></server></servers></settings>" > ~/.m2/settings.xml
       - cd .
-      - mvn install -DskipTests -N -q && mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
-      - mvn test 2>&1 | tail -30
+      - mvn install -DskipTests -N -q       - mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
+      - mvn test -U 2>&1 | tail -30
     when:
       - event: push
         branch: [dev]
