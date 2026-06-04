@@ -42,7 +42,7 @@ env:
 jobs:
   publish-shared-libraries:
     name: "📦 Publish Shared Libraries"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
@@ -155,7 +155,7 @@ jobs:
 
   central-configuration:
     name: "⚙️ Central-Configuration (Build → Test)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -239,7 +239,7 @@ jobs:
 
   shared-infrastructure:
     name: "🏗️ Shared-Infrastructure (Build → Test)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -323,7 +323,7 @@ jobs:
 
   orchestration-services:
     name: "🎯 Orchestration-Services (Build → Test)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -398,7 +398,7 @@ jobs:
 
   centralized-dashboard:
     name: "📊 Centralized-Dashboard (Build → Test)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -482,7 +482,7 @@ jobs:
 
   shared-models:
     name: "🗄️ Shared-Models (Build → Test)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -571,7 +571,7 @@ jobs:
     if: |
       (inputs.run_code_quality == true || inputs.run_code_quality == 'true' || inputs.run_code_quality == '') &&
       needs.central-configuration.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
     steps:
@@ -593,7 +593,7 @@ jobs:
     if: |
       (inputs.run_security_scan == true || inputs.run_security_scan == 'true' || inputs.run_security_scan == '') &&
       needs.central-configuration.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -610,7 +610,7 @@ jobs:
       always() &&
       needs.code-quality.result != 'failed' &&
       needs.security-scan.result != 'failed'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
@@ -735,7 +735,7 @@ jobs:
     name: "🧪 Smoke Test"
     needs: [docker-build]
     if: always() && needs.docker-build.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read
@@ -894,7 +894,7 @@ jobs:
       always() &&
       needs.smoke-test.result == 'success' &&
       (github.ref == 'refs/heads/staging/uat' || github.ref == 'refs/heads/production')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger infrastructure deploy
         uses: actions/github-script@v7
@@ -927,7 +927,7 @@ jobs:
     name: "Notify Team"
     needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Send Slack Notification
         uses: 8398a7/action-slack@v3
@@ -942,7 +942,7 @@ jobs:
     name: "Pipeline Summary"
     needs: [publish-shared-libraries, central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models, code-quality, security-scan, docker-build, smoke-test, trigger-infra-deploy, notify]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Generate Summary
         run: |
