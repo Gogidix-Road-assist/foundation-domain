@@ -127,8 +127,6 @@ class IntegrationConfigServiceTest {
 
     @Test
     void testFindByTenantAndId_CrossTenantAccessDenied() {
-        when(repository.findByTenantIdAndId("tenant-1", "config-1"))
-                .thenReturn(Optional.of(existingConfig));
         when(repository.findByTenantIdAndId("tenant-2", "config-1"))
                 .thenReturn(Optional.empty());
 
