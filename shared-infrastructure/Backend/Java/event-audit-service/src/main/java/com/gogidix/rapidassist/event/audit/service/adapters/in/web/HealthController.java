@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.event.audit.service.interfaces.rest;
+package com.gogidix.rapidassist.event.audit.service.adapters.in.web;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
