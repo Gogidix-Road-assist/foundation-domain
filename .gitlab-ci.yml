@@ -94,18 +94,12 @@ central-configuration:
     - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd central-configuration/Backend/Java
     - mvn clean package -DskipTests
-    - mvn test org.jacoco:jacoco-maven-plugin:report || true
-    - mkdir -p $CI_PROJECT_DIR/artifacts
-    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
+    - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
-  artifacts:
-    paths:
-      - artifacts/*.jar
-    expire_in: 1 day
 
 shared-infrastructure:
   stage: build
@@ -122,18 +116,12 @@ shared-infrastructure:
     - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd shared-infrastructure/Backend/Java
     - mvn clean package -DskipTests
-    - mvn test org.jacoco:jacoco-maven-plugin:report || true
-    - mkdir -p $CI_PROJECT_DIR/artifacts
-    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
+    - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
-  artifacts:
-    paths:
-      - artifacts/*.jar
-    expire_in: 1 day
 
 orchestration-services:
   stage: build
@@ -150,18 +138,12 @@ orchestration-services:
     - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd orchestration-services/Backend/Java
     - mvn clean package -DskipTests
-    - mvn test org.jacoco:jacoco-maven-plugin:report || true
-    - mkdir -p $CI_PROJECT_DIR/artifacts
-    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
+    - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
-  artifacts:
-    paths:
-      - artifacts/*.jar
-    expire_in: 1 day
 
 centralized-dashboard:
   stage: build
@@ -178,18 +160,12 @@ centralized-dashboard:
     - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd centralized-dashboard/Backend/Java
     - mvn clean package -DskipTests
-    - mvn test org.jacoco:jacoco-maven-plugin:report || true
-    - mkdir -p $CI_PROJECT_DIR/artifacts
-    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
+    - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
-  artifacts:
-    paths:
-      - artifacts/*.jar
-    expire_in: 1 day
 
 shared-models:
   stage: build
@@ -215,15 +191,9 @@ shared-models:
       for svc in shared-libraries/shared-models/*/; do
         if [ -f "${svc}pom.xml" ]; then
           echo "Testing $(basename ${svc})..."
-          mvn test org.jacoco:jacoco-maven-plugin:report -f "${svc}pom.xml" || true
+          mvn test org.jacoco:jacoco-maven-plugin:report -f "${svc}pom.xml"
         fi
       done
-    - mkdir -p $CI_PROJECT_DIR/artifacts
-    - find shared-libraries/shared-models -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
-  artifacts:
-    paths:
-      - artifacts/*.jar
-    expire_in: 1 day
 
 code-quality:
   stage: quality
@@ -234,7 +204,7 @@ code-quality:
       allow_failure: false
   script:
     - semgrep --config auto --json -o semgrep-report.json . || true
-    - semgrep --config auto . 
+    - semgrep --config auto .
   allow_failure: false
 
 security-scan:
@@ -249,33 +219,28 @@ security-scan:
 
 docker-build:
   stage: docker
-  image: docker:latest
-  needs:
-    - job: central-configuration
-      artifacts: true
-    - job: shared-infrastructure
-      artifacts: true
-    - job: orchestration-services
-      artifacts: true
-    - job: centralized-dashboard
-      artifacts: true
-    - job: shared-models
-      artifacts: true
+  image: maven:3.9-eclipse-temurin-21
+  needs: [code-quality, security-scan]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   services:
-    - docker:dind
+    - name: docker:dind
+      command: ["--tls=false"]
   variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   before_script:
+    - *maven_setup
+    - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
     - ORG_LOWER="gogidix-road-assist"
     - REPO_NAME="foundation-domain"
     - GHCR_PREFIX="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - |
       declare -A SERVICE_PORTS=(
         [service-registry-discovery]=8761
@@ -326,9 +291,8 @@ docker-build:
         exit 1
       fi
       IMAGE_COUNT=0
-      for jar in artifacts/*.jar; do
-        [ -f "$jar" ] || continue
-        SERVICE_NAME=$(basename "$jar" .jar)
+      find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read jar; do
+        SERVICE_NAME=$(basename "$jar" | sed 's/-[0-9].*//')
         IMAGE_NAME=$(echo "$SERVICE_NAME" | tr '_' '-' | tr '[:upper:]' '[:lower:]')
         PORT=${SERVICE_PORTS[$SERVICE_NAME]:-8080}
         GHCR_IMAGE="${GHCR_PREFIX}-${IMAGE_NAME}"
@@ -370,10 +334,11 @@ smoke-test:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   services:
-    - docker:dind
+    - name: docker:dind
+      command: ["--tls=false"]
   variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
