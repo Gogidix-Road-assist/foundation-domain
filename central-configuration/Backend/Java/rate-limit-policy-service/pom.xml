@@ -234,6 +234,14 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <excludes>
+            <exclude>**/*SmokeTest*</exclude>
+            <exclude>**/smoke/**</exclude>
+            <exclude>**/*ContextLoadsTest*</exclude>
+            <exclude>**/*TenantIsolationTest*</exclude>
+          </excludes>
+        </configuration>
       </plugin>
 
       <!-- Failsafe Plugin for Integration Tests -->
@@ -241,6 +249,14 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <includes>
+            <include>**/*SmokeTest*</include>
+            <include>**/smoke/**</include>
+            <include>**/*ContextLoadsTest*</include>
+            <include>**/*TenantIsolationTest*</include>
+          </includes>
+        </configuration>
         <executions>
           <execution>
             <goals>
