@@ -1,10 +1,10 @@
 stages:
   - publish
   - build
-  - test
   - quality
   - security
   - docker
+  - trivy
   - smoke
   - deploy
   - notify
@@ -306,7 +306,7 @@ docker-build:
       echo "Built ${IMAGE_COUNT} images"
 
 trivy-scan:
-  stage: security
+  stage: trivy
   image: aquasecurity/trivy:latest
   needs: [docker-build]
   rules:
