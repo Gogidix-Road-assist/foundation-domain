@@ -281,8 +281,8 @@ docker-build:
     - |
       DOCKERFILE=docker/Dockerfile.service
       if [ ! -f "$DOCKERFILE" ]; then
-        echo "Dockerfile not found, skipping docker build"
-        exit 0
+        echo "Dockerfile not found"
+        exit 1
       fi
       IMAGE_COUNT=0
       find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read jar; do
@@ -297,9 +297,9 @@ docker-build:
           -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}" \
           -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}" \
           -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest" \
-          "$BUILD_CTX" || true
-        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}" || true
-        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}" || true
+          "$BUILD_CTX"
+        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}"
+        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
       done
@@ -333,18 +333,18 @@ smoke-test:
     - apk add --no-cache curl
     - |
       if [ -z "$MONGODB_URI" ]; then
-        echo "MONGODB_URI not set, skipping smoke test"
-        exit 0
+        echo "MONGODB_URI not set"
+        exit 1
       fi
     - |
       if [ ! -f "docker/docker-compose.smoke.yml" ]; then
-        echo "Smoke compose file not found, skipping"
-        exit 0
+        echo "Smoke compose file not found"
+        exit 1
       fi
     - export GHCR_REPO="${CI_REGISTRY_IMAGE}"
     - export IMAGE_TAG="${SHORT_SHA}"
     - export MONGODB_URI="${MONGODB_URI}"
-    - docker compose -f docker/docker-compose.smoke.yml up -d || true
+    - docker compose -f docker/docker-compose.smoke.yml up -d
     - sleep 60
     - |
       declare -A SERVICES=(
