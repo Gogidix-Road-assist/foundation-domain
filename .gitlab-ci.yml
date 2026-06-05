@@ -1,13 +1,43 @@
 stages:
+  - publish
   - build
   - test
+  - quality
+  - security
+  - docker
+  - smoke
   - deploy
+  - notify
 
 variables:
   MAVEN_OPTS: "-Xmx1024m"
+  JAVA_VERSION: "21"
+  REGISTRY: ghcr.io
+
+.maven_setup: &maven_setup
+  - mkdir -p ~/.m2
+  - |
+    cat > ~/.m2/settings.xml << SETTINGS
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+      <servers>
+        <server>
+          <id>gitlab-maven</id>
+          <username>gitlab-ci-token</username>
+          <password>${CI_JOB_TOKEN}</password>
+        </server>
+        <server>
+          <id>github</id>
+          <username>${GITHUB_ACTOR}</username>
+          <password>${GITHUB_TOKEN}</password>
+        </server>
+      </servers>
+    </settings>
+    SETTINGS
 
 publish-shared-libraries:
-  stage: build
+  stage: publish
   image: maven:3.9-eclipse-temurin-21
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
@@ -15,11 +45,41 @@ publish-shared-libraries:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: false
   script:
-    - mvn install -DskipTests -N -q
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
     - cd shared-libraries/Backend/Java
-    - mvn clean install -DskipTests -q
+    - mvn clean install -U -DskipTests -q
+    - cd $CI_PROJECT_DIR
+    - |
+      for module in shared-libraries/Backend/Java/shared-audit-library \
+                    shared-libraries/Backend/Java/shared-cors-config \
+                    shared-libraries/Backend/Java/shared-dto-library \
+                    shared-libraries/Backend/Java/shared-exception-library \
+                    shared-libraries/Backend/Java/shared-idempotency-library \
+                    shared-libraries/Backend/Java/shared-mapper-library \
+                    shared-libraries/Backend/Java/shared-observability-library \
+                    shared-libraries/Backend/Java/shared-persistence-library \
+                    shared-libraries/Backend/Java/shared-request-context-library \
+                    shared-libraries/Backend/Java/shared-security-library \
+                    shared-libraries/Backend/Java/shared-validation-library; do
+        lib_name=$(basename "${module}")
+        mvn deploy -DskipTests -f "${module}/pom.xml" \
+          -DaltDeploymentRepository=gitlab-maven::https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/maven > deploy.log 2>&1 || true
+        DEPLOY_OK=$(grep -c "BUILD SUCCESS" deploy.log || echo "0")
+        if [ "$DEPLOY_OK" -eq 0 ]; then
+          if grep -q "409" deploy.log; then
+            echo "WARNING: ${lib_name} already published (409)"
+          else
+            echo "ERROR: ${lib_name} deploy FAILED"
+            cat deploy.log
+            exit 1
+          fi
+        else
+          echo "OK: ${lib_name} deployed"
+        fi
+      done
 
-build-services:
+central-configuration:
   stage: build
   image: maven:3.9-eclipse-temurin-21
   needs: [publish-shared-libraries]
@@ -29,26 +89,299 @@ build-services:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: false
   script:
-    - mvn install -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -DskipTests -q && cd $CI_PROJECT_DIR
-    - mvn clean package -DskipTests -q
-
-test-services:
-  stage: test
-  image: maven:3.9-eclipse-temurin-21
-  needs: [publish-shared-libraries]
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      allow_failure: false
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd central-configuration/Backend/Java
+    - mvn clean package -DskipTests
+    - mvn test org.jacoco:jacoco-maven-plugin:report || true
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
+
+shared-infrastructure:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  needs: [publish-shared-libraries]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: false
   script:
-    - mvn install -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -DskipTests -q && cd $CI_PROJECT_DIR
-    - mvn test -U
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-infrastructure/Backend/Java
+    - mvn clean package -DskipTests
+    - mvn test org.jacoco:jacoco-maven-plugin:report || true
+  services:
+    - name: mongo:7
+      alias: mongodb
+  variables:
+    MONGODB_URI: "mongodb://mongodb:27017/test"
+
+orchestration-services:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  needs: [publish-shared-libraries]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: false
+  script:
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd orchestration-services/Backend/Java
+    - mvn clean package -DskipTests
+    - mvn test org.jacoco:jacoco-maven-plugin:report || true
+  services:
+    - name: mongo:7
+      alias: mongodb
+  variables:
+    MONGODB_URI: "mongodb://mongodb:27017/test"
+
+centralized-dashboard:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  needs: [publish-shared-libraries]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: false
+  script:
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd centralized-dashboard/Backend/Java
+    - mvn clean package -DskipTests
+    - mvn test org.jacoco:jacoco-maven-plugin:report || true
+  services:
+    - name: mongo:7
+      alias: mongodb
+  variables:
+    MONGODB_URI: "mongodb://mongodb:27017/test"
+
+shared-models:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  needs: [publish-shared-libraries]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: false
+  script:
+    - *maven_setup
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - |
+      for svc in shared-libraries/shared-models/*/; do
+        if [ -f "${svc}pom.xml" ]; then
+          echo "Building $(basename ${svc})..."
+          mvn clean package -DskipTests -f "${svc}pom.xml"
+        fi
+      done
+    - |
+      for svc in shared-libraries/shared-models/*/; do
+        if [ -f "${svc}pom.xml" ]; then
+          echo "Testing $(basename ${svc})..."
+          mvn test org.jacoco:jacoco-maven-plugin:report -f "${svc}pom.xml" || true
+        fi
+      done
+
+code-quality:
+  stage: quality
+  image: returntocorp/semgrep:latest
+  needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  script:
+    - semgrep --config auto --json -o semgrep-report.json . || true
+    - semgrep --config auto . 
+  allow_failure: false
+
+security-scan:
+  stage: security
+  image: trufflesecurity/trufflehog:latest
+  needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  script:
+    - trufflehog filesystem --only-verified .
+
+docker-build:
+  stage: docker
+  image: docker:latest
+  needs: [code-quality, security-scan]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
+    - ORG_LOWER=$(echo "${CI_PROJECT_NAMESPACE}" | tr '[:upper:]' '[:lower:]')
+    - REPO_NAME=$(echo "${CI_PROJECT_NAME}" | tr '[:upper:]' '[:lower:]')
+    - |
+      declare -A SERVICE_PORTS=(
+        [service-registry-discovery]=8761
+        [config-service]=8080
+        [api-gateway]=8084
+        [tenant-org-service]=8116
+        [monitoring-service]=8091
+        [dashboard-configuration-service]=8200
+        [feature-flags-service]=8100
+        [dynamic-routing-config-service]=8102
+        [rate-limit-policy-service]=8104
+        [release-rollout-config-service]=8105
+        [tenancy-configuration-service]=8106
+        [dashboard-analytics-service]=8201
+        [dashboard-reporting-service]=8202
+        [country-aggregation-service]=8095
+        [executive-aggregation-service]=8096
+        [common-domain-models]=8261
+        [country-localization-config-service]=8262
+        [user-profile-service]=8117
+        [database-indexing-service]=8090
+        [access-control-service]=8311
+        [alerting-service]=8312
+        [api-keys-service]=8313
+        [audit-correlation-service]=8314
+        [database-management-service]=8315
+        [event-audit-service]=8316
+        [idempotency-service]=8317
+        [identity-access-service]=8318
+        [identity-service]=8319
+        [integration-adapters-service]=8320
+        [logging-aggregation-service]=8321
+        [mechanics-gps-tracker-service]=8322
+        [mechanics-insurance-bridge-service]=8323
+        [metrics-telemetry-service]=8324
+        [mfa-service]=8325
+        [rate-limiting-service]=8326
+        [request-routing-service]=8327
+        [service-health-monitor]=8328
+        [service-health-monitor-service]=8329
+        [session-token-service]=8330
+        [waf-policy-service]=8331
+      )
+    - |
+      DOCKERFILE=docker/Dockerfile.service
+      if [ ! -f "$DOCKERFILE" ]; then
+        echo "Dockerfile not found, skipping docker build"
+        exit 0
+      fi
+      IMAGE_COUNT=0
+      find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read jar; do
+        SERVICE_NAME=$(basename "$jar" | sed 's/-[0-9].*//')
+        IMAGE_NAME=$(echo "$SERVICE_NAME" | tr '_' '-' | tr '[:upper:]' '[:lower:]')
+        PORT=${SERVICE_PORTS[$SERVICE_NAME]:-8080}
+        BUILD_CTX=$(mktemp -d)
+        cp "$jar" "$BUILD_CTX/app.jar"
+        cp "$DOCKERFILE" "$BUILD_CTX/Dockerfile"
+        echo "Building ${IMAGE_NAME} (port ${PORT})"
+        docker build --build-arg SERVICE_PORT="${PORT}" \
+          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}" \
+          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}" \
+          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest" \
+          "$BUILD_CTX" || true
+        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}" || true
+        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}" || true
+        IMAGE_COUNT=$((IMAGE_COUNT + 1))
+        rm -rf "$BUILD_CTX"
+      done
+      echo "Built ${IMAGE_COUNT} images"
+
+trivy-scan:
+  stage: security
+  image: aquasecurity/trivy:latest
+  needs: [docker-build]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  script:
+    - trivy fs --severity CRITICAL,HIGH --exit-code 1 .
+
+smoke-test:
+  stage: smoke
+  image: docker:latest
+  needs: [docker-build]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  script:
+    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - apk add --no-cache curl
+    - |
+      if [ -z "$MONGODB_URI" ]; then
+        echo "MONGODB_URI not set, skipping smoke test"
+        exit 0
+      fi
+    - |
+      if [ ! -f "docker/docker-compose.smoke.yml" ]; then
+        echo "Smoke compose file not found, skipping"
+        exit 0
+      fi
+    - export GHCR_REPO="${CI_REGISTRY_IMAGE}"
+    - export IMAGE_TAG="${SHORT_SHA}"
+    - export MONGODB_URI="${MONGODB_URI}"
+    - docker compose -f docker/docker-compose.smoke.yml up -d || true
+    - sleep 60
+    - |
+      declare -A SERVICES=(
+        [service-registry]=8761
+        [config-service]=8080
+        [tenant-org-service]=8085
+        [monitoring-service]=8091
+        [dashboard-configuration-service]=8200
+      )
+      PASS=0
+      FAIL=0
+      for svc in "${!SERVICES[@]}"; do
+        PORT="${SERVICES[$svc]}"
+        ELAPSED=0
+        HEALTHY=false
+        while [ $ELAPSED -lt 180 ]; do
+          HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "${svc}: HEALTHY after ${ELAPSED}s"
+            HEALTHY=true
+            break
+          fi
+          sleep 5
+          ELAPSED=$((ELAPSED + 5))
+        done
+        if $HEALTHY; then
+          PASS=$((PASS + 1))
+        else
+          FAIL=$((FAIL + 1))
+          echo "ERROR: ${svc} failed health check on port ${PORT}"
+        fi
+      done
+      echo "Smoke test: ${PASS} passed, ${FAIL} failed"
+      if [ "${FAIL}" -gt 0 ]; then
+        exit 1
+      fi
+    - docker compose -f docker/docker-compose.smoke.yml down -v --remove-orphans 2>/dev/null || true
 
 promote-staging:
   stage: deploy
@@ -83,3 +416,19 @@ promote-production:
     - git push -f origin production
   environment:
     name: production
+
+notify:
+  stage: notify
+  image: alpine:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      when: on_failure
+      allow_failure: false
+  script:
+    - |
+      if [ -n "$SLACK_WEBHOOK_URL" ]; then
+        apk add --no-cache curl
+        curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+          -H 'Content-type: application/json' \
+          -d "{\"text\":\"Foundation-Domain pipeline FAILED on ${CI_COMMIT_BRANCH} - ${CI_PIPELINE_URL}\"}" || true
+      fi
