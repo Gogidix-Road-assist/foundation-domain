@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(UserProfileController.class)
@@ -87,7 +89,7 @@ class UserProfileControllerTest {
         when(userProfileService.createProfile(any()))
                 .thenReturn(CompletableFuture.completedFuture(sampleProfile));
 
-        mockMvc.perform(post("/api/v1/user-profile")
+        MvcResult mvcResult = mockMvc.perform(post("/api/v1/user-profile")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "tenantId", "tenant-123",
@@ -97,6 +99,9 @@ class UserProfileControllerTest {
                                 "lastName", "Doe",
                                 "createdBy", "admin@example.com"
                         ))))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").value("user-123"))
                 .andExpect(jsonPath("$.email").value("john@example.com"));
@@ -107,8 +112,11 @@ class UserProfileControllerTest {
         when(userProfileService.getProfileByUserId(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(sampleProfile)));
 
-        mockMvc.perform(get("/api/v1/user-profile/user-123")
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/user-profile/user-123")
                         .param("tenantId", "tenant-123"))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-123"))
                 .andExpect(jsonPath("$.email").value("john@example.com"));
@@ -119,8 +127,11 @@ class UserProfileControllerTest {
         when(userProfileService.getProfileByUserId(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
-        mockMvc.perform(get("/api/v1/user-profile/nonexistent")
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/user-profile/nonexistent")
                         .param("tenantId", "tenant-123"))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNotFound());
     }
 
@@ -129,7 +140,7 @@ class UserProfileControllerTest {
         when(userProfileService.updateProfile(any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(sampleProfile)));
 
-        mockMvc.perform(put("/api/v1/user-profile/user-123")
+        MvcResult mvcResult = mockMvc.perform(put("/api/v1/user-profile/user-123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "tenantId", "tenant-123",
@@ -138,6 +149,9 @@ class UserProfileControllerTest {
                                 "lastName", "Doe",
                                 "updatedBy", "admin@example.com"
                         ))))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-123"));
     }
@@ -147,9 +161,12 @@ class UserProfileControllerTest {
         when(userProfileService.deleteProfile(any(), any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(true));
 
-        mockMvc.perform(delete("/api/v1/user-profile/user-123")
+        MvcResult mvcResult = mockMvc.perform(delete("/api/v1/user-profile/user-123")
                         .param("tenantId", "tenant-123")
                         .param("deletedBy", "admin@example.com"))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNoContent());
     }
 
@@ -158,8 +175,11 @@ class UserProfileControllerTest {
         when(userProfileService.getProfilesByTenant(any()))
                 .thenReturn(CompletableFuture.completedFuture(List.of(sampleProfile)));
 
-        mockMvc.perform(get("/api/v1/user-profile")
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/user-profile")
                         .param("tenantId", "tenant-123"))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userId").value("user-123"));
     }
@@ -169,8 +189,11 @@ class UserProfileControllerTest {
         when(userProfileService.getActiveProfiles(any()))
                 .thenReturn(CompletableFuture.completedFuture(List.of(sampleProfile)));
 
-        mockMvc.perform(get("/api/v1/user-profile/active")
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/user-profile/active")
                         .param("tenantId", "tenant-123"))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"));
     }
