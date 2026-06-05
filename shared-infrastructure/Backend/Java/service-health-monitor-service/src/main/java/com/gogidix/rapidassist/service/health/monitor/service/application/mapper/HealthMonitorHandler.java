@@ -3,5 +3,5 @@ package com.gogidix.rapidassist.service.health.monitor.service.application.mappe
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceHealthMonitorMapper {
+public class HealthMonitorHandler {
 }

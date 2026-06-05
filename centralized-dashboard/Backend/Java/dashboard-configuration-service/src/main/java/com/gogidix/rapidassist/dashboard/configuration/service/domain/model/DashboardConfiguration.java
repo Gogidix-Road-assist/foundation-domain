@@ -1,11 +1,11 @@
 package com.gogidix.rapidassist.dashboard.configuration.service.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import java.time.Instant;
 import java.util.*;
 
-/**
- * Domain model for dashboard configuration
- */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class DashboardConfiguration {
 
     private final String id;
