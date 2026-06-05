@@ -7,15 +7,8 @@ steps:
     image: maven:3.9-eclipse-temurin-21
     environment:
       MAVEN_OPTS: -Xmx1024m
-      GITHUB_ACTOR:
-        from_secret: GITHUB_ACTOR
-      GITHUB_TOKEN:
-        from_secret: GITHUB_TOKEN
-      PAT_SECRET:
-        from_secret: PAT_SECRET
     commands:
       - mkdir -p ~/.m2
-      - echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0'><servers><server><id>github</id><username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password></server><server><id>github-foundation</id><username>${GITHUB_ACTOR}</username><password>${PAT_SECRET}</password></server></servers></settings>" > ~/.m2/settings.xml
       - mvn install -DskipTests -N -q
       - mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
       - mvn clean package -DskipTests -q
@@ -27,15 +20,8 @@ steps:
     image: maven:3.9-eclipse-temurin-21
     environment:
       MAVEN_OPTS: -Xmx1024m
-      GITHUB_ACTOR:
-        from_secret: GITHUB_ACTOR
-      GITHUB_TOKEN:
-        from_secret: GITHUB_TOKEN
-      PAT_SECRET:
-        from_secret: PAT_SECRET
     commands:
       - mkdir -p ~/.m2
-      - echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0'><servers><server><id>github</id><username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password></server><server><id>github-foundation</id><username>${GITHUB_ACTOR}</username><password>${PAT_SECRET}</password></server></servers></settings>" > ~/.m2/settings.xml
       - mvn install -DskipTests -N -q
       - mvn clean install -DskipTests -f shared-libraries/Backend/Java -q
       - mvn test -U 2>&1 | tail -30
