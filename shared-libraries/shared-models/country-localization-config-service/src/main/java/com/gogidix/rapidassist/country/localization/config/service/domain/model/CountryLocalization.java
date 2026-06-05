@@ -42,7 +42,7 @@ public class CountryLocalization {
 
     private CountryLocalization(Builder builder) {
         this.id = builder.id != null ? builder.id : UUID.randomUUID().toString();
-        this.tenantId = builder.tenantId;
+        this.tenantId = builder.tenantId != null ? builder.tenantId : "default";
         this.countryCode = builder.countryCode;
         this.countryName = builder.countryName;
         this.locale = builder.locale;

@@ -97,7 +97,8 @@ public class CountryLocalizationEventPublisher {
      * @return CompletableFuture that completes when published
      */
     private CompletableFuture<Void> publishEvent(DomainEvent<?> event, String eventType) {
-        String key = event.tenantId() + ":" + event.aggregateId();
+        String tenantId = event.tenantId() != null ? event.tenantId() : "default";
+        String key = tenantId + ":" + event.aggregateId();
 
         logger.debug("Publishing {} event for tenant: {}, aggregate: {}",
             eventType, event.tenantId(), event.aggregateId());

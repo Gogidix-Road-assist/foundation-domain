@@ -1,4 +1,4 @@
-package com.gogidix.rapidassist.access.control.service.adapters.in.web;
+package com.gogidix.rapidassist.access.control.service.interfaces.rest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
