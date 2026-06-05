@@ -95,11 +95,17 @@ central-configuration:
     - cd central-configuration/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report || true
+    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
+  artifacts:
+    paths:
+      - artifacts/*.jar
+    expire_in: 1 day
 
 shared-infrastructure:
   stage: build
@@ -117,11 +123,17 @@ shared-infrastructure:
     - cd shared-infrastructure/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report || true
+    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
+  artifacts:
+    paths:
+      - artifacts/*.jar
+    expire_in: 1 day
 
 orchestration-services:
   stage: build
@@ -139,11 +151,17 @@ orchestration-services:
     - cd orchestration-services/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report || true
+    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
+  artifacts:
+    paths:
+      - artifacts/*.jar
+    expire_in: 1 day
 
 centralized-dashboard:
   stage: build
@@ -161,11 +179,17 @@ centralized-dashboard:
     - cd centralized-dashboard/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report || true
+    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
   services:
     - name: mongo:7
       alias: mongodb
   variables:
     MONGODB_URI: "mongodb://mongodb:27017/test"
+  artifacts:
+    paths:
+      - artifacts/*.jar
+    expire_in: 1 day
 
 shared-models:
   stage: build
@@ -194,6 +218,12 @@ shared-models:
           mvn test org.jacoco:jacoco-maven-plugin:report -f "${svc}pom.xml" || true
         fi
       done
+    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - find shared-libraries/shared-models -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -exec cp {} $CI_PROJECT_DIR/artifacts/ \;
+  artifacts:
+    paths:
+      - artifacts/*.jar
+    expire_in: 1 day
 
 code-quality:
   stage: quality
@@ -209,18 +239,28 @@ code-quality:
 
 security-scan:
   stage: security
-  image: trufflesecurity/trufflehog:latest
+  image: trufflesecurity/trufflehog:v3.95.2
   needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   script:
-    - trufflehog filesystem --only-verified .
+    - trufflehog git file://. --only-verified
 
 docker-build:
   stage: docker
   image: docker:latest
-  needs: [code-quality, security-scan]
+  needs:
+    - job: central-configuration
+      artifacts: true
+    - job: shared-infrastructure
+      artifacts: true
+    - job: orchestration-services
+      artifacts: true
+    - job: centralized-dashboard
+      artifacts: true
+    - job: shared-models
+      artifacts: true
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -230,11 +270,12 @@ docker-build:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
-    - ORG_LOWER=$(echo "${CI_PROJECT_NAMESPACE}" | tr '[:upper:]' '[:lower:]')
-    - REPO_NAME=$(echo "${CI_PROJECT_NAME}" | tr '[:upper:]' '[:lower:]')
+    - ORG_LOWER="gogidix-road-assist"
+    - REPO_NAME="foundation-domain"
+    - GHCR_PREFIX="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
     - |
       declare -A SERVICE_PORTS=(
         [service-registry-discovery]=8761
@@ -285,24 +326,30 @@ docker-build:
         exit 1
       fi
       IMAGE_COUNT=0
-      find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read jar; do
-        SERVICE_NAME=$(basename "$jar" | sed 's/-[0-9].*//')
+      for jar in artifacts/*.jar; do
+        [ -f "$jar" ] || continue
+        SERVICE_NAME=$(basename "$jar" .jar)
         IMAGE_NAME=$(echo "$SERVICE_NAME" | tr '_' '-' | tr '[:upper:]' '[:lower:]')
         PORT=${SERVICE_PORTS[$SERVICE_NAME]:-8080}
+        GHCR_IMAGE="${GHCR_PREFIX}-${IMAGE_NAME}"
         BUILD_CTX=$(mktemp -d)
         cp "$jar" "$BUILD_CTX/app.jar"
         cp "$DOCKERFILE" "$BUILD_CTX/Dockerfile"
         echo "Building ${IMAGE_NAME} (port ${PORT})"
         docker build --build-arg SERVICE_PORT="${PORT}" \
-          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}" \
-          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}" \
-          -t "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest" \
+          -t "${GHCR_IMAGE}:${CI_COMMIT_SHA}" \
+          -t "${GHCR_IMAGE}:${SHORT_SHA}" \
+          -t "${GHCR_IMAGE}:latest" \
           "$BUILD_CTX"
-        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}"
-        docker push "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${SHORT_SHA}"
+        docker push "${GHCR_IMAGE}:${CI_COMMIT_SHA}"
+        docker push "${GHCR_IMAGE}:${SHORT_SHA}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
       done
+      if [ "$IMAGE_COUNT" -eq 0 ]; then
+        echo "ERROR: No Docker images built"
+        exit 1
+      fi
       echo "Built ${IMAGE_COUNT} images"
 
 trivy-scan:
@@ -329,7 +376,7 @@ smoke-test:
     DOCKER_TLS_CERTDIR: "/certs"
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
     - apk add --no-cache curl
     - |
       if [ -z "$MONGODB_URI" ]; then
@@ -341,7 +388,7 @@ smoke-test:
         echo "Smoke compose file not found"
         exit 1
       fi
-    - export GHCR_REPO="${CI_REGISTRY_IMAGE}"
+    - export GHCR_REPO="ghcr.io/gogidix-road-assist/foundation-domain"
     - export IMAGE_TAG="${SHORT_SHA}"
     - export MONGODB_URI="${MONGODB_URI}"
     - docker compose -f docker/docker-compose.smoke.yml up -d
