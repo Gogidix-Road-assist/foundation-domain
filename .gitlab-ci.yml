@@ -32,10 +32,6 @@ build-services:
     - mvn install -DskipTests -N -q
     - cd shared-libraries/Backend/Java && mvn clean install -DskipTests -q && cd $CI_PROJECT_DIR
     - mvn clean package -DskipTests -q
-  artifacts:
-    paths:
-      - "**/target/*.jar"
-    expire_in: 1 day
 
 test-services:
   stage: test
