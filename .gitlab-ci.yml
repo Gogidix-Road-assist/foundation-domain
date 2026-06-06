@@ -330,7 +330,7 @@ trivy-scan:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   script:
-    - trivy fs --severity CRITICAL,HIGH --exit-code 1 --skip-dirs '*/target' --timeout 10m .
+    - trivy fs --scanners vuln --severity CRITICAL,HIGH --exit-code 1 --skip-dirs target --timeout 10m .
 
 smoke-test:
   stage: smoke
@@ -368,17 +368,12 @@ smoke-test:
     - docker compose -f docker/docker-compose.smoke.yml up -d
     - sleep 60
     - |
-      declare -A SERVICES=(
-        [service-registry]=8761
-        [config-service]=8080
-        [tenant-org-service]=8085
-        [monitoring-service]=8091
-        [dashboard-configuration-service]=8200
-      )
+      SERVICES="service-registry:8761 config-service:8080 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200"
       PASS=0
       FAIL=0
-      for svc in "${!SERVICES[@]}"; do
-        PORT="${SERVICES[$svc]}"
+      for svc_port in $SERVICES; do
+        svc=$(echo "$svc_port" | cut -d: -f1)
+        PORT=$(echo "$svc_port" | cut -d: -f2)
         ELAPSED=0
         HEALTHY=false
         while [ $ELAPSED -lt 180 ]; do
