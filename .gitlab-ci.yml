@@ -227,11 +227,13 @@ docker-build:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   services:
-    - name: docker:dind
+    - name: docker:24.0.5-dind
+      alias: docker
       command: ["--tls=false"]
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
   before_script:
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
@@ -330,17 +332,19 @@ trivy-scan:
 
 smoke-test:
   stage: smoke
-  image: docker:latest
+  image: docker:24.0.5
   needs: [docker-build]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   services:
-    - name: docker:dind
+    - name: docker:24.0.5-dind
+      alias: docker
       command: ["--tls=false"]
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
