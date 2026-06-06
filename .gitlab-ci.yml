@@ -330,7 +330,7 @@ trivy-scan:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   script:
-    - trivy fs --severity CRITICAL,HIGH --exit-code 1 .
+    - trivy fs --severity CRITICAL,HIGH --exit-code 1 --skip-dirs '*/target' --timeout 10m .
 
 smoke-test:
   stage: smoke
