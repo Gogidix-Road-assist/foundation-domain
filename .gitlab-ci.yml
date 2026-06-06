@@ -244,8 +244,7 @@ docker-build:
     - ORG_LOWER="gogidix-road-assist"
     - REPO_NAME="foundation-domain"
     - GHCR_PREFIX="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn clean package -U -DskipTests -q
     - |
       declare -A SERVICE_PORTS=(
         [service-registry-discovery]=8761
@@ -323,7 +322,9 @@ docker-build:
 
 trivy-scan:
   stage: trivy
-  image: aquasec/trivy:0.71.0
+  image:
+    name: aquasec/trivy:0.71.0
+    entrypoint: [""]
   needs: [docker-build]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
