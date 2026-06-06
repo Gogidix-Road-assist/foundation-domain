@@ -209,7 +209,9 @@ code-quality:
 
 security-scan:
   stage: security
-  image: trufflesecurity/trufflehog:3.95.5
+  image:
+    name: trufflesecurity/trufflehog:3.95.5
+    entrypoint: [""]
   needs: [central-configuration, shared-infrastructure, orchestration-services, centralized-dashboard, shared-models]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
