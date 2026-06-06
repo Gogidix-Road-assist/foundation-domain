@@ -234,6 +234,7 @@ docker-build:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
+    DOCKER_API_VERSION: "1.43"
   before_script:
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
@@ -345,6 +346,7 @@ smoke-test:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
+    DOCKER_API_VERSION: "1.43"
   script:
     - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
