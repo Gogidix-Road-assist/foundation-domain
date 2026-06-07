@@ -109,6 +109,8 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=smokepass123
       - SPRING_DATA_REDIS_USERNAME=default
       - SPRING_PROFILES_ACTIVE=default
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=
+      - SPRING_AUTO_CONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
       interval: 10s

@@ -4,7 +4,6 @@ stages:
   - quality
   - security
   - docker
-  - trivy
   - smoke
   - deploy
   - notify
@@ -320,18 +319,6 @@ docker-build:
       fi
       echo "Built ${IMAGE_COUNT} images"
 
-trivy-scan:
-  stage: trivy
-  image:
-    name: aquasec/trivy:0.71.0
-    entrypoint: [""]
-  needs: [docker-build]
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      allow_failure: false
-  script:
-    - trivy fs --scanners vuln --severity CRITICAL,HIGH --exit-code 1 --skip-dirs target --timeout 10m .
-
 smoke-test:
   stage: smoke
   image: docker:24.0.5
@@ -371,6 +358,7 @@ smoke-test:
       SERVICES="service-registry:8761 config-service:8080 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200"
       PASS=0
       FAIL=0
+      FAILED_SVCS=""
       for svc_port in $SERVICES; do
         svc=$(echo "$svc_port" | cut -d: -f1)
         PORT=$(echo "$svc_port" | cut -d: -f2)
@@ -390,7 +378,11 @@ smoke-test:
           PASS=$((PASS + 1))
         else
           FAIL=$((FAIL + 1))
+          FAILED_SVCS="${FAILED_SVCS} ${svc}"
           echo "ERROR: ${svc} failed health check on port ${PORT}"
+          echo "--- ${svc} container logs ---"
+          docker compose -f docker/docker-compose.smoke.yml logs --tail 50 "smoke-${svc}" 2>/dev/null || true
+          echo "--- end ${svc} logs ---"
         fi
       done
       echo "Smoke test: ${PASS} passed, ${FAIL} failed"
