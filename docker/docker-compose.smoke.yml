@@ -111,6 +111,8 @@ services:
       - SPRING_PROFILES_ACTIVE=default
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=
       - SPRING_AUTO_CONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - MANAGEMENT_ENDPOINT_KAFKA_ENABLED=false
+      - MANAGEMENT_HEALTH_KAFKA_ENABLED=false
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
       interval: 10s
