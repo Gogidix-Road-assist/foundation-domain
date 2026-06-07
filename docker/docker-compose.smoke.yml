@@ -113,6 +113,7 @@ services:
       - SPRING_AUTO_CONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - MANAGEMENT_ENDPOINT_KAFKA_ENABLED=false
       - MANAGEMENT_HEALTH_KAFKA_ENABLED=false
+      - SPRING_DATA_MONGODB_DATABASE=rapid_assist_monitoring
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
       interval: 10s
