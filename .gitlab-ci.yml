@@ -312,6 +312,10 @@ docker-build:
         docker push "${GHCR_IMAGE}:${SHORT_SHA}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
+        docker rmi "${GHCR_IMAGE}:${CI_COMMIT_SHA}" "${GHCR_IMAGE}:${SHORT_SHA}" "${GHCR_IMAGE}:latest" 2>/dev/null || true
+        if [ $((IMAGE_COUNT % 5)) -eq 0 ]; then
+          docker builder prune -f 2>/dev/null || true
+        fi
       done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar")
       if [ "$IMAGE_COUNT" -eq 0 ]; then
         echo "ERROR: No Docker images built"
