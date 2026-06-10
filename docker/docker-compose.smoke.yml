@@ -2,6 +2,7 @@ version: "3.8"
 
 x-common-env: &common-env
   MONGODB_URI: ${MONGODB_URI}
+  SPRING_DATA_MONGODB_DATABASE: ${MONGODB_DATABASE}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: smokepass123
@@ -12,10 +13,10 @@ x-common-env: &common-env
   SPRING_PROFILES_ACTIVE: default
 
 x-common-healthcheck: &common-healthcheck
-  interval: 10s
+  interval: 15s
   timeout: 5s
-  retries: 18
-  start_period: 60s
+  retries: 30
+  start_period: 120s
 
 services:
   redis:
