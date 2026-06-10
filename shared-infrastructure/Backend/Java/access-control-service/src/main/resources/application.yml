@@ -11,6 +11,9 @@ gogidix:
       ttlMs: ${GOGIDIX_ACCESS_CONTROL_CACHE_TTL:5000}
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   data:
     mongodb:
       uri: ${MONGODB_URI:}

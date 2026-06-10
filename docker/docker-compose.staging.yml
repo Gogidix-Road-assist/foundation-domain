@@ -1,23 +1,42 @@
 version: "3.8"
 
+x-common-env: &common-env
+  MONGODB_URI: ${MONGODB_URI}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  SPRING_PROFILES_ACTIVE: production
+
+x-common-healthcheck: &common-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 5
+  start_period: 120s
+
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: staging-redis
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   service-registry:
     image: ghcr.io/${REPO}/service-registry-discovery:${SHA}
     container_name: service-registry
     ports:
       - "8761:8761"
     environment:
-      - SPRING_PROFILES_ACTIVE=production
-      - SERVER_PORT=8761
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_service_registry
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_service_registry
     restart: unless-stopped
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 120s
 
   config-service:
     image: ghcr.io/${REPO}/config-service:${SHA}
@@ -25,12 +44,31 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=production
-      - MONGODB_URI=${MONGODB_URI}
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_config
     depends_on:
       service-registry:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+
+  api-gateway:
+    image: ghcr.io/${REPO}/api-gateway:${SHA}
+    container_name: api-gateway
+    ports:
+      - "8304:8304"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_api_gateway
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8304/actuator/health"]
 
   tenant-org-service:
     image: ghcr.io/${REPO}/tenant-org-service:${SHA}
@@ -38,13 +76,15 @@ services:
     ports:
       - "8085:8085"
     environment:
-      - SPRING_PROFILES_ACTIVE=production
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_tenant_org
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_tenant_org
     depends_on:
       service-registry:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
 
   monitoring-service:
     image: ghcr.io/${REPO}/monitoring-service:${SHA}
@@ -52,12 +92,15 @@ services:
     ports:
       - "8091:8091"
     environment:
-      - SPRING_PROFILES_ACTIVE=production
-      - MONGODB_URI=${MONGODB_URI}
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_monitoring
     depends_on:
       service-registry:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
 
   dashboard-configuration-service:
     image: ghcr.io/${REPO}/dashboard-configuration-service:${SHA}
@@ -65,10 +108,540 @@ services:
     ports:
       - "8200:8200"
     environment:
-      - SPRING_PROFILES_ACTIVE=production
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_dashboard_config
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_config
     depends_on:
       service-registry:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8200/actuator/health"]
+
+  feature-flags-service:
+    image: ghcr.io/${REPO}/feature-flags-service:${SHA}
+    container_name: feature-flags-service
+    ports:
+      - "8100:8100"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_feature_flags
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8100/actuator/health"]
+
+  dynamic-routing-config-service:
+    image: ghcr.io/${REPO}/dynamic-routing-config-service:${SHA}
+    container_name: dynamic-routing-config-service
+    ports:
+      - "8102:8102"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dynamic_routing
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8102/actuator/health"]
+
+  rate-limit-policy-service:
+    image: ghcr.io/${REPO}/rate-limit-policy-service:${SHA}
+    container_name: rate-limit-policy-service
+    ports:
+      - "8104:8104"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_rate_limit_policy
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8104/actuator/health"]
+
+  release-rollout-config-service:
+    image: ghcr.io/${REPO}/release-rollout-config-service:${SHA}
+    container_name: release-rollout-config-service
+    ports:
+      - "8105:8105"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_release_rollout
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8105/actuator/health"]
+
+  tenancy-configuration-service:
+    image: ghcr.io/${REPO}/tenancy-configuration-service:${SHA}
+    container_name: tenancy-configuration-service
+    ports:
+      - "8106:8106"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_tenancy_config
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8106/actuator/health"]
+
+  dashboard-analytics-service:
+    image: ghcr.io/${REPO}/dashboard-analytics-service:${SHA}
+    container_name: dashboard-analytics-service
+    ports:
+      - "8201:8201"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_analytics
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8201/actuator/health"]
+
+  dashboard-reporting-service:
+    image: ghcr.io/${REPO}/dashboard-reporting-service:${SHA}
+    container_name: dashboard-reporting-service
+    ports:
+      - "8202:8202"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_reporting
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8202/actuator/health"]
+
+  country-aggregation-service:
+    image: ghcr.io/${REPO}/country-aggregation-service:${SHA}
+    container_name: country-aggregation-service
+    ports:
+      - "8095:8095"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_country_aggregation
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8095/actuator/health"]
+
+  executive-aggregation-service:
+    image: ghcr.io/${REPO}/executive-aggregation-service:${SHA}
+    container_name: executive-aggregation-service
+    ports:
+      - "8096:8096"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_executive_aggregation
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8096/actuator/health"]
+
+  common-domain-models:
+    image: ghcr.io/${REPO}/common-domain-models:${SHA}
+    container_name: common-domain-models
+    ports:
+      - "8261:8261"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_common_models
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8261/actuator/health"]
+
+  country-localization-config-service:
+    image: ghcr.io/${REPO}/country-localization-config-service:${SHA}
+    container_name: country-localization-config-service
+    ports:
+      - "8262:8262"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_country_localization
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8262/actuator/health"]
+
+  user-profile-service:
+    image: ghcr.io/${REPO}/user-profile-service:${SHA}
+    container_name: user-profile-service
+    ports:
+      - "8310:8310"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_user_profile
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8310/actuator/health"]
+
+  database-indexing-service:
+    image: ghcr.io/${REPO}/database-indexing-service:${SHA}
+    container_name: database-indexing-service
+    ports:
+      - "8090:8090"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_db_indexing
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+
+  access-control-service:
+    image: ghcr.io/${REPO}/access-control-service:${SHA}
+    container_name: access-control-service
+    ports:
+      - "8311:8311"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_access_control
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8311/actuator/health"]
+
+  alerting-service:
+    image: ghcr.io/${REPO}/alerting-service:${SHA}
+    container_name: alerting-service
+    ports:
+      - "8312:8312"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_alerting
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8312/actuator/health"]
+
+  api-keys-service:
+    image: ghcr.io/${REPO}/api-keys-service:${SHA}
+    container_name: api-keys-service
+    ports:
+      - "8313:8313"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_api_keys
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8313/actuator/health"]
+
+  audit-correlation-service:
+    image: ghcr.io/${REPO}/audit-correlation-service:${SHA}
+    container_name: audit-correlation-service
+    ports:
+      - "8314:8314"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_audit_correlation
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8314/actuator/health"]
+
+  database-management-service:
+    image: ghcr.io/${REPO}/database-management-service:${SHA}
+    container_name: database-management-service
+    ports:
+      - "8315:8315"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_db_management
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8315/actuator/health"]
+
+  event-audit-service:
+    image: ghcr.io/${REPO}/event-audit-service:${SHA}
+    container_name: event-audit-service
+    ports:
+      - "8316:8316"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_event_audit
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8316/actuator/health"]
+
+  idempotency-service:
+    image: ghcr.io/${REPO}/idempotency-service:${SHA}
+    container_name: idempotency-service
+    ports:
+      - "8317:8317"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_idempotency
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8317/actuator/health"]
+
+  identity-access-service:
+    image: ghcr.io/${REPO}/identity-access-service:${SHA}
+    container_name: identity-access-service
+    ports:
+      - "8318:8318"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_identity_access
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8318/actuator/health"]
+
+  identity-service:
+    image: ghcr.io/${REPO}/identity-service:${SHA}
+    container_name: identity-service
+    ports:
+      - "8319:8319"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_identity
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8319/actuator/health"]
+
+  integration-adapters-service:
+    image: ghcr.io/${REPO}/integration-adapters-service:${SHA}
+    container_name: integration-adapters-service
+    ports:
+      - "8320:8320"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_integration_adapters
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8320/actuator/health"]
+
+  logging-aggregation-service:
+    image: ghcr.io/${REPO}/logging-aggregation-service:${SHA}
+    container_name: logging-aggregation-service
+    ports:
+      - "8321:8321"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_logging_aggregation
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8321/actuator/health"]
+
+  metrics-telemetry-service:
+    image: ghcr.io/${REPO}/metrics-telemetry-service:${SHA}
+    container_name: metrics-telemetry-service
+    ports:
+      - "8324:8324"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_metrics_telemetry
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8324/actuator/health"]
+
+  mfa-service:
+    image: ghcr.io/${REPO}/mfa-service:${SHA}
+    container_name: mfa-service
+    ports:
+      - "8325:8325"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_mfa
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8325/actuator/health"]
+
+  rate-limiting-service:
+    image: ghcr.io/${REPO}/rate-limiting-service:${SHA}
+    container_name: rate-limiting-service
+    ports:
+      - "8326:8326"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_rate_limiting
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8326/actuator/health"]
+
+  request-routing-service:
+    image: ghcr.io/${REPO}/request-routing-service:${SHA}
+    container_name: request-routing-service
+    ports:
+      - "8327:8327"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_request_routing
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8327/actuator/health"]
+
+  service-health-monitor:
+    image: ghcr.io/${REPO}/service-health-monitor:${SHA}
+    container_name: service-health-monitor
+    ports:
+      - "8328:8328"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_service_health_monitor
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8328/actuator/health"]
+
+  service-health-monitor-service:
+    image: ghcr.io/${REPO}/service-health-monitor-service:${SHA}
+    container_name: service-health-monitor-service
+    ports:
+      - "8329:8329"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8329/actuator/health"]
+
+  session-token-service:
+    image: ghcr.io/${REPO}/session-token-service:${SHA}
+    container_name: session-token-service
+    ports:
+      - "8330:8330"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_session_token
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8330/actuator/health"]
+
+  waf-policy-service:
+    image: ghcr.io/${REPO}/waf-policy-service:${SHA}
+    container_name: waf-policy-service
+    ports:
+      - "8331:8331"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_waf_policy
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8331/actuator/health"]
+
+  event-schemas:
+    image: ghcr.io/${REPO}/event-schemas:${SHA}
+    container_name: event-schemas
+    ports:
+      - "8332:8332"
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_event_schemas
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:8332/actuator/health"]

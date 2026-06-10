@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.gogidix.rapidassist</groupId>
+        <artifactId>shared-libraries</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>shared-libraries-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>Gogidix Shared Libraries BOM</name>
+    <description>Bill of Materials for all shared libraries — import this in consuming domains</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-validation-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-security-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-request-context-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-observability-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-mapper-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-persistence-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-idempotency-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-exception-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-dto-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-cors-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.gogidix.rapidassist</groupId>
+                <artifactId>shared-audit-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

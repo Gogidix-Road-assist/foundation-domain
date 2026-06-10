@@ -2,6 +2,9 @@ server:
   port: 8100
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: feature-flags-service
 

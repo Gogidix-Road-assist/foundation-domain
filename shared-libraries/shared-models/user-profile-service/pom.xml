@@ -4,9 +4,9 @@
 
   <parent>
     <groupId>com.gogidix.rapidassist</groupId>
-    <artifactId>foundation-domain</artifactId>
+    <artifactId>shared-models</artifactId>
     <version>1.0.0</version>
-    <relativePath>../../../pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>com.gogidix.rapidassist</groupId>

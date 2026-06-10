@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.gogidix.rapidassist</groupId>
-        <artifactId>shared-libraries</artifactId>
+        <artifactId>foundation-domain</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>shared-models</artifactId>
+    <artifactId>shared-libraries</artifactId>
     <packaging>pom</packaging>
-    <name>Shared Domain Models</name>
+    <name>Gogidix Shared Libraries</name>
 
     <modules>
-        <module>common-domain-models</module>
-        <module>country-localization-config-service</module>
-        <module>user-profile-service</module>
+        <module>Backend/Java</module>
+        <module>shared-models</module>
+        <module>shared-events</module>
+        <module>shared-libraries-bom</module>
     </modules>
 </project>

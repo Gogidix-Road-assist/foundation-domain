@@ -1,22 +1,7 @@
-# Foundation-Domain Infrastructure - ExternalName Services for Atlas/RDS/ElastiCache
-# In-cluster databases REMOVED — using AWS managed services
+# Foundation-Domain Infrastructure - ExternalName Services
+# MongoDB Atlas + Upstash Redis
+# Deploy AFTER setting MONGODB_ATLAS_HOST and REDIS_HOST in environment
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: database-secrets
-  namespace: foundation
-type: Opaque
-stringData:
-  mongodb-uri: ""
-  rds-url: ""
-  rds-username: ""
-  rds-password: ""
-  redis-uri: ""
-
----
-# MongoDB Atlas - ExternalName Service
-# Update externalName to your Atlas cluster endpoint (e.g. cluster0.ggksiwg.mongodb.net)
 apiVersion: v1
 kind: Service
 metadata:
@@ -24,28 +9,14 @@ metadata:
   namespace: foundation
 spec:
   type: ExternalName
-  externalName: cluster0.ggksiwg.mongodb.net
+  externalName: ${MONGODB_ATLAS_HOST}
 
 ---
-# AWS RDS PostgreSQL - ExternalName Service
-# Update externalName to your RDS endpoint (e.g. gogidix-dev-postgres.xxx.use1.rds.amazonaws.com)
 apiVersion: v1
 kind: Service
 metadata:
-  name: rds-postgresql
+  name: redis
   namespace: foundation
 spec:
   type: ExternalName
-  externalName: REPLACE_WITH_RDS_ENDPOINT
-
----
-# AWS ElastiCache Redis - ExternalName Service
-# Update externalName to your ElastiCache primary endpoint
-apiVersion: v1
-kind: Service
-metadata:
-  name: elasticache-redis
-  namespace: foundation
-spec:
-  type: ExternalName
-  externalName: REPLACE_WITH_ELASTICACHE_ENDPOINT
+  externalName: ${REDIS_HOST}

@@ -1,6 +1,12 @@
 server:
   port: 8318
 
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:}
+      database: ${GOGIDIX_IDENTITY_ACCESS_DB:identity_access}
+
 management:
   endpoints:
     web:

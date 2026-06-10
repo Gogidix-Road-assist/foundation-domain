@@ -2,6 +2,9 @@ server:
   port: 8105
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: release-rollout-config-service
   data:

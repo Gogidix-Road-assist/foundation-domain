@@ -6,14 +6,14 @@
 
     <parent>
         <groupId>com.gogidix.rapidassist</groupId>
-        <artifactId>foundation-domain</artifactId>
+        <artifactId>shared-libraries</artifactId>
         <version>1.0.0</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>shared-libraries</artifactId>
+    <artifactId>shared-libraries-backend</artifactId>
     <packaging>pom</packaging>
-    <name>Gogidix Shared Libraries</name>
+    <name>Gogidix Shared Libraries - Backend</name>
 
     <modules>
         <module>shared-request-context-library</module>
