@@ -47,9 +47,7 @@ publish-shared-libraries:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java
-    - mvn clean install -U -DskipTests -q
-    - cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - |
       for module in shared-libraries/Backend/Java/shared-audit-library \
                     shared-libraries/Backend/Java/shared-cors-config \
@@ -91,7 +89,7 @@ central-configuration:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd central-configuration/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -113,7 +111,7 @@ shared-infrastructure:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd shared-infrastructure/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -135,7 +133,7 @@ orchestration-services:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd orchestration-services/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -157,7 +155,7 @@ centralized-dashboard:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - cd centralized-dashboard/Backend/Java
     - mvn clean package -DskipTests
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -179,7 +177,7 @@ shared-models:
   script:
     - *maven_setup
     - mvn install -U -DskipTests -N -q
-    - cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - |
       for svc in shared-libraries/shared-models/*/; do
         if [ -f "${svc}pom.xml" ]; then
@@ -452,7 +450,7 @@ integration-test:
       echo "Health check: ${PASS} passed, ${FAIL} not ready"
     - |
       mvn install -U -DskipTests -N -q
-      cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+      cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - |
       FAILSAFE_FAIL=0
       for subdomain in central-configuration/Backend/Java shared-infrastructure/Backend/Java orchestration-services/Backend/Java centralized-dashboard/Backend/Java; do

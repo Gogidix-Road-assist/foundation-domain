@@ -20,7 +20,7 @@
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/ggx-insurance-saas/Insurance-company-Saas</url>
+      <url>https://maven.pkg.github.com/Gogidix-Road-assist/foundation-domain</url>
     </repository>
   </repositories>
 
