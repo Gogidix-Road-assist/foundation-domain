@@ -81,7 +81,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build all shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Deploy root reactor POM
@@ -193,7 +193,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Build and package
@@ -277,7 +277,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Build and package
@@ -361,7 +361,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Build and package
@@ -436,7 +436,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Build and package
@@ -520,7 +520,7 @@ jobs:
         run: mvn install -DskipTests -N -q
 
       - name: Build shared libraries
-        working-directory: shared-libraries/Backend/Java
+        working-directory: shared-libraries
         run: mvn clean install -DskipTests -q
 
       - name: Build and package
