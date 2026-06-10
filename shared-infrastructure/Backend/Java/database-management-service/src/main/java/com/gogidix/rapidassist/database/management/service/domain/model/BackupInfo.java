@@ -1,74 +1,68 @@
 package com.gogidix.rapidassist.database.management.service.domain.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Domain model for database backup information.
- * This entity is tenant-scoped to ensure proper multi-tenancy isolation.
- */
-@Entity
-@Table(name = "backup_info",
-    indexes = {
-        @Index(name = "idx_tenant_id", columnList = "tenant_id"),
-        @Index(name = "idx_tenant_connection", columnList = "tenant_id,connection_id"),
-        @Index(name = "idx_status", columnList = "status")
-    }
-)
+@Document(collection = "backup_info")
+@CompoundIndex(name = "idx_tenant_connection", def = "{'tenantId': 1, 'connectionId': 1}")
 public class BackupInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "tenant_id", nullable = false)
+    @Indexed
+    @Field("tenant_id")
     private String tenantId;
 
-    @Column(name = "connection_id", nullable = false)
+    @Field("connection_id")
     private String connectionId;
 
-    @Column(name = "backup_name", nullable = false)
+    @Field("backup_name")
     private String backupName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Field("type")
     private BackupType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Indexed
+    @Field("status")
     private BackupStatus status;
 
-    @Column(name = "storage_location")
+    @Field("storage_location")
     private String storageLocation;
 
-    @Column(name = "size_bytes")
+    @Field("size_bytes")
     private long sizeBytes;
 
-    @Column(name = "duration")
+    @Field("duration")
     private long duration;
 
-    @Column(name = "start_time", nullable = false)
+    @Field("start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "end_time")
+    @Field("end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "error_message", length = 1000)
+    @Field("error_message")
     private String errorMessage;
 
-    @Column(name = "metadata", length = 2000)
+    @Field("metadata")
     private String metadataJson;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private Map<String, Object> metadata;
 
-    @Column(name = "tables_count")
+    @Field("tables_count")
     private int tablesCount;
 
-    @Column(name = "rows_count")
+    @Field("rows_count")
     private int rowsCount;
 
     public enum BackupType {
@@ -87,32 +81,20 @@ public class BackupInfo {
     }
 
     public BackupInfo() {
+        this.id = UUID.randomUUID().toString();
         this.startTime = LocalDateTime.now();
         this.status = BackupStatus.PENDING;
     }
 
     public BackupInfo(String id, String tenantId, String connectionId, String backupName, BackupType type) {
         this();
-        this.id = id;
+        this.id = id != null ? id : UUID.randomUUID().toString();
         this.tenantId = tenantId;
         this.connectionId = connectionId;
         this.backupName = backupName;
         this.type = type;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        if (startTime == null) {
-            startTime = LocalDateTime.now();
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        // Update timestamp on modifications
-    }
-
-    // Business logic
     public void markAsInProgress() {
         this.status = BackupStatus.IN_PROGRESS;
     }
@@ -156,7 +138,6 @@ public class BackupInfo {
         return String.format("%dm %ds", minutes, remainingSeconds);
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

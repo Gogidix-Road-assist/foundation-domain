@@ -1,81 +1,75 @@
 package com.gogidix.rapidassist.database.management.service.domain.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Domain model representing a database connection configuration.
- * This entity is tenant-scoped to ensure proper multi-tenancy isolation.
- */
-@Entity
-@Table(name = "database_connections",
-    indexes = {
-        @Index(name = "idx_tenant_id", columnList = "tenant_id"),
-        @Index(name = "idx_tenant_name", columnList = "tenant_id,name"),
-        @Index(name = "idx_tenant_type", columnList = "tenant_id,type"),
-        @Index(name = "idx_status", columnList = "status")
-    }
-)
+@Document(collection = "database_connections")
+@CompoundIndex(name = "idx_tenant_name", def = "{'tenantId': 1, 'name': 1}")
+@CompoundIndex(name = "idx_tenant_type", def = "{'tenantId': 1, 'type': 1}")
 public class DatabaseConnection {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "tenant_id", nullable = false)
+    @Indexed
+    @Field("tenant_id")
     private String tenantId;
 
-    @Column(name = "name", nullable = false)
+    @Field("name")
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Field("type")
     private DatabaseType type;
 
-    @Column(name = "host", nullable = false)
+    @Field("host")
     private String host;
 
-    @Column(name = "port", nullable = false)
+    @Field("port")
     private int port;
 
-    @Column(name = "database", nullable = false)
+    @Field("database")
     private String database;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Indexed
+    @Field("status")
     private ConnectionStatus status;
 
-    @Column(name = "pool_size")
+    @Field("pool_size")
     private int poolSize;
 
-    @Column(name = "active_connections")
+    @Field("active_connections")
     private int activeConnections;
 
-    @Column(name = "idle_connections")
+    @Field("idle_connections")
     private int idleConnections;
 
-    @Column(name = "max_wait_time")
+    @Field("max_wait_time")
     private long maxWaitTime;
 
-    @Column(name = "average_query_time")
+    @Field("average_query_time")
     private double averageQueryTime;
 
-    @Column(name = "last_checked")
+    @Field("last_checked")
     private LocalDateTime lastChecked;
 
-    @Column(name = "properties", length = 2000)
+    @Field("properties")
     private String propertiesJson;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private Map<String, Object> properties;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Field("created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Field("updated_at")
     private LocalDateTime updatedAt;
 
     public enum DatabaseType {
@@ -96,6 +90,7 @@ public class DatabaseConnection {
     }
 
     public DatabaseConnection() {
+        this.id = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.status = ConnectionStatus.UNKNOWN;
@@ -103,7 +98,7 @@ public class DatabaseConnection {
 
     public DatabaseConnection(String id, String tenantId, String name, DatabaseType type, String host, int port, String database) {
         this();
-        this.id = id;
+        this.id = id != null ? id : UUID.randomUUID().toString();
         this.tenantId = tenantId;
         this.name = name;
         this.type = type;
@@ -112,20 +107,6 @@ public class DatabaseConnection {
         this.database = database;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    // Business logic
     public void markAsHealthy() {
         this.status = ConnectionStatus.HEALTHY;
         this.lastChecked = LocalDateTime.now();
@@ -170,7 +151,6 @@ public class DatabaseConnection {
         };
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
