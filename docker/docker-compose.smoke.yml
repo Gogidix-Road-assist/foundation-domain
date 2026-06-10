@@ -1,12 +1,27 @@
 version: "3.8"
 
+x-common-env: &common-env
+  MONGODB_URI: ${MONGODB_URI}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: smokepass123
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_PASSWORD: smokepass123
+  SPRING_DATA_REDIS_USERNAME: default
+  SPRING_PROFILES_ACTIVE: default
+
+x-common-healthcheck: &common-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 18
+  start_period: 60s
+
 services:
   redis:
     image: redis:7-alpine
     container_name: smoke-redis
     command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru --requirepass smokepass123
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "smokepass123", "ping"]
       interval: 5s
@@ -15,134 +30,472 @@ services:
 
   service-registry:
     image: ${GHCR_REPO}-service-registry-discovery:${IMAGE_TAG}
-    container_name: smoke-service-registry
     depends_on:
       redis:
         condition: service_healthy
-    ports:
-      - "8761:8761"
     environment:
-      - SERVER_PORT=8761
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_service_registry
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_USERNAME=default
-      - SPRING_PROFILES_ACTIVE=default
+      <<: *common-env
+      SERVER_PORT: "8761"
+      MONGODB_DATABASE: rapid_assist_service_registry
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 60s
 
   config-service:
     image: ${GHCR_REPO}-config-service:${IMAGE_TAG}
-    container_name: smoke-config-service
     depends_on:
       redis:
         condition: service_healthy
-    ports:
-      - "8080:8080"
     environment:
-      - MONGODB_URI=${MONGODB_URI}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_USERNAME=default
-      - SPRING_PROFILES_ACTIVE=default
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_config
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 60s
+
+  api-gateway:
+    image: ${GHCR_REPO}-api-gateway:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      SERVER_PORT: "8304"
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8304/actuator/health"]
 
   tenant-org-service:
     image: ${GHCR_REPO}-tenant-org-service:${IMAGE_TAG}
-    container_name: smoke-tenant-org-service
     depends_on:
       redis:
         condition: service_healthy
-    ports:
-      - "8085:8085"
     environment:
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_tenant_org
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_USERNAME=default
-      - SPRING_PROFILES_ACTIVE=default
+      <<: *common-env
+      SERVER_PORT: "8085"
+      MONGODB_DATABASE: rapid_assist_tenant_org
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 60s
 
   monitoring-service:
     image: ${GHCR_REPO}-monitoring-service:${IMAGE_TAG}
-    container_name: smoke-monitoring-service
     depends_on:
       redis:
         condition: service_healthy
-    ports:
-      - "8091:8091"
     environment:
-      - MONGODB_URI=${MONGODB_URI}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_USERNAME=default
-      - SPRING_PROFILES_ACTIVE=default
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=
-      - SPRING_AUTO_CONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-      - MANAGEMENT_ENDPOINT_KAFKA_ENABLED=false
-      - MANAGEMENT_HEALTH_KAFKA_ENABLED=false
-      - SPRING_DATA_MONGODB_DATABASE=rapid_assist_monitoring
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_monitoring
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 60s
 
   dashboard-configuration-service:
     image: ${GHCR_REPO}-dashboard-configuration-service:${IMAGE_TAG}
-    container_name: smoke-dashboard-configuration-service
     depends_on:
       redis:
         condition: service_healthy
-    ports:
-      - "8200:8200"
     environment:
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=rapid_assist_dashboard_config
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=smokepass123
-      - SPRING_DATA_REDIS_USERNAME=default
-      - SPRING_PROFILES_ACTIVE=default
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_config
     healthcheck:
+      <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 60s
+
+  feature-flags-service:
+    image: ${GHCR_REPO}-feature-flags-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_feature_flags
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8100/actuator/health"]
+
+  dynamic-routing-config-service:
+    image: ${GHCR_REPO}-dynamic-routing-config-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dynamic_routing
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8102/actuator/health"]
+
+  rate-limit-policy-service:
+    image: ${GHCR_REPO}-rate-limit-policy-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_rate_limit_policy
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8104/actuator/health"]
+
+  release-rollout-config-service:
+    image: ${GHCR_REPO}-release-rollout-config-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_release_rollout
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8105/actuator/health"]
+
+  tenancy-configuration-service:
+    image: ${GHCR_REPO}-tenancy-configuration-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_tenancy_config
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8106/actuator/health"]
+
+  dashboard-analytics-service:
+    image: ${GHCR_REPO}-dashboard-analytics-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_analytics
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8201/actuator/health"]
+
+  dashboard-reporting-service:
+    image: ${GHCR_REPO}-dashboard-reporting-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_dashboard_reporting
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8202/actuator/health"]
+
+  country-aggregation-service:
+    image: ${GHCR_REPO}-country-aggregation-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_country_aggregation
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8095/actuator/health"]
+
+  executive-aggregation-service:
+    image: ${GHCR_REPO}-executive-aggregation-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_executive_aggregation
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8096/actuator/health"]
+
+  common-domain-models:
+    image: ${GHCR_REPO}-common-domain-models:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_common_models
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8261/actuator/health"]
+
+  country-localization-config-service:
+    image: ${GHCR_REPO}-country-localization-config-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_country_localization
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8262/actuator/health"]
+
+  user-profile-service:
+    image: ${GHCR_REPO}-user-profile-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      SERVER_PORT: "8310"
+      MONGODB_DATABASE: rapid_assist_user_profile
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8310/actuator/health"]
+
+  database-indexing-service:
+    image: ${GHCR_REPO}-database-indexing-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_db_indexing
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
+
+  access-control-service:
+    image: ${GHCR_REPO}-access-control-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_access_control
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
+
+  alerting-service:
+    image: ${GHCR_REPO}-alerting-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_alerting
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8312/actuator/health"]
+
+  api-keys-service:
+    image: ${GHCR_REPO}-api-keys-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_api_keys
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8313/actuator/health"]
+
+  audit-correlation-service:
+    image: ${GHCR_REPO}-audit-correlation-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_audit_correlation
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8314/actuator/health"]
+
+  database-management-service:
+    image: ${GHCR_REPO}-database-management-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_db_management
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8315/actuator/health"]
+
+  event-audit-service:
+    image: ${GHCR_REPO}-event-audit-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_event_audit
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8316/actuator/health"]
+
+  idempotency-service:
+    image: ${GHCR_REPO}-idempotency-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_idempotency
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8317/actuator/health"]
+
+  identity-access-service:
+    image: ${GHCR_REPO}-identity-access-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_identity_access
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8318/actuator/health"]
+
+  identity-service:
+    image: ${GHCR_REPO}-identity-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_identity
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8319/actuator/health"]
+
+  integration-adapters-service:
+    image: ${GHCR_REPO}-integration-adapters-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_integration_adapters
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8320/actuator/health"]
+
+  logging-aggregation-service:
+    image: ${GHCR_REPO}-logging-aggregation-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_logging_aggregation
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8321/actuator/health"]
+
+  metrics-telemetry-service:
+    image: ${GHCR_REPO}-metrics-telemetry-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_metrics_telemetry
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8324/actuator/health"]
+
+  mfa-service:
+    image: ${GHCR_REPO}-mfa-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_mfa
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8325/actuator/health"]
+
+  rate-limiting-service:
+    image: ${GHCR_REPO}-rate-limiting-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_rate_limiting
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8326/actuator/health"]
+
+  request-routing-service:
+    image: ${GHCR_REPO}-request-routing-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_request_routing
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8327/actuator/health"]
+
+  service-health-monitor:
+    image: ${GHCR_REPO}-service-health-monitor:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_service_health_monitor
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8328/actuator/health"]
+
+  service-health-monitor-service:
+    image: ${GHCR_REPO}-service-health-monitor-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8329/actuator/health"]
+
+  session-token-service:
+    image: ${GHCR_REPO}-session-token-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_session_token
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8330/actuator/health"]
+
+  waf-policy-service:
+    image: ${GHCR_REPO}-waf-policy-service:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_waf_policy
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8331/actuator/health"]
+
+  event-schemas:
+    image: ${GHCR_REPO}-event-schemas:${IMAGE_TAG}
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MONGODB_DATABASE: rapid_assist_event_schemas
+    healthcheck:
+      <<: *common-healthcheck
+      test: ["CMD", "curl", "-sf", "http://localhost:8332/actuator/health"]

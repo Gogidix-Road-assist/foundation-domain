@@ -5,6 +5,7 @@ stages:
   - security
   - docker
   - smoke
+  - integration
   - deploy
   - notify
 
@@ -248,8 +249,8 @@ docker-build:
       declare -A SERVICE_PORTS=(
         [service-registry-discovery]=8761
         [config-service]=8080
-        [api-gateway]=8084
-        [tenant-org-service]=8116
+        [api-gateway]=8304
+        [tenant-org-service]=8085
         [monitoring-service]=8091
         [dashboard-configuration-service]=8200
         [feature-flags-service]=8100
@@ -263,7 +264,7 @@ docker-build:
         [executive-aggregation-service]=8096
         [common-domain-models]=8261
         [country-localization-config-service]=8262
-        [user-profile-service]=8117
+        [user-profile-service]=8310
         [database-indexing-service]=8090
         [access-control-service]=8311
         [alerting-service]=8312
@@ -276,8 +277,6 @@ docker-build:
         [identity-service]=8319
         [integration-adapters-service]=8320
         [logging-aggregation-service]=8321
-        [mechanics-gps-tracker-service]=8322
-        [mechanics-insurance-bridge-service]=8323
         [metrics-telemetry-service]=8324
         [mfa-service]=8325
         [rate-limiting-service]=8326
@@ -286,6 +285,7 @@ docker-build:
         [service-health-monitor-service]=8329
         [session-token-service]=8330
         [waf-policy-service]=8331
+        [event-schemas]=8332
       )
     - |
       DOCKERFILE=docker/Dockerfile.service
@@ -312,10 +312,6 @@ docker-build:
         docker push "${GHCR_IMAGE}:${SHORT_SHA}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
-        docker rmi "${GHCR_IMAGE}:${CI_COMMIT_SHA}" "${GHCR_IMAGE}:${SHORT_SHA}" "${GHCR_IMAGE}:latest" 2>/dev/null || true
-        if [ $((IMAGE_COUNT % 5)) -eq 0 ]; then
-          docker builder prune -f 2>/dev/null || true
-        fi
       done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar")
       if [ "$IMAGE_COUNT" -eq 0 ]; then
         echo "ERROR: No Docker images built"
@@ -359,7 +355,7 @@ smoke-test:
     - docker compose -f docker/docker-compose.smoke.yml up -d
     - sleep 60
     - |
-      SERVICES="service-registry:8761 config-service:8080 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200"
+      SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
       PASS=0
       FAIL=0
       FAILED_SVCS=""
@@ -393,6 +389,89 @@ smoke-test:
       if [ "${FAIL}" -gt 0 ]; then
         exit 1
       fi
+    - docker compose -f docker/docker-compose.smoke.yml down -v --remove-orphans 2>/dev/null || true
+
+integration-test:
+  stage: integration
+  image: maven:3.9-eclipse-temurin-21
+  needs: [smoke-test]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      allow_failure: false
+  services:
+    - name: docker:24.0.5-dind
+      alias: docker
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+    DOCKER_API_VERSION: "1.43"
+  before_script:
+    - *maven_setup
+    - apt-get update -qq && apt-get install -qq -y docker.io curl > /dev/null 2>&1
+    - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
+  script:
+    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
+    - |
+      if [ -z "$MONGODB_URI" ]; then
+        echo "MONGODB_URI not set"
+        exit 1
+      fi
+    - export GHCR_REPO="ghcr.io/gogidix-road-assist/foundation-domain"
+    - export IMAGE_TAG="${SHORT_SHA}"
+    - export MONGODB_URI="${MONGODB_URI}"
+    - docker compose -f docker/docker-compose.smoke.yml up -d
+    - sleep 90
+    - |
+      SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
+      PASS=0
+      FAIL=0
+      for svc_port in $SERVICES; do
+        svc=$(echo "$svc_port" | cut -d: -f1)
+        PORT=$(echo "$svc_port" | cut -d: -f2)
+        ELAPSED=0
+        HEALTHY=false
+        while [ $ELAPSED -lt 180 ]; do
+          HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "${svc}: HEALTHY after ${ELAPSED}s"
+            HEALTHY=true
+            break
+          fi
+          sleep 5
+          ELAPSED=$((ELAPSED + 5))
+        done
+        if $HEALTHY; then
+          PASS=$((PASS + 1))
+        else
+          FAIL=$((FAIL + 1))
+          echo "WARNING: ${svc} not healthy for integration tests (port ${PORT})"
+        fi
+      done
+      echo "Health check: ${PASS} passed, ${FAIL} not ready"
+    - |
+      mvn install -U -DskipTests -N -q
+      cd shared-libraries/Backend/Java && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - |
+      FAILSAFE_FAIL=0
+      for subdomain in central-configuration/Backend/Java shared-infrastructure/Backend/Java orchestration-services/Backend/Java centralized-dashboard/Backend/Java; do
+        if [ -f "${subdomain}/pom.xml" ]; then
+          echo "Running integration tests for ${subdomain}..."
+          mvn failsafe:integration-test failsafe:verify -f "${subdomain}/pom.xml" -DskipUnitTests=true || FAILSAFE_FAIL=$((FAILSAFE_FAIL + 1))
+        fi
+      done
+      for svc in shared-libraries/shared-models/*/; do
+        if [ -f "${svc}pom.xml" ]; then
+          echo "Running integration tests for $(basename ${svc})..."
+          mvn failsafe:integration-test failsafe:verify -f "${svc}pom.xml" -DskipUnitTests=true || FAILSAFE_FAIL=$((FAILSAFE_FAIL + 1))
+        fi
+      done
+      if [ "${FAILSAFE_FAIL}" -gt 0 ]; then
+        echo "Integration tests failed in ${FAILSAFE_FAIL} subdomain(s)"
+        exit 1
+      fi
+      echo "All integration tests passed"
     - docker compose -f docker/docker-compose.smoke.yml down -v --remove-orphans 2>/dev/null || true
 
 promote-staging:
