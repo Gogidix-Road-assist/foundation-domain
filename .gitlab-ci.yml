@@ -221,6 +221,7 @@ docker-build:
   stage: docker
   image: maven:3.9-eclipse-temurin-21
   needs: [code-quality, security-scan]
+  tags: [docker]
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -234,6 +235,7 @@ docker-build:
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
   before_script:
+    - docker system prune -af --volumes 2>/dev/null || true
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
@@ -341,6 +343,7 @@ smoke-test:
   stage: smoke
   image: docker:24.0.5
   needs: [docker-build]
+  tags: [docker]
   timeout: 1h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
@@ -355,11 +358,12 @@ smoke-test:
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
     RUNNER_SCRIPT_TIMEOUT: 55m
+  before_script:
+    - docker system prune -af --volumes 2>/dev/null || true
   script:
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
     - apk add --no-cache curl
-    - docker system prune -af --volumes 2>/dev/null || true
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
@@ -425,6 +429,7 @@ integration-test:
   stage: integration
   image: maven:3.9-eclipse-temurin-21
   needs: [smoke-test]
+  tags: [docker]
   timeout: 1h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
@@ -440,12 +445,12 @@ integration-test:
     DOCKER_API_VERSION: "1.43"
     RUNNER_SCRIPT_TIMEOUT: 55m
   before_script:
+    - docker system prune -af --volumes 2>/dev/null || true
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io curl > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
-    - docker system prune -af --volumes 2>/dev/null || true
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
