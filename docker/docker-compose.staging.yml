@@ -2,7 +2,6 @@ version: "3.8"
 
 x-common-env: &common-env
   MONGODB_URI: ${MONGODB_URI}
-  SPRING_DATA_MONGODB_DATABASE: ${MONGODB_DATABASE}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -34,6 +33,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_service_registry
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_registry
     restart: unless-stopped
     healthcheck:
       <<: *common-healthcheck
@@ -47,6 +47,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_config
     depends_on:
       service-registry:
         condition: service_healthy
@@ -63,6 +64,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_api_gateway
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_api_gateway
     depends_on:
       service-registry:
         condition: service_healthy
@@ -79,6 +81,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_tenant_org
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_tenant_org
     depends_on:
       service-registry:
         condition: service_healthy
@@ -95,6 +98,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_monitoring
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_monitoring
     depends_on:
       service-registry:
         condition: service_healthy
@@ -111,6 +115,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_config
     depends_on:
       service-registry:
         condition: service_healthy
@@ -127,6 +132,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_feature_flags
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_feature_flags
     depends_on:
       service-registry:
         condition: service_healthy
@@ -143,6 +149,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dynamic_routing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dynamic_routing
     depends_on:
       service-registry:
         condition: service_healthy
@@ -159,6 +166,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_rate_limit_policy
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_rate_limit_policy
     depends_on:
       service-registry:
         condition: service_healthy
@@ -175,6 +183,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_release_rollout
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_release_rollout
     depends_on:
       service-registry:
         condition: service_healthy
@@ -191,6 +200,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_tenancy_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_tenancy_config
     depends_on:
       service-registry:
         condition: service_healthy
@@ -207,6 +217,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_analytics
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_analytics
     depends_on:
       service-registry:
         condition: service_healthy
@@ -223,6 +234,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_reporting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_reporting
     depends_on:
       service-registry:
         condition: service_healthy
@@ -239,6 +251,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_country_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_country_aggregation
     depends_on:
       service-registry:
         condition: service_healthy
@@ -255,6 +268,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_executive_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_executive_aggregation
     depends_on:
       service-registry:
         condition: service_healthy
@@ -271,6 +285,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_common_models
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_common_models
     depends_on:
       service-registry:
         condition: service_healthy
@@ -287,6 +302,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_country_localization
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_country_localization
     depends_on:
       service-registry:
         condition: service_healthy
@@ -303,6 +319,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_user_profile
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_user_profile
     depends_on:
       service-registry:
         condition: service_healthy
@@ -319,6 +336,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_db_indexing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_db_indexing
     depends_on:
       service-registry:
         condition: service_healthy
@@ -335,6 +353,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_access_control
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_access_control
     depends_on:
       service-registry:
         condition: service_healthy
@@ -351,6 +370,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_alerting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_alerting
     depends_on:
       service-registry:
         condition: service_healthy
@@ -367,6 +387,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_api_keys
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_api_keys
     depends_on:
       service-registry:
         condition: service_healthy
@@ -383,6 +404,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_audit_correlation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_audit_correlation
     depends_on:
       service-registry:
         condition: service_healthy
@@ -399,6 +421,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_db_management
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_db_management
     depends_on:
       service-registry:
         condition: service_healthy
@@ -415,6 +438,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_event_audit
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_event_audit
     depends_on:
       service-registry:
         condition: service_healthy
@@ -431,6 +455,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_idempotency
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_idempotency
     depends_on:
       service-registry:
         condition: service_healthy
@@ -447,6 +472,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_identity_access
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_identity_access
     depends_on:
       service-registry:
         condition: service_healthy
@@ -463,6 +489,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_identity
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_identity
     depends_on:
       service-registry:
         condition: service_healthy
@@ -479,6 +506,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_integration_adapters
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_integration_adapters
     depends_on:
       service-registry:
         condition: service_healthy
@@ -495,6 +523,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_logging_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_logging_aggregation
     depends_on:
       service-registry:
         condition: service_healthy
@@ -511,6 +540,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_metrics_telemetry
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_metrics_telemetry
     depends_on:
       service-registry:
         condition: service_healthy
@@ -527,6 +557,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_mfa
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_mfa
     depends_on:
       service-registry:
         condition: service_healthy
@@ -543,6 +574,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_rate_limiting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_rate_limiting
     depends_on:
       service-registry:
         condition: service_healthy
@@ -559,6 +591,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_request_routing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_request_routing
     depends_on:
       service-registry:
         condition: service_healthy
@@ -575,6 +608,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_service_health_monitor
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_health_monitor
     depends_on:
       service-registry:
         condition: service_healthy
@@ -591,6 +625,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
     depends_on:
       service-registry:
         condition: service_healthy
@@ -607,6 +642,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_session_token
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_session_token
     depends_on:
       service-registry:
         condition: service_healthy
@@ -623,6 +659,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_waf_policy
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_waf_policy
     depends_on:
       service-registry:
         condition: service_healthy
@@ -639,6 +676,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_event_schemas
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_event_schemas
     depends_on:
       service-registry:
         condition: service_healthy

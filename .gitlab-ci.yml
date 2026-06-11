@@ -319,7 +319,7 @@ docker-build:
         BUILD_LIST="${BUILD_LIST} ${GHCR_IMAGE}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
-      done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" ! -path "*/shared-libraries/Backend/Java/*" ! -path "*/shared-libraries/shared-events/*")
+      done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" ! -path "*/shared-libraries/Backend/Java/*")
       if [ "$IMAGE_COUNT" -eq 0 ]; then
         echo "ERROR: No Docker images built"
         exit 1

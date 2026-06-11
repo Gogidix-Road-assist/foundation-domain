@@ -2,7 +2,6 @@ version: "3.8"
 
 x-common-env: &common-env
   MONGODB_URI: ${MONGODB_URI}
-  SPRING_DATA_MONGODB_DATABASE: ${MONGODB_DATABASE}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: smokepass123
@@ -38,6 +37,7 @@ services:
       <<: *common-env
       SERVER_PORT: "8761"
       MONGODB_DATABASE: rapid_assist_service_registry
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_registry
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
@@ -50,6 +50,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_config
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
@@ -75,6 +76,7 @@ services:
       <<: *common-env
       SERVER_PORT: "8085"
       MONGODB_DATABASE: rapid_assist_tenant_org
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_tenant_org
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
@@ -87,6 +89,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_monitoring
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_monitoring
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     healthcheck:
       <<: *common-healthcheck
@@ -100,6 +103,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_config
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
@@ -112,6 +116,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_feature_flags
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_feature_flags
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8100/actuator/health"]
@@ -124,6 +129,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dynamic_routing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dynamic_routing
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8102/actuator/health"]
@@ -136,6 +142,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_rate_limit_policy
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_rate_limit_policy
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8104/actuator/health"]
@@ -148,6 +155,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_release_rollout
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_release_rollout
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8105/actuator/health"]
@@ -160,6 +168,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_tenancy_config
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_tenancy_config
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8106/actuator/health"]
@@ -172,6 +181,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_analytics
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_analytics
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8201/actuator/health"]
@@ -184,6 +194,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_dashboard_reporting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_dashboard_reporting
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8202/actuator/health"]
@@ -196,6 +207,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_country_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_country_aggregation
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8095/actuator/health"]
@@ -208,6 +220,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_executive_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_executive_aggregation
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8096/actuator/health"]
@@ -220,6 +233,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_common_models
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_common_models
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8261/actuator/health"]
@@ -232,6 +246,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_country_localization
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_country_localization
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8262/actuator/health"]
@@ -245,6 +260,7 @@ services:
       <<: *common-env
       SERVER_PORT: "8310"
       MONGODB_DATABASE: rapid_assist_user_profile
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_user_profile
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8310/actuator/health"]
@@ -257,6 +273,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_db_indexing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_db_indexing
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
@@ -269,6 +286,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_access_control
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_access_control
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
@@ -281,6 +299,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_alerting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_alerting
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8312/actuator/health"]
@@ -293,6 +312,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_api_keys
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_api_keys
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8313/actuator/health"]
@@ -305,6 +325,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_audit_correlation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_audit_correlation
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8314/actuator/health"]
@@ -317,6 +338,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_db_management
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_db_management
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8315/actuator/health"]
@@ -329,6 +351,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_event_audit
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_event_audit
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8316/actuator/health"]
@@ -341,6 +364,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_idempotency
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_idempotency
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8317/actuator/health"]
@@ -353,6 +377,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_identity_access
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_identity_access
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8318/actuator/health"]
@@ -365,6 +390,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_identity
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_identity
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8319/actuator/health"]
@@ -377,6 +403,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_integration_adapters
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_integration_adapters
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8320/actuator/health"]
@@ -389,6 +416,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_logging_aggregation
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_logging_aggregation
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8321/actuator/health"]
@@ -401,6 +429,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_metrics_telemetry
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_metrics_telemetry
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8324/actuator/health"]
@@ -413,6 +442,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_mfa
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_mfa
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8325/actuator/health"]
@@ -425,6 +455,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_rate_limiting
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_rate_limiting
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8326/actuator/health"]
@@ -437,6 +468,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_request_routing
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_request_routing
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8327/actuator/health"]
@@ -449,6 +481,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_service_health_monitor
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_health_monitor
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8328/actuator/health"]
@@ -461,6 +494,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8329/actuator/health"]
@@ -473,6 +507,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_session_token
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_session_token
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8330/actuator/health"]
@@ -485,6 +520,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_waf_policy
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_waf_policy
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8331/actuator/health"]
@@ -497,6 +533,7 @@ services:
     environment:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_event_schemas
+      SPRING_DATA_MONGODB_DATABASE: rapid_assist_event_schemas
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8332/actuator/health"]
