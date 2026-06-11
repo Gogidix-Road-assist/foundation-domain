@@ -341,7 +341,7 @@ smoke-test:
   stage: smoke
   image: docker:24.0.5
   needs: [docker-build]
-  timeout: 30m
+  timeout: 1h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -354,6 +354,7 @@ smoke-test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
+    RUNNER_SCRIPT_TIMEOUT: 55m
   script:
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
@@ -373,7 +374,7 @@ smoke-test:
     - export IMAGE_TAG="${SHORT_SHA}"
     - export MONGODB_URI="${MONGODB_URI}"
     - docker compose -f docker/docker-compose.smoke.yml up -d
-    - sleep 120
+    - sleep 60
     - |
       SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
       PASS=0
@@ -390,7 +391,7 @@ smoke-test:
         for svc_port in $REMAINING; do
           svc=$(echo "$svc_port" | cut -d: -f1)
           PORT=$(echo "$svc_port" | cut -d: -f2)
-          HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
+          HTTP_CODE=$(curl -sf --connect-timeout 2 --max-time 3 -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
           if [ "$HTTP_CODE" = "200" ]; then
             echo "${svc}: HEALTHY after $((ELAPSED + 120))s"
             PASS=$((PASS + 1))
@@ -424,6 +425,7 @@ integration-test:
   stage: integration
   image: maven:3.9-eclipse-temurin-21
   needs: [smoke-test]
+  timeout: 1h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -436,6 +438,7 @@ integration-test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
+    RUNNER_SCRIPT_TIMEOUT: 55m
   before_script:
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io curl > /dev/null 2>&1
@@ -452,7 +455,7 @@ integration-test:
     - export IMAGE_TAG="${SHORT_SHA}"
     - export MONGODB_URI="${MONGODB_URI}"
     - docker compose -f docker/docker-compose.smoke.yml up -d
-    - sleep 90
+    - sleep 60
     - |
       SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
       PASS=0
@@ -463,7 +466,7 @@ integration-test:
         ELAPSED=0
         HEALTHY=false
         while [ $ELAPSED -lt 180 ]; do
-          HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
+          HTTP_CODE=$(curl -sf --connect-timeout 2 --max-time 3 -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
           if [ "$HTTP_CODE" = "200" ]; then
             echo "${svc}: HEALTHY after ${ELAPSED}s"
             HEALTHY=true
