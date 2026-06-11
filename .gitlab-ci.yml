@@ -238,7 +238,7 @@ docker-build:
     - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
-    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
+    - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - ORG_LOWER="gogidix-road-assist"
     - REPO_NAME="foundation-domain"
     - GHCR_PREFIX="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
@@ -335,7 +335,7 @@ smoke-test:
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
   script:
-    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1 -7)
+    - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
     - apk add --no-cache curl
     - |
@@ -420,7 +420,7 @@ integration-test:
     - apt-get update -qq && apt-get install -qq -y docker.io curl > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
-    - SHORT_SHA=$(echo "$CI_COMMIT_SHA" | cut -c1-7)
+    - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
