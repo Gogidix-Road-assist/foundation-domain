@@ -291,6 +291,17 @@ docker-build:
         echo "Dockerfile not found"
         exit 1
       fi
+      docker_push() {
+        local image="$1"
+        for attempt in 1 2 3 4 5; do
+          if docker push "$image"; then return 0; fi
+          echo "WARN: push attempt ${attempt} failed for ${image}, retrying in 10s..."
+          sleep 10
+        done
+        echo "ERROR: failed to push ${image} after 5 attempts"
+        return 1
+      }
+      BUILD_LIST=""
       IMAGE_COUNT=0
       while read jar; do
         SERVICE_NAME=$(basename "$jar" | sed 's/-[0-9].*//')
@@ -305,19 +316,7 @@ docker-build:
           -t "${GHCR_IMAGE}:${CI_COMMIT_SHA}" \
           -t "${GHCR_IMAGE}:${SHORT_SHA}" \
           "$BUILD_CTX"
-        docker_push() {
-          local image="$1"; shift
-          for attempt in 1 2 3; do
-            if docker push "$image"; then return 0; fi
-            echo "WARN: push attempt ${attempt} failed for ${image}, retrying in 5s..."
-            sleep 5
-          done
-          echo "ERROR: failed to push ${image} after 3 attempts"
-          return 1
-        }
-        docker_push "${GHCR_IMAGE}:${CI_COMMIT_SHA}"
-        docker_push "${GHCR_IMAGE}:${SHORT_SHA}"
-        docker rmi "${GHCR_IMAGE}:${CI_COMMIT_SHA}" "${GHCR_IMAGE}:${SHORT_SHA}" 2>/dev/null || true
+        BUILD_LIST="${BUILD_LIST} ${GHCR_IMAGE}"
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
       done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" ! -path "*/shared-libraries/Backend/Java/*" ! -path "*/shared-libraries/shared-events/*")
@@ -325,8 +324,18 @@ docker-build:
         echo "ERROR: No Docker images built"
         exit 1
       fi
-      echo "Built ${IMAGE_COUNT} images"
+      echo "Built ${IMAGE_COUNT} images, pushing to GHCR..."
+      PUSH_FAIL=0
+      for GHCR_IMAGE in $BUILD_LIST; do
+        docker_push "${GHCR_IMAGE}:${CI_COMMIT_SHA}" || PUSH_FAIL=$((PUSH_FAIL + 1))
+        docker_push "${GHCR_IMAGE}:${SHORT_SHA}" || PUSH_FAIL=$((PUSH_FAIL + 1))
+      done
       docker system prune -af 2>/dev/null || true
+      if [ "$PUSH_FAIL" -gt 0 ]; then
+        echo "ERROR: ${PUSH_FAIL} push operations failed"
+        exit 1
+      fi
+      echo "All ${IMAGE_COUNT} images pushed successfully"
 
 smoke-test:
   stage: smoke
