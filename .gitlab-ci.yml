@@ -305,12 +305,22 @@ docker-build:
           -t "${GHCR_IMAGE}:${CI_COMMIT_SHA}" \
           -t "${GHCR_IMAGE}:${SHORT_SHA}" \
           "$BUILD_CTX"
-        docker push "${GHCR_IMAGE}:${CI_COMMIT_SHA}"
-        docker push "${GHCR_IMAGE}:${SHORT_SHA}"
+        docker_push() {
+          local image="$1"; shift
+          for attempt in 1 2 3; do
+            if docker push "$image"; then return 0; fi
+            echo "WARN: push attempt ${attempt} failed for ${image}, retrying in 5s..."
+            sleep 5
+          done
+          echo "ERROR: failed to push ${image} after 3 attempts"
+          return 1
+        }
+        docker_push "${GHCR_IMAGE}:${CI_COMMIT_SHA}"
+        docker_push "${GHCR_IMAGE}:${SHORT_SHA}"
         docker rmi "${GHCR_IMAGE}:${CI_COMMIT_SHA}" "${GHCR_IMAGE}:${SHORT_SHA}" 2>/dev/null || true
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
-      done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar")
+      done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar" ! -path "*/shared-libraries/Backend/Java/*" ! -path "*/shared-libraries/shared-events/*")
       if [ "$IMAGE_COUNT" -eq 0 ]; then
         echo "ERROR: No Docker images built"
         exit 1
