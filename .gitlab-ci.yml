@@ -304,10 +304,10 @@ docker-build:
         docker build --build-arg SERVICE_PORT="${PORT}" \
           -t "${GHCR_IMAGE}:${CI_COMMIT_SHA}" \
           -t "${GHCR_IMAGE}:${SHORT_SHA}" \
-          -t "${GHCR_IMAGE}:latest" \
           "$BUILD_CTX"
         docker push "${GHCR_IMAGE}:${CI_COMMIT_SHA}"
         docker push "${GHCR_IMAGE}:${SHORT_SHA}"
+        docker rmi "${GHCR_IMAGE}:${CI_COMMIT_SHA}" "${GHCR_IMAGE}:${SHORT_SHA}" 2>/dev/null || true
         IMAGE_COUNT=$((IMAGE_COUNT + 1))
         rm -rf "$BUILD_CTX"
       done < <(find . -name "*.jar" -path "*/target/*" ! -name "original-*" ! -name "*-sources.jar" ! -name "*-javadoc.jar")
@@ -316,6 +316,7 @@ docker-build:
         exit 1
       fi
       echo "Built ${IMAGE_COUNT} images"
+      docker system prune -af 2>/dev/null || true
 
 smoke-test:
   stage: smoke
@@ -338,6 +339,7 @@ smoke-test:
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
     - apk add --no-cache curl
+    - docker system prune -af --volumes 2>/dev/null || true
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
@@ -421,6 +423,7 @@ integration-test:
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
+    - docker system prune -af --volumes 2>/dev/null || true
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
