@@ -47,7 +47,7 @@ publish-shared-libraries:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - |
       set -eo pipefail
       for module in shared-libraries/Backend/Java/shared-audit-library \
@@ -90,7 +90,7 @@ central-configuration:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - cd central-configuration/Backend/Java
     - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -112,7 +112,7 @@ shared-infrastructure:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - cd shared-infrastructure/Backend/Java
     - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -134,7 +134,7 @@ orchestration-services:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - cd orchestration-services/Backend/Java
     - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -156,7 +156,7 @@ centralized-dashboard:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - cd centralized-dashboard/Backend/Java
     - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
@@ -178,7 +178,7 @@ shared-models:
   script:
     - *maven_setup
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - |
       set -eo pipefail
       for svc in shared-libraries/shared-models/*/; do
@@ -471,7 +471,7 @@ integration-test:
         exit 1
       fi
     - mvn install -U -Dmaven.test.skip=true -N -q
-    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
+    - mvn clean install -U -Dmaven.test.skip=true -q -f shared-libraries/pom.xml
     - |
       set -eo pipefail
       FAILSAFE_FAIL=0

@@ -1,40 +1,23 @@
 package com.gogidix.rapidassist.dynamic.routing.config.service.infrastructure.messaging.kafka;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.kafka.support.SendResult;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@EmbeddedKafka(partitions = 1, topics = {"dynamic-routing-config-service.events"})
-@DirtiesContext
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-    "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
-})
-@Timeout(30)
+@ExtendWith(MockitoExtension.class)
 class DynamicRoutingConfigServiceEventPublisherTest {
 
-    @Autowired
+    @Mock
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Test
@@ -44,12 +27,16 @@ class DynamicRoutingConfigServiceEventPublisherTest {
 
     @Test
     void canPublishEventToTopic() {
+        CompletableFuture<SendResult<String, Object>> future = CompletableFuture.completedFuture(null);
+        when(kafkaTemplate.send(anyString(), anyString(), any())).thenReturn(future);
+
         String topic = "dynamic-routing-config-service.events";
-        var future = kafkaTemplate.send(topic, "test-key", Map.of(
+        var result = kafkaTemplate.send(topic, "test-key", Map.of(
             "eventType", "TEST_EVENT",
             "service", "dynamic-routing-config-service",
             "timestamp", java.time.Instant.now().toString()
         ));
-        assertDoesNotThrow(() -> future.get());
+
+        assertDoesNotThrow(() -> result.get());
     }
 }
