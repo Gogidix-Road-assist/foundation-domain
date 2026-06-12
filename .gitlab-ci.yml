@@ -426,7 +426,7 @@ smoke-test:
         FAILED_SVCS="${FAILED_SVCS} ${svc}"
         echo "ERROR: ${svc} failed health check on port ${PORT}"
         echo "--- ${svc} container logs ---"
-        docker compose -f docker/docker-compose.smoke.yml logs --tail 30 "${svc}" 2>/dev/null || true
+        docker compose -f docker/docker-compose.smoke.yml logs --tail 200 "${svc}" 2>/dev/null || true
         echo "--- end ${svc} logs ---"
       done
       echo "Smoke test: ${PASS} passed, ${FAIL} failed"
