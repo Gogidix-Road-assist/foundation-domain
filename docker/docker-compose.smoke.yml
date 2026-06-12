@@ -602,8 +602,8 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
-      SPRING_DATA_MONGODB_DATABASE: rapid_assist_service_health_monitor_svc
+      MONGODB_DATABASE: svc_health_monitor_svc
+      SPRING_DATA_MONGODB_DATABASE: svc_health_monitor_svc
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8329/actuator/health"]
