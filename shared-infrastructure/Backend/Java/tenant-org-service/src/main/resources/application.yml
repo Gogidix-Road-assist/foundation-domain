@@ -2,6 +2,9 @@ server:
   port: ${SERVER_PORT:8085}
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   cloud:
     compatibility-verifier:
       enabled: false
@@ -11,19 +14,26 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:}
+      auto-index-creation: true
       database: ${MONGODB_DATABASE:rapid_assist_tenant_org}
-    redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 14
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
-          min-idle: 0
-
+          min-idle: 2
+          max-wait: -1ms
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:

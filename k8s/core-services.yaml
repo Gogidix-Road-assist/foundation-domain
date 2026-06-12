@@ -7,9 +7,13 @@ metadata:
   name: foundation-config
   namespace: foundation
 data:
-  SPRING_PROFILES_ACTIVE: "kubernetes"
+  SPRING_PROFILES_ACTIVE: "kubernetes,kafka-disabled"
   EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://service-registry:8761/eureka/"
-  JAVA_OPTS: "-Xmx192m -Xms64m"
+  SPRING_DATA_REDIS_HOST: "redis"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_USERNAME: "default"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  JAVA_OPTS: "-Xmx256m -Xms64m -XX:+UseG1GC"
 
 ---
 apiVersion: v1
@@ -21,7 +25,11 @@ type: Opaque
 stringData:
   MONGODB_URI: ""
   REDIS_HOST: ""
+  REDIS_PORT: ""
   REDIS_PASSWORD: ""
+  REDIS_USERNAME: ""
+  SPRING_DATA_REDIS_PASSWORD: ""
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: ""
 
 ---
 apiVersion: apps/v1
@@ -54,16 +62,14 @@ spec:
         ports:
         - containerPort: 8761
           name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
         - name: SERVER_PORT
           value: "8761"
-        - name: JAVA_OPTS
-          value: "-Xmx256m -Xms128m"
         resources:
           requests:
             memory: "512Mi"
@@ -129,28 +135,16 @@ spec:
         ports:
         - containerPort: 8304
           name: http
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: foundation-secrets
-              key: MONGODB_URI
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         - name: SERVER_PORT
           value: "8304"
         - name: GATEWAY_MONGODB_ENABLED
           value: "false"
-        - name: JAVA_OPTS
-          value: "-Xmx256m -Xms128m"
         resources:
           requests:
             memory: "512Mi"
@@ -216,22 +210,11 @@ spec:
         ports:
         - containerPort: 8080
           name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: foundation-secrets
-              key: MONGODB_URI
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         resources:
           requests:
             memory: "256Mi"
@@ -296,22 +279,11 @@ spec:
         ports:
         - containerPort: 8085
           name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: foundation-secrets
-              key: MONGODB_URI
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         resources:
           requests:
             memory: "256Mi"
@@ -376,22 +348,11 @@ spec:
         ports:
         - containerPort: 8091
           name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: foundation-secrets
-              key: MONGODB_URI
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         resources:
           requests:
             memory: "256Mi"
@@ -456,22 +417,11 @@ spec:
         ports:
         - containerPort: 8200
           name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: foundation-secrets
-              key: MONGODB_URI
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          valueFrom:
-            configMapKeyRef:
-              name: foundation-config
-              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        envFrom:
+        - configMapRef:
+            name: foundation-config
+        - secretRef:
+            name: foundation-secrets
         resources:
           requests:
             memory: "256Mi"

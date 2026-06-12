@@ -23,7 +23,7 @@ import java.util.List;
  * and replays events when needed.
  */
 @Component
-@Profile("!event-store-disabled")
+@Profile("!kafka-disabled")
 public class RoutingRuleEventStore {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingRuleEventStore.class);

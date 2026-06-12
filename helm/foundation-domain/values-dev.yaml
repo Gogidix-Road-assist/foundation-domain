@@ -1,0 +1,16 @@
+global:
+  environment: development
+  imageTag: "dev"
+  imagePullPolicy: Always
+  springProfiles: "kubernetes,kafka-disabled"
+  javaOpts: "-Xmx256m -Xms64m -XX:+UseG1GC"
+
+secrets:
+  mongodbUri: ""
+  redisHost: ""
+  redisPort: ""
+  redisPassword: ""
+  redisUsername: ""
+
+ingress:
+  enabled: false

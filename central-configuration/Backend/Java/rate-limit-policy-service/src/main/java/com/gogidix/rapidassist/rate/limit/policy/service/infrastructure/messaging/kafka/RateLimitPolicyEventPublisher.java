@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.rate.limit.policy.service.domain.event.DomainEven
 import com.gogidix.rapidassist.rate.limit.policy.service.infrastructure.messaging.events.RateLimitPolicyEventStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
  * by other services in the system.
  */
 @Component
+@Profile("!kafka-disabled")
 public class RateLimitPolicyEventPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(RateLimitPolicyEventPublisher.class);

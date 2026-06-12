@@ -1,27 +1,36 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: dashboard-configuration-service
 
   data:
     mongodb:
       uri: ${MONGODB_URI:}
+      auto-index-creation: true
       database: ${MONGODB_DATABASE:rapid_assist_dashboard_config}
-    redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
-      database: 3
+      username: ${REDIS_USERNAME:}
+      database: 6
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 2
-
+          max-wait: -1ms
 server:
   port: 8200
 
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -44,5 +53,5 @@ logging:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:your-very-secure-secret-key-for-jwt-token-generation-at-least-256-bits-long}
+  secret: ${JWT_SECRET:}
   expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds

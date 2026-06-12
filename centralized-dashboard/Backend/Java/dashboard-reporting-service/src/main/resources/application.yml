@@ -1,16 +1,39 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: dashboard-reporting-service
 
   data:
     mongodb:
       uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:dashboard_reporting_service}
+      auto-index-creation: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 8
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
       database: rapid_assist_dashboard_reporting
 
 server:
   port: 8202
 
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:

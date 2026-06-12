@@ -1,0 +1,98 @@
+{{- range $name, $svc := .Values.services }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 4 }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: {{ $svc.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ $svc.port }}"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      serviceAccountName: {{ $name }}
+      containers:
+      - name: {{ $name }}
+        image: {{ $.Values.global.registry }}/{{ $.Values.global.org }}/{{ $.Values.global.repo }}-{{ $name }}:{{ $.Values.global.imageTag | default $.Chart.AppVersion }}
+        imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ $svc.port }}
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: {{ include "foundation-domain.fullname" $ }}-config
+        - secretRef:
+            name: {{ include "foundation-domain.fullname" $ }}-secrets
+        env:
+        - name: SERVER_PORT
+          value: "{{ $svc.port }}"
+        {{- range $key, $value := $svc.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        resources:
+          requests:
+            memory: "{{ $svc.resources.requests.memory }}"
+            cpu: "{{ $svc.resources.requests.cpu }}"
+          limits:
+            memory: "{{ $svc.resources.limits.memory }}"
+            cpu: "{{ $svc.resources.limits.cpu }}"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: {{ $svc.port }}
+          initialDelaySeconds: {{ dig "probes" "liveness" "initialDelaySeconds" 60 $svc }}
+          periodSeconds: {{ dig "probes" "liveness" "periodSeconds" 20 $svc }}
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: {{ $svc.port }}
+          initialDelaySeconds: {{ dig "probes" "readiness" "initialDelaySeconds" 30 $svc }}
+          periodSeconds: {{ dig "probes" "readiness" "periodSeconds" 10 $svc }}
+          timeoutSeconds: 5
+          failureThreshold: 3
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 4 }}
+spec:
+  selector:
+    {{- include "foundation-domain.selectorLabels" (dict "serviceName" $name) | nindent 4 }}
+  ports:
+  - port: {{ $svc.port }}
+    targetPort: {{ $svc.port }}
+    name: http
+    protocol: TCP
+  {{- if $svc.headless | default false }}
+  clusterIP: None
+  {{- end }}
+{{- end }}

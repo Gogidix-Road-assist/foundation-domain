@@ -4,6 +4,7 @@ import com.gogidix.rapidassist.feature.flags.service.domain.event.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -20,6 +21,7 @@ import java.util.List;
  * to the event store for audit and replay purposes.
  */
 @Component
+@Profile("!kafka-disabled")
 public class FeatureFlagEventStore {
 
     private static final Logger logger = LoggerFactory.getLogger(FeatureFlagEventStore.class);

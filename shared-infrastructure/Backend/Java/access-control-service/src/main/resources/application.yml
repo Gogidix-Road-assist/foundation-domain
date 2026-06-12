@@ -17,13 +17,39 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:access_control_service}
+      auto-index-creation: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 15
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
       database: ${GOGIDIX_ACCESS_CONTROL_DB:access_control}
 
 management:
+  health:
+    redis:
+      enabled: false
+  health:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
   endpoints:
     web:
       exposure:
-        include: health,info
-  endpoint:
+        include: health,info,metrics,prometheus
+    endpoint:
+      health:
+        show-details: when-authorized
     health:
-      show-details: when-authorized
+      kafka:
+        enabled: false

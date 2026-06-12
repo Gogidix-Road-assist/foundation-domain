@@ -1,0 +1,274 @@
+global:
+  namespace: foundation
+  environment: production
+  registry: ghcr.io
+  org: gogidix-road-assist
+  repo: foundation-domain
+  imageTag: "latest"
+  imagePullPolicy: Always
+  springProfiles: "kubernetes,kafka-disabled"
+  eurekaUrl: "http://service-registry-discovery:8761/eureka/"
+  redisHost: "redis"
+  redisPort: "6379"
+  redisUsername: "default"
+  kafkaBootstrapServers: "kafka:9092"
+  javaOpts: "-Xmx256m -Xms64m -XX:+UseG1GC"
+
+secrets:
+  mongodbUri: ""
+  redisHost: ""
+  redisPort: ""
+  redisPassword: ""
+  redisUsername: ""
+
+ingress:
+  enabled: false
+  host: foundation.gogidix.com
+  className: nginx
+  tls:
+    enabled: false
+    issuer: letsencrypt-prod
+
+services:
+  service-registry-discovery:
+    port: 8761
+    headless: true
+    replicas: 1
+    resources:
+      requests: { memory: "512Mi", cpu: "250m" }
+      limits: { memory: "1Gi", cpu: "500m" }
+    probes:
+      liveness: { initialDelaySeconds: 60, periodSeconds: 20 }
+      readiness: { initialDelaySeconds: 30, periodSeconds: 10 }
+  api-gateway:
+    port: 8304
+    expose: true
+    replicas: 1
+    resources:
+      requests: { memory: "512Mi", cpu: "250m" }
+      limits: { memory: "1Gi", cpu: "500m" }
+    probes:
+      liveness: { initialDelaySeconds: 60, periodSeconds: 20 }
+      readiness: { initialDelaySeconds: 30, periodSeconds: 10 }
+  config-service:
+    port: 8080
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  tenant-org-service:
+    port: 8085
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  monitoring-service:
+    port: 8091
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  dashboard-configuration-service:
+    port: 8200
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  dashboard-analytics-service:
+    port: 8201
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  dashboard-reporting-service:
+    port: 8202
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  feature-flags-service:
+    port: 8100
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  dynamic-routing-config-service:
+    port: 8102
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  rate-limit-policy-service:
+    port: 8104
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  release-rollout-config-service:
+    port: 8105
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  tenancy-configuration-service:
+    port: 8106
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  country-aggregation-service:
+    port: 8095
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  executive-aggregation-service:
+    port: 8096
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  common-domain-models:
+    port: 8261
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  country-localization-config-service:
+    port: 8262
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  user-profile-service:
+    port: 8310
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  database-indexing-service:
+    port: 8090
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  access-control-service:
+    port: 8311
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  alerting-service:
+    port: 8312
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  api-keys-service:
+    port: 8313
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  audit-correlation-service:
+    port: 8314
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  database-management-service:
+    port: 8315
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  event-audit-service:
+    port: 8316
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  idempotency-service:
+    port: 8317
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  identity-access-service:
+    port: 8318
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  identity-service:
+    port: 8319
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  integration-adapters-service:
+    port: 8320
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  logging-aggregation-service:
+    port: 8321
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  metrics-telemetry-service:
+    port: 8324
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  mfa-service:
+    port: 8325
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  rate-limiting-service:
+    port: 8326
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  request-routing-service:
+    port: 8327
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  service-health-monitor:
+    port: 8328
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  service-health-monitor-service:
+    port: 8329
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  session-token-service:
+    port: 8330
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  waf-policy-service:
+    port: 8331
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }
+  event-schemas:
+    port: 8332
+    replicas: 1
+    resources:
+      requests: { memory: "256Mi", cpu: "100m" }
+      limits: { memory: "512Mi", cpu: "250m" }

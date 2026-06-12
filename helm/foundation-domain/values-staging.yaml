@@ -1,0 +1,26 @@
+global:
+  environment: staging
+  imageTag: "staging"
+  imagePullPolicy: Always
+  springProfiles: "kubernetes,kafka-disabled"
+  javaOpts: "-Xmx384m -Xms128m -XX:+UseG1GC"
+
+secrets:
+  mongodbUri: ""
+  redisHost: ""
+  redisPort: ""
+  redisPassword: ""
+  redisUsername: ""
+
+ingress:
+  enabled: true
+  host: staging.foundation.gogidix.com
+  tls:
+    enabled: true
+    issuer: letsencrypt-staging
+
+services:
+  service-registry-discovery:
+    replicas: 1
+  api-gateway:
+    replicas: 2

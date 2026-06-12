@@ -17,18 +17,21 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      uri: ${MONGODB_URI:}
-      auto-index-creation: true
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 37
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
-          min-idle: 0
-
+          min-idle: 2
+          max-wait: -1ms
+      uri: ${MONGODB_URI:}
+      auto-index-creation: true
   # Kafka Configuration
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
@@ -44,14 +47,21 @@ spring:
 
 # Actuator Configuration
 management:
+  health:
+    redis:
+      enabled: false
+  health:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
-  endpoint:
+    endpoint:
+      health:
+        show-details: always
     health:
-      show-details: always
-
+      kafka:
+        enabled: false
+  
 # Logging Configuration
 logging:
   level:

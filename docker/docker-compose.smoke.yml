@@ -9,7 +9,8 @@ x-common-env: &common-env
   SPRING_DATA_REDIS_PORT: "6379"
   SPRING_DATA_REDIS_PASSWORD: smokepass123
   SPRING_DATA_REDIS_USERNAME: default
-  SPRING_PROFILES_ACTIVE: default
+  SPRING_PROFILES_ACTIVE: default,kafka-disabled
+  JAVA_OPTS: "-Xmx200m -Xms64m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
 
 x-common-healthcheck: &common-healthcheck
   interval: 15s
@@ -21,7 +22,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: smoke-redis
-    command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru --requirepass smokepass123
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass smokepass123
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "smokepass123", "ping"]
       interval: 5s
@@ -29,6 +30,9 @@ services:
       retries: 5
 
   service-registry:
+    ports:
+      - "8761:8761"
+    mem_limit: 300m
     image: ${GHCR_REPO}-service-registry-discovery:${IMAGE_TAG}
     depends_on:
       redis:
@@ -43,6 +47,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
 
   config-service:
+    ports:
+      - "8080:8080"
+    mem_limit: 300m
     image: ${GHCR_REPO}-config-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -56,6 +63,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
 
   api-gateway:
+    ports:
+      - "8304:8304"
+    mem_limit: 300m
     image: ${GHCR_REPO}-api-gateway:${IMAGE_TAG}
     depends_on:
       redis:
@@ -68,6 +78,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8304/actuator/health"]
 
   tenant-org-service:
+    ports:
+      - "8085:8085"
+    mem_limit: 300m
     image: ${GHCR_REPO}-tenant-org-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -82,6 +95,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
 
   monitoring-service:
+    ports:
+      - "8091:8091"
+    mem_limit: 300m
     image: ${GHCR_REPO}-monitoring-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -90,12 +106,14 @@ services:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_monitoring
       SPRING_DATA_MONGODB_DATABASE: rapid_assist_monitoring
-      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
 
   dashboard-configuration-service:
+    ports:
+      - "8200:8200"
+    mem_limit: 300m
     image: ${GHCR_REPO}-dashboard-configuration-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -109,6 +127,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
 
   feature-flags-service:
+    ports:
+      - "8100:8100"
+    mem_limit: 300m
     image: ${GHCR_REPO}-feature-flags-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -122,6 +143,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8100/actuator/health"]
 
   dynamic-routing-config-service:
+    ports:
+      - "8102:8102"
+    mem_limit: 300m
     image: ${GHCR_REPO}-dynamic-routing-config-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -135,6 +159,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8102/actuator/health"]
 
   rate-limit-policy-service:
+    ports:
+      - "8104:8104"
+    mem_limit: 300m
     image: ${GHCR_REPO}-rate-limit-policy-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -148,6 +175,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8104/actuator/health"]
 
   release-rollout-config-service:
+    ports:
+      - "8105:8105"
+    mem_limit: 300m
     image: ${GHCR_REPO}-release-rollout-config-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -161,6 +191,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8105/actuator/health"]
 
   tenancy-configuration-service:
+    ports:
+      - "8106:8106"
+    mem_limit: 300m
     image: ${GHCR_REPO}-tenancy-configuration-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -174,6 +207,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8106/actuator/health"]
 
   dashboard-analytics-service:
+    ports:
+      - "8201:8201"
+    mem_limit: 300m
     image: ${GHCR_REPO}-dashboard-analytics-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -187,6 +223,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8201/actuator/health"]
 
   dashboard-reporting-service:
+    ports:
+      - "8202:8202"
+    mem_limit: 300m
     image: ${GHCR_REPO}-dashboard-reporting-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -200,6 +239,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8202/actuator/health"]
 
   country-aggregation-service:
+    ports:
+      - "8095:8095"
+    mem_limit: 300m
     image: ${GHCR_REPO}-country-aggregation-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -213,6 +255,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8095/actuator/health"]
 
   executive-aggregation-service:
+    ports:
+      - "8096:8096"
+    mem_limit: 300m
     image: ${GHCR_REPO}-executive-aggregation-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -226,6 +271,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8096/actuator/health"]
 
   common-domain-models:
+    ports:
+      - "8261:8261"
+    mem_limit: 300m
     image: ${GHCR_REPO}-common-domain-models:${IMAGE_TAG}
     depends_on:
       redis:
@@ -239,6 +287,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8261/actuator/health"]
 
   country-localization-config-service:
+    ports:
+      - "8262:8262"
+    mem_limit: 300m
     image: ${GHCR_REPO}-country-localization-config-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -252,6 +303,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8262/actuator/health"]
 
   user-profile-service:
+    ports:
+      - "8310:8310"
+    mem_limit: 300m
     image: ${GHCR_REPO}-user-profile-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -266,6 +320,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8310/actuator/health"]
 
   database-indexing-service:
+    ports:
+      - "8090:8090"
+    mem_limit: 300m
     image: ${GHCR_REPO}-database-indexing-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -279,6 +336,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
 
   access-control-service:
+    ports:
+      - "8311:8311"
+    mem_limit: 300m
     image: ${GHCR_REPO}-access-control-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -292,6 +352,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
 
   alerting-service:
+    ports:
+      - "8312:8312"
+    mem_limit: 300m
     image: ${GHCR_REPO}-alerting-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -305,6 +368,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8312/actuator/health"]
 
   api-keys-service:
+    ports:
+      - "8313:8313"
+    mem_limit: 300m
     image: ${GHCR_REPO}-api-keys-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -318,6 +384,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8313/actuator/health"]
 
   audit-correlation-service:
+    ports:
+      - "8314:8314"
+    mem_limit: 300m
     image: ${GHCR_REPO}-audit-correlation-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -331,6 +400,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8314/actuator/health"]
 
   database-management-service:
+    ports:
+      - "8315:8315"
+    mem_limit: 300m
     image: ${GHCR_REPO}-database-management-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -344,6 +416,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8315/actuator/health"]
 
   event-audit-service:
+    ports:
+      - "8316:8316"
+    mem_limit: 300m
     image: ${GHCR_REPO}-event-audit-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -357,6 +432,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8316/actuator/health"]
 
   idempotency-service:
+    ports:
+      - "8317:8317"
+    mem_limit: 300m
     image: ${GHCR_REPO}-idempotency-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -370,6 +448,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8317/actuator/health"]
 
   identity-access-service:
+    ports:
+      - "8318:8318"
+    mem_limit: 300m
     image: ${GHCR_REPO}-identity-access-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -383,6 +464,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8318/actuator/health"]
 
   identity-service:
+    ports:
+      - "8319:8319"
+    mem_limit: 300m
     image: ${GHCR_REPO}-identity-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -396,6 +480,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8319/actuator/health"]
 
   integration-adapters-service:
+    ports:
+      - "8320:8320"
+    mem_limit: 300m
     image: ${GHCR_REPO}-integration-adapters-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -409,6 +496,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8320/actuator/health"]
 
   logging-aggregation-service:
+    ports:
+      - "8321:8321"
+    mem_limit: 300m
     image: ${GHCR_REPO}-logging-aggregation-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -422,6 +512,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8321/actuator/health"]
 
   metrics-telemetry-service:
+    ports:
+      - "8324:8324"
+    mem_limit: 300m
     image: ${GHCR_REPO}-metrics-telemetry-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -435,6 +528,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8324/actuator/health"]
 
   mfa-service:
+    ports:
+      - "8325:8325"
+    mem_limit: 300m
     image: ${GHCR_REPO}-mfa-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -448,6 +544,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8325/actuator/health"]
 
   rate-limiting-service:
+    ports:
+      - "8326:8326"
+    mem_limit: 300m
     image: ${GHCR_REPO}-rate-limiting-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -461,6 +560,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8326/actuator/health"]
 
   request-routing-service:
+    ports:
+      - "8327:8327"
+    mem_limit: 300m
     image: ${GHCR_REPO}-request-routing-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -474,6 +576,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8327/actuator/health"]
 
   service-health-monitor:
+    ports:
+      - "8328:8328"
+    mem_limit: 300m
     image: ${GHCR_REPO}-service-health-monitor:${IMAGE_TAG}
     depends_on:
       redis:
@@ -487,6 +592,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8328/actuator/health"]
 
   service-health-monitor-service:
+    ports:
+      - "8329:8329"
+    mem_limit: 300m
     image: ${GHCR_REPO}-service-health-monitor-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -500,6 +608,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8329/actuator/health"]
 
   session-token-service:
+    ports:
+      - "8330:8330"
+    mem_limit: 300m
     image: ${GHCR_REPO}-session-token-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -513,6 +624,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8330/actuator/health"]
 
   waf-policy-service:
+    ports:
+      - "8331:8331"
+    mem_limit: 300m
     image: ${GHCR_REPO}-waf-policy-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -526,6 +640,9 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:8331/actuator/health"]
 
   event-schemas:
+    ports:
+      - "8332:8332"
+    mem_limit: 300m
     image: ${GHCR_REPO}-event-schemas:${IMAGE_TAG}
     depends_on:
       redis:

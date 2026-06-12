@@ -1,15 +1,27 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: database-management-service
   data:
     mongodb:
       uri: ${MONGODB_URI:}
-      database: ${GOGIDIX_DB_MANAGEMENT_DB:database_management}
-    redis:
+      database: ${MONGODB_DATABASE:database_management_service}
+      auto-index-creation: true
       host: ${REDIS_HOST:localhost}
-      port: 6379
-      timeout: 3000
-
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 20
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+      database: ${GOGIDIX_DB_MANAGEMENT_DB:database_management}
 server:
   port: 8315
 
@@ -47,11 +59,19 @@ logging:
 
 # Actuator endpoints
 management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus,metrics
   endpoint:
     health:
       show-details: always
-

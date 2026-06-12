@@ -1,11 +1,28 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   application:
     name: monitoring-service
 
   data:
     mongodb:
       uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:monitoring_service}
       auto-index-creation: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 11
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
 
   # Kafka is REQUIRED for monitoring events
   kafka:
@@ -44,6 +61,10 @@ server:
   shutdown: graceful
 
 management:
+  health:
+    redis:
+      enabled: false
+  health:
   endpoints:
     web:
       exposure:
@@ -54,9 +75,8 @@ management:
     # MongoDB is required for metrics storage
     mongo:
       enabled: true
-    # Kafka is required for event processing
     kafka:
-      enabled: true
+      enabled: false
 
 logging:
   level:

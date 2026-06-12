@@ -2,6 +2,9 @@ server:
   port: ${SERVER_PORT:8761}
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   cloud:
     compatibility-verifier:
       enabled: false
@@ -11,21 +14,21 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:}
-      database: ${MONGODB_DATABASE:rapid_assist_service_registry}
       auto-index-creation: true
+      database: ${MONGODB_DATABASE:rapid_assist_service_registry}
     redis:
-      host: ${REDIS_HOST:}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+      username: ${REDIS_USERNAME:}
+      database: 12
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
-          min-idle: 0
-      # Redis is optional - for caching only
-      condition-on-property: "spring.redis.host"
-
+          min-idle: 2
+          max-wait: -1ms
 eureka:
   instance:
     hostname: ${EUREKA_HOSTNAME:localhost}
@@ -39,6 +42,11 @@ eureka:
     eviction-interval-timer-in-ms: 30000
 
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -50,9 +58,6 @@ management:
         enabled: true
     mongo:
       enabled: true
-    redis:
-      enabled: false  # Optional - don't fail health check if unavailable
-
 logging:
   level:
     com.gogidix.rapidassist.service.registry.discovery: INFO

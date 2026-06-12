@@ -1,0 +1,691 @@
+version: "3.8"
+
+x-common-env: &common-env
+  MONGODB_URI: ${MONGODB_URI}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: smokepass123
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_PASSWORD: smokepass123
+  SPRING_DATA_REDIS_USERNAME: default
+  SPRING_PROFILES_ACTIVE: default
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  JAVA_OPTS: "-Xmx200m -Xms64m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
+
+x-common-healthcheck: &common-healthcheck
+  interval: 15s
+  timeout: 5s
+  retries: 30
+  start_period: 120s
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: integration-redis
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass smokepass123
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "smokepass123", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: integration-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: integration-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+  dashboard-configuration-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-dashboard-configuration-service:latest
+    container_name: integration-dashboard-configuration-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8200:8200"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8200/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  country-aggregation-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-country-aggregation-service:latest
+    container_name: integration-country-aggregation-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8095:8095"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8095/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  service-health-monitor-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-service-health-monitor-service:latest
+    container_name: integration-service-health-monitor-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8329:8329"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8329/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  database-management-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-database-management-service:latest
+    container_name: integration-database-management-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8315:8315"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8315/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  service-health-monitor:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-service-health-monitor:latest
+    container_name: integration-service-health-monitor
+    environment:
+      <<: *common-env
+    ports:
+      - "8328:8328"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8328/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  service-registry-discovery:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-service-registry-discovery:latest
+    container_name: integration-service-registry-discovery
+    environment:
+      <<: *common-env
+    ports:
+      - "8761:8761"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8761/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  access-control-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-access-control-service:latest
+    container_name: integration-access-control-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8311:8311"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  database-indexing-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-database-indexing-service:latest
+    container_name: integration-database-indexing-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8090:8090"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  metrics-telemetry-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-metrics-telemetry-service:latest
+    container_name: integration-metrics-telemetry-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8324:8324"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8324/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  dynamic-routing-config-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-dynamic-routing-config-service:latest
+    container_name: integration-dynamic-routing-config-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8102:8102"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8102/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  identity-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-identity-service:latest
+    container_name: integration-identity-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8319:8319"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8319/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  event-audit-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-event-audit-service:latest
+    container_name: integration-event-audit-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8316:8316"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8316/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  rate-limiting-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-rate-limiting-service:latest
+    container_name: integration-rate-limiting-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8326:8326"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8326/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  tenant-org-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-tenant-org-service:latest
+    container_name: integration-tenant-org-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8085:8085"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8085/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  idempotency-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-idempotency-service:latest
+    container_name: integration-idempotency-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8317:8317"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8317/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  feature-flags-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-feature-flags-service:latest
+    container_name: integration-feature-flags-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8100:8100"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8100/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  request-routing-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-request-routing-service:latest
+    container_name: integration-request-routing-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8327:8327"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8327/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  identity-access-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-identity-access-service:latest
+    container_name: integration-identity-access-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8318:8318"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8318/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  waf-policy-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-waf-policy-service:latest
+    container_name: integration-waf-policy-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8331:8331"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8331/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  rate-limit-policy-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-rate-limit-policy-service:latest
+    container_name: integration-rate-limit-policy-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8104:8104"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8104/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  audit-correlation-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-audit-correlation-service:latest
+    container_name: integration-audit-correlation-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8314:8314"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8314/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  user-profile-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-user-profile-service:latest
+    container_name: integration-user-profile-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8310:8310"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8310/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  country-localization-config-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-country-localization-config-service:latest
+    container_name: integration-country-localization-config-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8262:8262"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8262/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  integration-adapters-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-integration-adapters-service:latest
+    container_name: integration-integration-adapters-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8320:8320"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8320/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  logging-aggregation-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-logging-aggregation-service:latest
+    container_name: integration-logging-aggregation-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8321:8321"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8321/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  dashboard-reporting-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-dashboard-reporting-service:latest
+    container_name: integration-dashboard-reporting-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8202:8202"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8202/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  alerting-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-alerting-service:latest
+    container_name: integration-alerting-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8312:8312"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8312/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  session-token-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-session-token-service:latest
+    container_name: integration-session-token-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8330:8330"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8330/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  tenancy-configuration-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-tenancy-configuration-service:latest
+    container_name: integration-tenancy-configuration-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8106:8106"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8106/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  executive-aggregation-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-executive-aggregation-service:latest
+    container_name: integration-executive-aggregation-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8096:8096"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8096/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  event-schemas:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-event-schemas:latest
+    container_name: integration-event-schemas
+    environment:
+      <<: *common-env
+    ports:
+      - "8332:8332"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8332/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  api-gateway:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-api-gateway:latest
+    container_name: integration-api-gateway
+    environment:
+      <<: *common-env
+    ports:
+      - "8304:8304"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8304/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  config-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-config-service:latest
+    container_name: integration-config-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8080:8080"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  mfa-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-mfa-service:latest
+    container_name: integration-mfa-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8325:8325"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8325/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  release-rollout-config-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-release-rollout-config-service:latest
+    container_name: integration-release-rollout-config-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8105:8105"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8105/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  common-domain-models:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-common-domain-models:latest
+    container_name: integration-common-domain-models
+    environment:
+      <<: *common-env
+    ports:
+      - "8261:8261"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8261/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  monitoring-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-monitoring-service:latest
+    container_name: integration-monitoring-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8091:8091"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  dashboard-analytics-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-dashboard-analytics-service:latest
+    container_name: integration-dashboard-analytics-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8201:8201"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8201/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+  api-keys-service:
+    image: ghcr.io/gogidix-road-assist/foundation-domain-api-keys-service:latest
+    container_name: integration-api-keys-service
+    environment:
+      <<: *common-env
+    ports:
+      - "8313:8313"
+    mem_limit: 300m
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8313/actuator/health"]
+      <<: *common-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy

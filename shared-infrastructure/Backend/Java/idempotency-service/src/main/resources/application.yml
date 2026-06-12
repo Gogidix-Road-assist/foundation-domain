@@ -10,23 +10,41 @@ gogidix:
     lock-timeout-seconds: ${GOGIDIX_IDEMPOTENCY_LOCK_TIMEOUT:300} # 5 minutes
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
   data:
+    mongodb:
+      uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:idempotency_service}
+      auto-index-creation: true
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
-      timeout: ${REDIS_TIMEOUT:2000}
+      username: ${REDIS_USERNAME:}
+      database: 22
+      timeout: 2000ms
       lettuce:
         pool:
-          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
-          max-idle: ${REDIS_POOL_MAX_IDLE:8}
-          min-idle: ${REDIS_POOL_MIN_IDLE:0}
-
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
 management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized

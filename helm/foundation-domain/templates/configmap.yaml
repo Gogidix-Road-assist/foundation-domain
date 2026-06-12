@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-domain.fullname" . }}-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "foundation-domain.labels" . | nindent 4 }}
+data:
+  SPRING_PROFILES_ACTIVE: "{{ .Values.global.springProfiles }}"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eurekaUrl }}"
+  SPRING_DATA_REDIS_HOST: "{{ .Values.global.redisHost }}"
+  SPRING_DATA_REDIS_PORT: "{{ .Values.global.redisPort }}"
+  SPRING_DATA_REDIS_USERNAME: "{{ .Values.global.redisUsername }}"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ .Values.global.kafkaBootstrapServers }}"
+  JAVA_OPTS: "{{ .Values.global.javaOpts }}"

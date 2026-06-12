@@ -8,6 +8,7 @@ import com.gogidix.rapidassist.access.control.service.domain.event.PermissionRev
 import com.gogidix.rapidassist.access.control.service.domain.port.out.AuditEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
  * the AuditEventPublisher output port using Kafka.
  */
 @Component
+@Profile("!kafka-disabled")
 public class KafkaAuditEventPublisher implements AuditEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaAuditEventPublisher.class);

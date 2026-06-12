@@ -1,0 +1,45 @@
+global:
+  environment: production
+  imageTag: "production"
+  imagePullPolicy: IfNotPresent
+  springProfiles: "kubernetes"
+  javaOpts: "-Xmx512m -Xms128m -XX:+UseG1GC"
+  kafkaBootstrapServers: "kafka:9092"
+
+secrets:
+  mongodbUri: ""
+  redisHost: ""
+  redisPort: ""
+  redisPassword: ""
+  redisUsername: ""
+
+ingress:
+  enabled: true
+  host: foundation.gogidix.com
+  tls:
+    enabled: true
+    issuer: letsencrypt-prod
+
+services:
+  service-registry-discovery:
+    replicas: 3
+    hpa: true
+    hpaMin: 3
+    hpaMax: 5
+    resources:
+      requests: { memory: "512Mi", cpu: "250m" }
+      limits: { memory: "1Gi", cpu: "500m" }
+  api-gateway:
+    replicas: 3
+    hpa: true
+    hpaMin: 3
+    hpaMax: 10
+    resources:
+      requests: { memory: "512Mi", cpu: "250m" }
+      limits: { memory: "1Gi", cpu: "500m" }
+  config-service:
+    replicas: 2
+  tenant-org-service:
+    replicas: 2
+  monitoring-service:
+    replicas: 2

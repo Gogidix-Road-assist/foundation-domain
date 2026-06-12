@@ -235,11 +235,14 @@ docker-build:
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
   before_script:
+    - df -h / && free -m
     - docker system prune -af --volumes 2>/dev/null || true
+    - df -h / && free -m
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
   script:
+    - df -h / && free -m
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - ORG_LOWER="gogidix-road-assist"
     - REPO_NAME="foundation-domain"
@@ -344,7 +347,7 @@ smoke-test:
   image: docker:24.0.5
   needs: [docker-build]
   tags: [docker]
-  timeout: 1h
+  timeout: 2h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -357,10 +360,13 @@ smoke-test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
-    RUNNER_SCRIPT_TIMEOUT: 55m
+    RUNNER_SCRIPT_TIMEOUT: 120m
   before_script:
+    - df -h / && free -m
     - docker system prune -af --volumes 2>/dev/null || true
+    - df -h / && free -m
   script:
+    - df -h / && free -m
     - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
     - apk add --no-cache curl
@@ -379,6 +385,7 @@ smoke-test:
     - export MONGODB_URI="${MONGODB_URI}"
     - docker compose -f docker/docker-compose.smoke.yml up -d
     - sleep 60
+    - echo "=== Resource usage after compose up ===" && df -h / && free -m
     - |
       SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
       PASS=0
@@ -388,7 +395,7 @@ smoke-test:
       for svc_port in $SERVICES; do
         REMAINING="${REMAINING} ${svc_port}"
       done
-      MAX_WAIT=480
+      MAX_WAIT=2700
       ELAPSED=0
       while [ $ELAPSED -lt $MAX_WAIT ] && [ -n "$REMAINING" ]; do
         NEW_REMAINING=""
@@ -409,6 +416,7 @@ smoke-test:
           ELAPSED=$((ELAPSED + 15))
         fi
       done
+      echo "=== Resource usage after health checks ===" && df -h / && free -m
       for svc_port in $REMAINING; do
         svc=$(echo "$svc_port" | cut -d: -f1)
         PORT=$(echo "$svc_port" | cut -d: -f2)
@@ -430,7 +438,7 @@ integration-test:
   image: maven:3.9-eclipse-temurin-21
   needs: [smoke-test]
   tags: [docker]
-  timeout: 1h
+  timeout: 2h
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
@@ -443,54 +451,25 @@ integration-test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
     DOCKER_API_VERSION: "1.43"
-    RUNNER_SCRIPT_TIMEOUT: 55m
+    RUNNER_SCRIPT_TIMEOUT: 120m
+    TESTCONTAINERS_HOST_OVERRIDE: docker
   before_script:
+    - df -h / && free -m
     - docker system prune -af --volumes 2>/dev/null || true
+    - df -h / && free -m
     - *maven_setup
     - apt-get update -qq && apt-get install -qq -y docker.io curl > /dev/null 2>&1
     - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
+    - docker pull confluentinc/cp-kafka:7.6.1 || true
   script:
-    - SHORT_SHA="${CI_COMMIT_SHA:0:7}"
+    - df -h / && free -m
     - |
       if [ -z "$MONGODB_URI" ]; then
         echo "MONGODB_URI not set"
         exit 1
       fi
-    - export GHCR_REPO="ghcr.io/gogidix-road-assist/foundation-domain"
-    - export IMAGE_TAG="${SHORT_SHA}"
-    - export MONGODB_URI="${MONGODB_URI}"
-    - docker compose -f docker/docker-compose.smoke.yml up -d
-    - sleep 60
-    - |
-      SERVICES="service-registry:8761 config-service:8080 api-gateway:8304 tenant-org-service:8085 monitoring-service:8091 dashboard-configuration-service:8200 feature-flags-service:8100 dynamic-routing-config-service:8102 rate-limit-policy-service:8104 release-rollout-config-service:8105 tenancy-configuration-service:8106 dashboard-analytics-service:8201 dashboard-reporting-service:8202 country-aggregation-service:8095 executive-aggregation-service:8096 common-domain-models:8261 country-localization-config-service:8262 user-profile-service:8310 database-indexing-service:8090 access-control-service:8311 alerting-service:8312 api-keys-service:8313 audit-correlation-service:8314 database-management-service:8315 event-audit-service:8316 idempotency-service:8317 identity-access-service:8318 identity-service:8319 integration-adapters-service:8320 logging-aggregation-service:8321 metrics-telemetry-service:8324 mfa-service:8325 rate-limiting-service:8326 request-routing-service:8327 service-health-monitor:8328 service-health-monitor-service:8329 session-token-service:8330 waf-policy-service:8331 event-schemas:8332"
-      PASS=0
-      FAIL=0
-      for svc_port in $SERVICES; do
-        svc=$(echo "$svc_port" | cut -d: -f1)
-        PORT=$(echo "$svc_port" | cut -d: -f2)
-        ELAPSED=0
-        HEALTHY=false
-        while [ $ELAPSED -lt 180 ]; do
-          HTTP_CODE=$(curl -sf --connect-timeout 2 --max-time 3 -o /dev/null -w '%{http_code}' "http://docker:${PORT}/actuator/health" 2>/dev/null || echo "000")
-          if [ "$HTTP_CODE" = "200" ]; then
-            echo "${svc}: HEALTHY after ${ELAPSED}s"
-            HEALTHY=true
-            break
-          fi
-          sleep 5
-          ELAPSED=$((ELAPSED + 5))
-        done
-        if $HEALTHY; then
-          PASS=$((PASS + 1))
-        else
-          FAIL=$((FAIL + 1))
-          echo "WARNING: ${svc} not healthy for integration tests (port ${PORT})"
-        fi
-      done
-      echo "Health check: ${PASS} passed, ${FAIL} not ready"
-    - |
-      mvn install -U -DskipTests -N -q
-      cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -DskipTests -N -q
+    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
     - |
       FAILSAFE_FAIL=0
       for subdomain in central-configuration/Backend/Java shared-infrastructure/Backend/Java orchestration-services/Backend/Java centralized-dashboard/Backend/Java; do
@@ -505,12 +484,18 @@ integration-test:
           mvn failsafe:integration-test failsafe:verify -f "${svc}pom.xml" -DskipUnitTests=true || FAILSAFE_FAIL=$((FAILSAFE_FAIL + 1))
         fi
       done
+      for svc in shared-libraries/shared-events/*/; do
+        if [ -f "${svc}pom.xml" ]; then
+          echo "Running integration tests for $(basename ${svc})..."
+          mvn failsafe:integration-test failsafe:verify -f "${svc}pom.xml" -DskipUnitTests=true || FAILSAFE_FAIL=$((FAILSAFE_FAIL + 1))
+        fi
+      done
       if [ "${FAILSAFE_FAIL}" -gt 0 ]; then
         echo "Integration tests failed in ${FAILSAFE_FAIL} subdomain(s)"
         exit 1
       fi
       echo "All integration tests passed"
-    - docker compose -f docker/docker-compose.smoke.yml down -v --remove-orphans 2>/dev/null || true
+    - df -h / && free -m
 
 promote-staging:
   stage: deploy

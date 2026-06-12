@@ -5,7 +5,12 @@ x-common-env: &common-env
   REDIS_HOST: redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-  SPRING_PROFILES_ACTIVE: production
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  SPRING_DATA_REDIS_USERNAME: default
+  SPRING_PROFILES_ACTIVE: production,kafka-disabled
+  JAVA_OPTS: "-Xmx256m -Xms64m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
 
 x-common-healthcheck: &common-healthcheck
   interval: 30s
@@ -26,6 +31,7 @@ services:
       retries: 5
 
   service-registry:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/service-registry-discovery:${SHA}
     container_name: service-registry
     ports:
@@ -40,6 +46,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
 
   config-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/config-service:${SHA}
     container_name: config-service
     ports:
@@ -57,6 +64,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
 
   api-gateway:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/api-gateway:${SHA}
     container_name: api-gateway
     ports:
@@ -74,6 +82,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8304/actuator/health"]
 
   tenant-org-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/tenant-org-service:${SHA}
     container_name: tenant-org-service
     ports:
@@ -91,6 +100,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
 
   monitoring-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/monitoring-service:${SHA}
     container_name: monitoring-service
     ports:
@@ -108,6 +118,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
 
   dashboard-configuration-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/dashboard-configuration-service:${SHA}
     container_name: dashboard-configuration-service
     ports:
@@ -125,6 +136,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8200/actuator/health"]
 
   feature-flags-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/feature-flags-service:${SHA}
     container_name: feature-flags-service
     ports:
@@ -142,6 +154,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8100/actuator/health"]
 
   dynamic-routing-config-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/dynamic-routing-config-service:${SHA}
     container_name: dynamic-routing-config-service
     ports:
@@ -159,6 +172,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8102/actuator/health"]
 
   rate-limit-policy-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/rate-limit-policy-service:${SHA}
     container_name: rate-limit-policy-service
     ports:
@@ -176,6 +190,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8104/actuator/health"]
 
   release-rollout-config-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/release-rollout-config-service:${SHA}
     container_name: release-rollout-config-service
     ports:
@@ -193,6 +208,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8105/actuator/health"]
 
   tenancy-configuration-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/tenancy-configuration-service:${SHA}
     container_name: tenancy-configuration-service
     ports:
@@ -210,6 +226,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8106/actuator/health"]
 
   dashboard-analytics-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/dashboard-analytics-service:${SHA}
     container_name: dashboard-analytics-service
     ports:
@@ -227,6 +244,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8201/actuator/health"]
 
   dashboard-reporting-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/dashboard-reporting-service:${SHA}
     container_name: dashboard-reporting-service
     ports:
@@ -244,6 +262,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8202/actuator/health"]
 
   country-aggregation-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/country-aggregation-service:${SHA}
     container_name: country-aggregation-service
     ports:
@@ -261,6 +280,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8095/actuator/health"]
 
   executive-aggregation-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/executive-aggregation-service:${SHA}
     container_name: executive-aggregation-service
     ports:
@@ -278,6 +298,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8096/actuator/health"]
 
   common-domain-models:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/common-domain-models:${SHA}
     container_name: common-domain-models
     ports:
@@ -295,6 +316,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8261/actuator/health"]
 
   country-localization-config-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/country-localization-config-service:${SHA}
     container_name: country-localization-config-service
     ports:
@@ -312,6 +334,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8262/actuator/health"]
 
   user-profile-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/user-profile-service:${SHA}
     container_name: user-profile-service
     ports:
@@ -329,6 +352,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8310/actuator/health"]
 
   database-indexing-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/database-indexing-service:${SHA}
     container_name: database-indexing-service
     ports:
@@ -346,6 +370,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
 
   access-control-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/access-control-service:${SHA}
     container_name: access-control-service
     ports:
@@ -363,6 +388,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8311/actuator/health"]
 
   alerting-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/alerting-service:${SHA}
     container_name: alerting-service
     ports:
@@ -380,6 +406,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8312/actuator/health"]
 
   api-keys-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/api-keys-service:${SHA}
     container_name: api-keys-service
     ports:
@@ -397,6 +424,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8313/actuator/health"]
 
   audit-correlation-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/audit-correlation-service:${SHA}
     container_name: audit-correlation-service
     ports:
@@ -414,6 +442,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8314/actuator/health"]
 
   database-management-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/database-management-service:${SHA}
     container_name: database-management-service
     ports:
@@ -431,6 +460,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8315/actuator/health"]
 
   event-audit-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/event-audit-service:${SHA}
     container_name: event-audit-service
     ports:
@@ -448,6 +478,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8316/actuator/health"]
 
   idempotency-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/idempotency-service:${SHA}
     container_name: idempotency-service
     ports:
@@ -465,6 +496,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8317/actuator/health"]
 
   identity-access-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/identity-access-service:${SHA}
     container_name: identity-access-service
     ports:
@@ -482,6 +514,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8318/actuator/health"]
 
   identity-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/identity-service:${SHA}
     container_name: identity-service
     ports:
@@ -499,6 +532,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8319/actuator/health"]
 
   integration-adapters-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/integration-adapters-service:${SHA}
     container_name: integration-adapters-service
     ports:
@@ -516,6 +550,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8320/actuator/health"]
 
   logging-aggregation-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/logging-aggregation-service:${SHA}
     container_name: logging-aggregation-service
     ports:
@@ -533,6 +568,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8321/actuator/health"]
 
   metrics-telemetry-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/metrics-telemetry-service:${SHA}
     container_name: metrics-telemetry-service
     ports:
@@ -550,6 +586,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8324/actuator/health"]
 
   mfa-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/mfa-service:${SHA}
     container_name: mfa-service
     ports:
@@ -567,6 +604,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8325/actuator/health"]
 
   rate-limiting-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/rate-limiting-service:${SHA}
     container_name: rate-limiting-service
     ports:
@@ -584,6 +622,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8326/actuator/health"]
 
   request-routing-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/request-routing-service:${SHA}
     container_name: request-routing-service
     ports:
@@ -601,6 +640,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8327/actuator/health"]
 
   service-health-monitor:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/service-health-monitor:${SHA}
     container_name: service-health-monitor
     ports:
@@ -618,6 +658,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8328/actuator/health"]
 
   service-health-monitor-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/service-health-monitor-service:${SHA}
     container_name: service-health-monitor-service
     ports:
@@ -635,6 +676,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8329/actuator/health"]
 
   session-token-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/session-token-service:${SHA}
     container_name: session-token-service
     ports:
@@ -652,6 +694,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8330/actuator/health"]
 
   waf-policy-service:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/waf-policy-service:${SHA}
     container_name: waf-policy-service
     ports:
@@ -669,6 +712,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8331/actuator/health"]
 
   event-schemas:
+    mem_limit: 350m
     image: ghcr.io/${REPO}/event-schemas:${SHA}
     container_name: event-schemas
     ports:
