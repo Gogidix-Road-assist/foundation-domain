@@ -59,14 +59,29 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>kafka</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.gogidix.rapidassist</groupId>
       <artifactId>shared-security-library</artifactId>
       <version>1.0.0</version>
     </dependency>
     <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>kafka</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.gogidix.rapidassist</groupId>
       <artifactId>shared-request-context-library</artifactId>
       <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>kafka</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.gogidix.rapidassist</groupId>

@@ -46,9 +46,10 @@ publish-shared-libraries:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - |
+      set -eo pipefail
       for module in shared-libraries/Backend/Java/shared-audit-library \
                     shared-libraries/Backend/Java/shared-cors-config \
                     shared-libraries/Backend/Java/shared-dto-library \
@@ -88,10 +89,10 @@ central-configuration:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - cd central-configuration/Backend/Java
-    - mvn clean package -DskipTests
+    - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
@@ -110,10 +111,10 @@ shared-infrastructure:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - cd shared-infrastructure/Backend/Java
-    - mvn clean package -DskipTests
+    - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
@@ -132,10 +133,10 @@ orchestration-services:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - cd orchestration-services/Backend/Java
-    - mvn clean package -DskipTests
+    - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
@@ -154,10 +155,10 @@ centralized-dashboard:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - cd centralized-dashboard/Backend/Java
-    - mvn clean package -DskipTests
+    - mvn clean package -Dmaven.test.skip=true
     - mvn test org.jacoco:jacoco-maven-plugin:report
   services:
     - name: mongo:7
@@ -176,13 +177,14 @@ shared-models:
       allow_failure: false
   script:
     - *maven_setup
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - |
+      set -eo pipefail
       for svc in shared-libraries/shared-models/*/; do
         if [ -f "${svc}pom.xml" ]; then
           echo "Building $(basename ${svc})..."
-          mvn clean package -DskipTests -f "${svc}pom.xml"
+          mvn clean package -Dmaven.test.skip=true -f "${svc}pom.xml"
         fi
       done
     - |
@@ -201,7 +203,7 @@ code-quality:
     - if: $CI_COMMIT_BRANCH == "dev"
       allow_failure: false
   script:
-    - semgrep --config auto --json -o semgrep-report.json . || true
+    - semgrep --config auto --json -o semgrep-report.json .
     - semgrep --config auto .
   allow_failure: false
 
@@ -247,7 +249,7 @@ docker-build:
     - ORG_LOWER="gogidix-road-assist"
     - REPO_NAME="foundation-domain"
     - GHCR_PREFIX="ghcr.io/${ORG_LOWER}/${REPO_NAME}"
-    - mvn clean package -U -DskipTests -q
+    - mvn clean package -U -Dmaven.test.skip=true -q
     - |
       declare -A SERVICE_PORTS=(
         [service-registry-discovery]=8761
@@ -468,9 +470,10 @@ integration-test:
         echo "MONGODB_URI not set"
         exit 1
       fi
-    - mvn install -U -DskipTests -N -q
-    - cd shared-libraries && mvn clean install -U -DskipTests -q && cd $CI_PROJECT_DIR
+    - mvn install -U -Dmaven.test.skip=true -N -q
+    - cd shared-libraries && mvn clean install -U -Dmaven.test.skip=true -q && cd $CI_PROJECT_DIR
     - |
+      set -eo pipefail
       FAILSAFE_FAIL=0
       for subdomain in central-configuration/Backend/Java shared-infrastructure/Backend/Java orchestration-services/Backend/Java centralized-dashboard/Backend/Java; do
         if [ -f "${subdomain}/pom.xml" ]; then
