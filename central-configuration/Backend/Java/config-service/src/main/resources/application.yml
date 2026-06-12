@@ -109,7 +109,10 @@ management:
   health:
     redis:
       enabled: false
-  health:
+    kafka:
+      enabled: false
+    mongo:
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -117,16 +120,7 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-    # MongoDB is required for config storage
-    mongo:
-      enabled: true
-      # Redis is optional - only for caching
-      redis:
-        enabled: false
-    health:
-      kafka:
-        enabled: false
-    metrics:
+  metrics:
     export:
       prometheus:
         enabled: true

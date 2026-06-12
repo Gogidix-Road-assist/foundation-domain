@@ -10,6 +10,7 @@ x-common-env: &common-env
   SPRING_DATA_REDIS_PASSWORD: smokepass123
   SPRING_DATA_REDIS_USERNAME: default
   SPRING_PROFILES_ACTIVE: default,kafka-disabled
+  GOGIDIX_JWT_SECRET: smoke-test-secret-key-at-least-256-bits-long-for-hs256-algorithm
   JAVA_OPTS: "-Xmx200m -Xms64m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
 
 x-common-healthcheck: &common-healthcheck
