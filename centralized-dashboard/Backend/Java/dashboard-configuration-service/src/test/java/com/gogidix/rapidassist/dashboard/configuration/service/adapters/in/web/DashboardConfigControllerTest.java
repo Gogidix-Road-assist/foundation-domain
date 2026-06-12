@@ -4,16 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogidix.rapidassist.dashboard.configuration.service.adapters.in.web.dto.*;
 import com.gogidix.rapidassist.dashboard.configuration.service.application.DashboardConfigService;
 import com.gogidix.rapidassist.dashboard.configuration.service.domain.model.DashboardConfiguration;
-import com.gogidix.rapidassist.dashboard.configuration.service.security.JwtAuthenticationFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -21,42 +21,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Unit tests for DashboardConfigController.
- *
- * <p>Tests cover REST endpoints, request validation, error handling,
- * and response serialization.</p>
- *
- * @author Rapid Assist Team
- * @since 1.0.0
- */
-@WebMvcTest(DashboardConfigController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class DashboardConfigControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private DashboardConfigService dashboardService;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
 
     private DashboardConfiguration testDashboard;
 
     @BeforeEach
     void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        mockMvc = MockMvcBuilders
+            .standaloneSetup(new DashboardConfigController(dashboardService))
+            .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+            .setValidator(new LocalValidatorFactoryBean())
+            .build();
+
         testDashboard = DashboardConfiguration.builder()
             .id("test-id")
             .tenantId("tenant-001")
@@ -82,11 +73,9 @@ class DashboardConfigControllerTest {
 
     @Test
     void getAllDashboards_ShouldReturnDashboardList() throws Exception {
-        // Arrange
         when(dashboardService.getAllDashboards())
             .thenReturn(CompletableFuture.completedFuture(List.of(testDashboard)));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].dashboardId").value("dash-001"))
@@ -95,11 +84,9 @@ class DashboardConfigControllerTest {
 
     @Test
     void getDashboard_WhenExists_ShouldReturnDashboard() throws Exception {
-        // Arrange
         when(dashboardService.getDashboard("dash-001"))
             .thenReturn(CompletableFuture.completedFuture(Optional.of(testDashboard)));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/dash-001"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.dashboardId").value("dash-001"))
@@ -108,22 +95,18 @@ class DashboardConfigControllerTest {
 
     @Test
     void getDashboard_WhenNotExists_ShouldReturnNotFound() throws Exception {
-        // Arrange
         when(dashboardService.getDashboard("non-existent"))
             .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/non-existent"))
             .andExpect(status().isNotFound());
     }
 
     @Test
     void getDashboardsByTenant_ShouldReturnDashboardList() throws Exception {
-        // Arrange
         when(dashboardService.getDashboardsByTenant("tenant-001"))
             .thenReturn(CompletableFuture.completedFuture(List.of(testDashboard)));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/tenant/tenant-001"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].tenantId").value("tenant-001"))
@@ -132,7 +115,6 @@ class DashboardConfigControllerTest {
 
     @Test
     void createDashboard_WithValidData_ShouldReturnCreated() throws Exception {
-        // Arrange
         CreateDashboardRequestDto request = new CreateDashboardRequestDto(
             "tenant-001",
             "dash-001",
@@ -149,7 +131,6 @@ class DashboardConfigControllerTest {
             eq("user-123")
         )).thenReturn(CompletableFuture.completedFuture(testDashboard));
 
-        // Act & Assert
         mockMvc.perform(post("/api/dashboards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -160,16 +141,14 @@ class DashboardConfigControllerTest {
 
     @Test
     void createDashboard_WithMissingName_ShouldReturnBadRequest() throws Exception {
-        // Arrange
         CreateDashboardRequestDto request = new CreateDashboardRequestDto(
             "tenant-001",
             "dash-001",
-            "", // Empty name - should fail validation
+            "",
             "Test Description",
             "user-123"
         );
 
-        // Act & Assert
         mockMvc.perform(post("/api/dashboards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -178,16 +157,14 @@ class DashboardConfigControllerTest {
 
     @Test
     void createDashboard_WithShortDashboardId_ShouldReturnBadRequest() throws Exception {
-        // Arrange
         CreateDashboardRequestDto request = new CreateDashboardRequestDto(
             "tenant-001",
-            "x", // Too short - minimum 2 characters
+            "x",
             "Test Dashboard",
             "Test Description",
             "user-123"
         );
 
-        // Act & Assert
         mockMvc.perform(post("/api/dashboards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -196,7 +173,6 @@ class DashboardConfigControllerTest {
 
     @Test
     void updateDashboard_WithValidData_ShouldReturnUpdatedDashboard() throws Exception {
-        // Arrange
         UpdateDashboardRequestDto request = new UpdateDashboardRequestDto(
             "Updated Name",
             "Updated Description",
@@ -225,7 +201,6 @@ class DashboardConfigControllerTest {
             eq("user-456")
         )).thenReturn(CompletableFuture.completedFuture(Optional.of(updatedDashboard)));
 
-        // Act & Assert
         mockMvc.perform(put("/api/dashboards/dash-001")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -236,22 +211,18 @@ class DashboardConfigControllerTest {
 
     @Test
     void deleteDashboard_ShouldReturnNoContent() throws Exception {
-        // Arrange
         when(dashboardService.deleteDashboard("dash-001"))
             .thenReturn(CompletableFuture.completedFuture(true));
 
-        // Act & Assert
         mockMvc.perform(delete("/api/dashboards/dash-001"))
             .andExpect(status().isNoContent());
     }
 
     @Test
     void searchDashboards_ShouldReturnMatchingDashboards() throws Exception {
-        // Arrange
         when(dashboardService.searchDashboards("tenant-001", "test"))
             .thenReturn(CompletableFuture.completedFuture(List.of(testDashboard)));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/search")
                 .param("tenantId", "tenant-001")
                 .param("keyword", "test"))
@@ -261,11 +232,9 @@ class DashboardConfigControllerTest {
 
     @Test
     void getActiveDashboards_ShouldReturnActiveDashboards() throws Exception {
-        // Arrange
         when(dashboardService.getActiveDashboards("tenant-001"))
             .thenReturn(CompletableFuture.completedFuture(List.of(testDashboard)));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/tenant/tenant-001/active"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].active").value(true));
@@ -273,11 +242,9 @@ class DashboardConfigControllerTest {
 
     @Test
     void checkPermission_ShouldReturnPermissionStatus() throws Exception {
-        // Arrange
         when(dashboardService.hasPermission("dash-001", "read", "admin"))
             .thenReturn(CompletableFuture.completedFuture(true));
 
-        // Act & Assert
         mockMvc.perform(get("/api/dashboards/dash-001/permissions/check")
                 .param("action", "read")
                 .param("role", "admin"))
