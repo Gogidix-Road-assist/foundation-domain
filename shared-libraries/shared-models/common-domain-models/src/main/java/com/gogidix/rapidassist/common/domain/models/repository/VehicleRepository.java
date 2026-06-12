@@ -71,7 +71,8 @@ public interface VehicleRepository extends MongoRepository<Vehicle, String> {
      * @param make the make to search for (supports partial matching)
      * @return list of vehicles with make containing the search term
      */
-        List<Vehicle> searchByMake(@Param("make") String make);
+    @Query("{'make': {$regex: ?0, $options: 'i'}}")
+    List<Vehicle> searchByMake(String make);
 
     /**
      * Counts vehicles by customer ID.

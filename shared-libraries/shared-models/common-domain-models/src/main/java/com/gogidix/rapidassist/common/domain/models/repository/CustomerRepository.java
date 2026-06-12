@@ -77,7 +77,8 @@ public interface CustomerRepository extends MongoRepository<Customer, String> {
      * Finds customers whose membership is expired.
      * @return list of customers with expired memberships
      */
-        List<Customer> findExpiredMemberships();
+    @Query("{'membershipExpiry': {$lt: new Date()}}")
+    List<Customer> findExpiredMemberships();
 
     /**
      * Finds customers by organization ID.
@@ -92,7 +93,8 @@ public interface CustomerRepository extends MongoRepository<Customer, String> {
      * @param lastName the last name search term
      * @return list of matching customers
      */
-        List<Customer> searchByName(@Param("firstName") String firstName, @Param("lastName") String lastName);
+    @Query("{$or: [{'firstName': {$regex: ?0, $options: 'i'}}, {'lastName': {$regex: ?1, $options: 'i'}}]}")
+    List<Customer> searchByName(String firstName, String lastName);
 
     /**
      * Counts customers by tenant ID.

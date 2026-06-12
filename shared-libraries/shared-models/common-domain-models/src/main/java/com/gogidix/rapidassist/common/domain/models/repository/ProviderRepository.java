@@ -78,7 +78,8 @@ public interface ProviderRepository extends MongoRepository<Provider, String> {
      * @param companyName the company name to search for
      * @return list of providers with company name containing the search term
      */
-        List<Provider> searchByCompanyName(@Param("companyName") String companyName);
+    @Query("{'companyName': {$regex: ?0, $options: 'i'}}")
+    List<Provider> searchByCompanyName(String companyName);
 
     /**
      * Finds providers by business license.
@@ -99,7 +100,8 @@ public interface ProviderRepository extends MongoRepository<Provider, String> {
      * @param minRating the minimum rating threshold
      * @return list of providers with rating above the threshold
      */
-        List<Provider> findActiveProvidersWithMinRating(@Param("minRating") Double minRating);
+    @Query("{'status': 'ACTIVE', 'rating': {$gte: ?0}}")
+    List<Provider> findActiveProvidersWithMinRating(Double minRating);
 
     /**
      * Counts providers by tenant ID.

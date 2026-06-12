@@ -23,7 +23,6 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
-      database: ${GOGIDIX_IDENTITY_ACCESS_DB:identity_access}
 
 management:
   metrics:

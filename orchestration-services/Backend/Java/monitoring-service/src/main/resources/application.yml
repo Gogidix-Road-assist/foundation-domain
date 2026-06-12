@@ -64,7 +64,10 @@ management:
   health:
     redis:
       enabled: false
-  health:
+    kafka:
+      enabled: false
+    mongo:
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -72,11 +75,10 @@ management:
   endpoint:
     health:
       show-details: always
-    # MongoDB is required for metrics storage
-    mongo:
-      enabled: true
-    kafka:
-      enabled: false
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 logging:
   level:

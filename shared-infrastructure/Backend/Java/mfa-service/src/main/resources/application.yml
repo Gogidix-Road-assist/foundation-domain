@@ -43,7 +43,6 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
-      database: ${GOGIDIX_MFA_DB:mfa}
 
 management:
   metrics:

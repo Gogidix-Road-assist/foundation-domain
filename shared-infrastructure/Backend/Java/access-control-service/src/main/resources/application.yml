@@ -32,13 +32,13 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
-      database: ${GOGIDIX_ACCESS_CONTROL_DB:access_control}
 
 management:
   health:
     redis:
       enabled: false
-  health:
+    kafka:
+      enabled: false
   metrics:
     export:
       prometheus:
@@ -47,9 +47,6 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
-    endpoint:
-      health:
-        show-details: when-authorized
+  endpoint:
     health:
-      kafka:
-        enabled: false
+      show-details: when-authorized

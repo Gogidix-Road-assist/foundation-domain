@@ -48,6 +48,10 @@ server:
 
 management:
   health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -55,11 +59,6 @@ management:
   endpoint:
     health:
       show-details: always
-  health:
-    redis:
-      enabled: false
-    kafka:
-      enabled: false
   metrics:
     export:
       prometheus:

@@ -10,18 +10,13 @@ spring:
     web-application-type: reactive
   application:
     name: edge-api-gateway
-  cloud:
-    compatibility-verifier:
-      enabled: false
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
-        - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 
-  # Redis is OPTIONAL - only used for rate limiting and caching
-  # Gateway will start without Redis if not configured
   data:
     mongodb:
       uri: ${MONGODB_URI:}
@@ -42,6 +37,8 @@ spring:
           max-wait: -1ms
 
   cloud:
+    compatibility-verifier:
+      enabled: false
     gateway:
       discovery:
         locator:
@@ -257,6 +254,10 @@ management:
       enabled: false
     kafka:
       enabled: false
+    mongo:
+      enabled: false
+    diskspace:
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -267,12 +268,6 @@ management:
       probes:
         enabled: true
     gateway:
-      enabled: true
-    # API Gateway is stateless - no database health check
-    mongo:
-      enabled: false
-    # Redis is optional - only for rate limiting
-    diskSpace:
       enabled: true
 
 logging:

@@ -35,7 +35,6 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
-      database: ${GOGIDIX_API_KEYS_DB:api_keys}
 
 management:
   metrics:

@@ -27,15 +27,18 @@ spring:
           max-wait: -1ms
 management:
   health:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  health:
     redis:
       enabled: false
     kafka:
       enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 logging:
   level:

@@ -30,18 +30,20 @@ management:
   health:
     redis:
       enabled: false
-  health:
+    kafka:
+      enabled: false
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
-    endpoint:
-      health:
-        show-details: always
+  endpoint:
     health:
-      kafka:
-        enabled: false
-  
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 logging:
   level:
     com.gogidix.rapidassist.dynamic.routing.config.service: INFO

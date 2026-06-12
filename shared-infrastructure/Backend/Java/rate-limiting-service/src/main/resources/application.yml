@@ -26,6 +26,7 @@ spring:
       uri: ${MONGODB_URI:}
       database: ${MONGODB_DATABASE:rate_limiting_service}
       auto-index-creation: true
+    redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
@@ -38,7 +39,6 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
-      database: ${GOGIDIX_RATE_LIMITING_DB:rate_limiting}
 management:
   metrics:
     export:
