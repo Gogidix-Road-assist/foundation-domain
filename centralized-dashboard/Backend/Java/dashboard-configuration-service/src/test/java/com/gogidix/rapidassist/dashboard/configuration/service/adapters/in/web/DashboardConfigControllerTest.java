@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogidix.rapidassist.dashboard.configuration.service.adapters.in.web.dto.*;
 import com.gogidix.rapidassist.dashboard.configuration.service.application.DashboardConfigService;
 import com.gogidix.rapidassist.dashboard.configuration.service.domain.model.DashboardConfiguration;
+import com.gogidix.rapidassist.dashboard.configuration.service.security.JwtAuthenticationFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ class DashboardConfigControllerTest {
 
     @MockBean
     private DashboardConfigService dashboardService;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private DashboardConfiguration testDashboard;
 
