@@ -66,14 +66,18 @@ services:
   api-gateway:
     ports:
       - "8304:8304"
-    mem_limit: 300m
+    mem_limit: 512m
     image: ${GHCR_REPO}-api-gateway:${IMAGE_TAG}
     depends_on:
       redis:
         condition: service_healthy
+      service-registry:
+        condition: service_healthy
     environment:
       <<: *common-env
       SERVER_PORT: "8304"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      JAVA_OPTS: "-Xmx320m -Xms64m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8304/actuator/health"]
@@ -339,7 +343,7 @@ services:
   access-control-service:
     ports:
       - "8311:8311"
-    mem_limit: 300m
+    mem_limit: 512m
     image: ${GHCR_REPO}-access-control-service:${IMAGE_TAG}
     depends_on:
       redis:
@@ -348,6 +352,7 @@ services:
       <<: *common-env
       MONGODB_DATABASE: rapid_assist_access_control
       SPRING_DATA_MONGODB_DATABASE: rapid_assist_access_control
+      JAVA_OPTS: "-Xmx256m -Xms64m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
     healthcheck:
       <<: *common-healthcheck
       test: ["CMD", "curl", "-sf", "http://localhost:8311/actuator/health"]
